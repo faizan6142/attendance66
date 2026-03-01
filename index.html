@@ -771,15 +771,15 @@
 
     <!-- BULK UPDATE MODAL -->
     <!-- BULK UPDATE MODAL (UPDATED with checkboxes) -->
+<!-- BULK UPDATE MODAL (UPDATED with calendar and date status) -->
 <div class="bulk-update-modal" id="bulkUpdateModal">
     <div class="bulk-update-content">
         <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
         
         <div class="mb-3">
             <label class="form-label">Select Date</label>
-            <select class="form-control" id="bulkUpdateDate">
-                <option value="">Choose date...</option>
-            </select>
+            <input type="date" class="form-control" id="bulkUpdateDate">
+            <small class="text-muted date-status" id="bulkUpdateDateStatus"></small>
         </div>
         
         <div class="mb-3">
@@ -787,6 +787,7 @@
             <select class="form-control" id="bulkUpdateSubject">
                 <option value="">Choose subject...</option>
             </select>
+            <small class="text-muted subject-status" id="bulkUpdateSubjectStatus"></small>
         </div>
         
         <div class="mb-3">
@@ -1773,8 +1774,13 @@
 
         // ==================== BULK UPDATE ====================
         // ==================== BULK UPDATE WITH CHECKBOXES ====================
+// ==================== BULK UPDATE WITH CALENDAR AND DATE STATUS ====================
 if (quickBulkUpdateBtn) {
     quickBulkUpdateBtn.addEventListener('click', async () => {
+        // Set today's date as default in calendar
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bulkUpdateDate').value = today;
+        
         // Load subjects for bulk update
         const subjectSelect = document.getElementById('bulkUpdateSubject');
         subjectSelect.innerHTML = '<option value="">Select Subject</option>';
@@ -1788,31 +1794,55 @@ if (quickBulkUpdateBtn) {
             });
         });
         
-        // Clear and show modal
+        // Clear status messages
+        document.getElementById('bulkUpdateDateStatus').textContent = '';
+        document.getElementById('bulkUpdateSubjectStatus').textContent = '';
         document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
+        
         bulkUpdateModal.style.display = 'flex';
     });
 }
+
+// Check date status when date changes
+document.getElementById('bulkUpdateDate')?.addEventListener('change', function() {
+    const date = this.value;
+    const subjectId = document.getElementById('bulkUpdateSubject').value;
+    
+    // Update date status
+    const dateStatus = document.getElementById('bulkUpdateDateStatus');
+    if (attendance[date]) {
+        const totalSubjects = Object.keys(attendance[date]).length;
+        dateStatus.textContent = `✓ Attendance exists for ${totalSubjects} subject(s) on this date`;
+        dateStatus.style.color = '#28a745';
+    } else {
+        dateStatus.textContent = '⚠ No attendance marked for this date yet';
+        dateStatus.style.color = '#ffc107';
+    }
+    
+    if (subjectId) {
+        loadStudentsForBulkUpdate(subjectId, date);
+    }
+});
 
 // Load students when subject is selected
 document.getElementById('bulkUpdateSubject')?.addEventListener('change', function() {
     const subjectId = this.value;
     const date = document.getElementById('bulkUpdateDate').value;
     
-    if (!subjectId || !date) {
-        document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
-        return;
+    // Update subject status
+    const subjectStatus = document.getElementById('bulkUpdateSubjectStatus');
+    if (subjectId && date && attendance[date]?.[subjectId]) {
+        const totalStudents = Object.keys(attendance[date][subjectId]).length;
+        subjectStatus.textContent = `✓ Attendance already marked for ${totalStudents} students`;
+        subjectStatus.style.color = '#28a745';
+    } else if (subjectId && date) {
+        subjectStatus.textContent = '⚠ No attendance marked for this subject yet';
+        subjectStatus.style.color = '#ffc107';
+    } else {
+        subjectStatus.textContent = '';
     }
     
-    loadStudentsForBulkUpdate(subjectId, date);
-});
-
-// Load students when date is selected
-document.getElementById('bulkUpdateDate')?.addEventListener('change', function() {
-    const date = this.value;
-    const subjectId = document.getElementById('bulkUpdateSubject').value;
-    
-    if (!subjectId || !date) {
+    if (!date || !subjectId) {
         document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
         return;
     }
@@ -1835,25 +1865,52 @@ function loadStudentsForBulkUpdate(subjectId, date) {
     }
     
     let html = '';
+    let markedCount = 0;
+    let unmarkedCount = 0;
+    
     studentsForSubject.forEach(roll => {
         const student = students[roll];
         if (!student) return;
         
-        const currentStatus = attendance[date]?.[subjectId]?.[roll] || 'A';
-        const isChecked = currentStatus === document.getElementById('bulkUpdateStatus').value;
+        const currentStatus = attendance[date]?.[subjectId]?.[roll];
+        const isMarked = currentStatus !== undefined;
+        const statusDisplay = isMarked ? 
+            (currentStatus === 'P' ? 'Present' : currentStatus === 'A' ? 'Absent' : 'Holiday') : 
+            'Not marked';
+        const statusClass = isMarked ? 
+            (currentStatus === 'P' ? 'bg-success' : currentStatus === 'A' ? 'bg-danger' : 'bg-warning') : 
+            'bg-secondary';
+        
+        if (isMarked) markedCount++;
+        else unmarkedCount++;
         
         html += `<div class="form-check mb-2">
-            <input class="form-check-input student-checkbox" type="checkbox" value="${roll}" id="student_${roll}" ${isChecked ? 'checked' : ''}>
+            <input class="form-check-input student-checkbox" type="checkbox" value="${roll}" id="student_${roll}">
             <label class="form-check-label" for="student_${roll}">
                 <strong>${roll}</strong> - ${student.name} 
-                <span class="badge ${currentStatus === 'P' ? 'bg-success' : currentStatus === 'A' ? 'bg-danger' : 'bg-warning'}">
-                    Current: ${currentStatus === 'P' ? 'Present' : currentStatus === 'A' ? 'Absent' : 'Holiday'}
+                <span class="badge ${statusClass}">
+                    ${statusDisplay}
                 </span>
             </label>
         </div>`;
     });
     
+    // Add summary at the top
+    html = `<div class="alert alert-info py-2 mb-2">
+        <strong>Summary:</strong> ${markedCount} marked, ${unmarkedCount} unmarked
+    </div>` + html;
+    
     document.getElementById('bulkUpdateStudentsContainer').innerHTML = html;
+    
+    // Update subject status with more detail
+    const subjectStatus = document.getElementById('bulkUpdateSubjectStatus');
+    if (markedCount > 0) {
+        subjectStatus.textContent = `✓ ${markedCount} students already marked (${unmarkedCount} unmarked)`;
+        subjectStatus.style.color = '#28a745';
+    } else {
+        subjectStatus.textContent = '⚠ No attendance marked for any student yet';
+        subjectStatus.style.color = '#ffc107';
+    }
 }
 
 // Select all students
@@ -1894,8 +1951,10 @@ if (applyBulkUpdate) {
             renderSubjectAttendance(subject);
         }
         
-        bulkUpdateModal.style.display = 'none';
-        showToast('Bulk update applied', 'success');
+        // Update the display after saving
+        loadStudentsForBulkUpdate(subject, date);
+        
+        showToast(`Bulk update applied for ${selected.length} students`, 'success');
     });
 }
 
