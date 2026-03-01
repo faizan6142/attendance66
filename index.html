@@ -3,106 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AttenZen - World Class Attendance Management System</title>
+    <title>AttenZen – Multi-Course Attendance System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
-            --danger-color: #f72585;
-            --warning-color: #f8961e;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --info-color: #4895ef;
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
         }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            margin: 0;
             padding: 20px;
         }
-        
-        .glass-morphism {
+        .glass {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
         }
-        
         .login-container {
             max-width: 450px;
             margin: 50px auto;
             padding: 40px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255,255,255,0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: slideUp 0.5s ease;
         }
-        
         @keyframes slideUp {
             from { transform: translateY(50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        
-        .dashboard-container {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
+        .dashboard-container { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .navbar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 15px;
             margin-bottom: 25px;
             padding: 15px 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: white !important;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: white !important; display: flex; align-items: center; gap: 10px; }
         .card {
             border: none;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 20px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden;
         }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-        
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
         .card-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             border: none;
             padding: 15px 20px;
             font-weight: 600;
             font-size: 1.1rem;
         }
-        
         .stats-card {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
@@ -112,7 +86,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .stats-card::before {
             content: '';
             position: absolute;
@@ -123,35 +96,16 @@
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
             animation: rotate 20s linear infinite;
         }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 10px 0;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .stats-label {
-            font-size: 1rem;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-        }
-        
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .stats-number { font-size: 2.5rem; font-weight: 700; margin: 10px 0; position: relative; z-index: 1; }
+        .stats-label { font-size: 1rem; opacity: 0.9; position: relative; z-index: 1; }
         .attendance-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 5px;
         }
-        
         .attendance-table th {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             padding: 12px;
             font-weight: 600;
@@ -160,14 +114,7 @@
             top: 0;
             z-index: 10;
         }
-        
-        .attendance-table td {
-            padding: 12px;
-            background: white;
-            border: none;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-        
+        .attendance-table td { padding: 12px; background: white; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .status-toggle {
             cursor: pointer;
             padding: 8px 15px;
@@ -178,30 +125,10 @@
             min-width: 60px;
             text-align: center;
         }
-        
-        .status-toggle.present {
-            background: linear-gradient(135deg, #4cc9f0, #4895ef);
-            color: white;
-            box-shadow: 0 4px 10px rgba(76, 201, 240, 0.3);
-        }
-        
-        .status-toggle.absent {
-            background: linear-gradient(135deg, #f72585, #b5179e);
-            color: white;
-            box-shadow: 0 4px 10px rgba(247, 37, 133, 0.3);
-        }
-        
-        .status-toggle.holiday {
-            background: linear-gradient(135deg, #f8961e, #f3722c);
-            color: white;
-            box-shadow: 0 4px 10px rgba(248, 150, 30, 0.3);
-        }
-        
-        .status-toggle:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-        }
-        
+        .status-toggle.present { background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white; box-shadow: 0 4px 10px rgba(76,201,240,0.3); }
+        .status-toggle.absent { background: linear-gradient(135deg, #f72585, #b5179e); color: white; box-shadow: 0 4px 10px rgba(247,37,133,0.3); }
+        .status-toggle.holiday { background: linear-gradient(135deg, #f8961e, #f3722c); color: white; box-shadow: 0 4px 10px rgba(248,150,30,0.3); }
+        .status-toggle:hover { transform: scale(1.05); filter: brightness(1.1); }
         .btn-modern {
             padding: 10px 20px;
             border-radius: 10px;
@@ -211,7 +138,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .btn-modern::before {
             content: '';
             position: absolute;
@@ -220,32 +146,15 @@
             width: 0;
             height: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%,-50%);
             transition: width 0.6s, height 0.6s;
         }
-        
-        .btn-modern:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #4cc9f0, #4895ef);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #f72585, #b5179e);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #f8961e, #f3722c);
-        }
-        
+        .btn-modern:hover::before { width: 300px; height: 300px; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .btn-success { background: linear-gradient(135deg, #4cc9f0, #4895ef); }
+        .btn-danger { background: linear-gradient(135deg, #f72585, #b5179e); }
+        .btn-warning { background: linear-gradient(135deg, #f8961e, #f3722c); }
         .date-picker-container {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
@@ -253,12 +162,11 @@
             color: white;
             margin-bottom: 20px;
         }
-        
         .cloud-sync {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             width: 60px;
             height: 60px;
@@ -266,203 +174,52 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             cursor: pointer;
             z-index: 1000;
             transition: all 0.3s ease;
             animation: pulse 2s infinite;
         }
-        
-        .cloud-sync:hover {
-            transform: scale(1.1) rotate(180deg);
-        }
-        
+        .cloud-sync:hover { transform: scale(1.1) rotate(180deg); }
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(67, 97, 238, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(67,97,238,0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(67,97,238,0); }
+            100% { box-shadow: 0 0 0 0 rgba(67,97,238,0); }
         }
-        
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1055;
-        }
-        
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1055; }
         .toast {
             background: white;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border-left: 5px solid var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-left: 5px solid var(--primary);
             margin-bottom: 10px;
         }
-        
         .toast-success { border-left-color: #4cc9f0; }
         .toast-error { border-left-color: #f72585; }
         .toast-warning { border-left-color: #f8961e; }
-        
-        .date-management-card {
-            background: linear-gradient(135deg, #4cc9f0, #4895ef);
-            color: white;
-        }
-        
-        .attendance-summary {
-            background: linear-gradient(135deg, #f72585, #b5179e);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .quick-action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        
-        .quick-action-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 15px;
-            border-radius: 10px;
-            background: white;
-            border: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .quick-action-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-        }
-        
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .badge-custom {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .badge-present {
-            background: linear-gradient(135deg, #4cc9f0, #4895ef);
-            color: white;
-        }
-        
-        .badge-absent {
-            background: linear-gradient(135deg, #f72585, #b5179e);
-            color: white;
-        }
-        
-        .holiday-badge {
-            background: linear-gradient(135deg, #f8961e, #f3722c);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            display: inline-block;
-        }
-        
-        .date-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin: 5px 0;
-        }
-        
         .attendance-legend {
             display: flex;
             gap: 20px;
             justify-content: center;
             margin: 20px 0;
         }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 5px;
-        }
-        
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 5px; }
         .legend-color.present { background: linear-gradient(135deg, #4cc9f0, #4895ef); }
         .legend-color.absent { background: linear-gradient(135deg, #f72585, #b5179e); }
         .legend-color.holiday { background: linear-gradient(135deg, #f8961e, #f3722c); }
-        
-        .date-delete-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .date-delete-btn:hover {
-            background: var(--danger-color);
-            transform: scale(1.1);
-        }
-        
         .bulk-update-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
         }
-        
         .bulk-update-content {
             background: white;
             padding: 30px;
@@ -470,327 +227,463 @@
             max-width: 500px;
             width: 90%;
         }
-        
-        .notification-badge {
-            position: relative;
+        .user-list { max-height: 400px; overflow-y: auto; }
+        .quick-action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        
-        .notification-badge::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 10px;
-            height: 10px;
-            background: var(--danger-color);
+        .quick-action-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            border-radius: 10px;
+            background: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .quick-action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        .loading-spinner { display: none; text-align: center; padding: 40px; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
             border-radius: 50%;
-            animation: blink 1s infinite;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .badge-custom { padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+        .badge-present { background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white; }
+        .badge-absent { background: linear-gradient(135deg, #f72585, #b5179e); color: white; }
+        .nav-tabs .nav-link { color: white; border: none; }
+        .nav-tabs .nav-link.active { background-color: rgba(255,255,255,0.2); color: white; border: none; }
+        .user-management-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
+        .course-structure { max-height: 500px; overflow-y: auto; }
+        .subject-checkbox-group { max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
     <div class="toast-container"></div>
 
-    <!-- Login Section -->
+    <!-- LOGIN SECTION -->
     <div id="loginSection" class="login-container">
         <div class="text-center mb-4">
-            <i class="fas fa-calendar-check fa-4x" style="color: var(--primary-color);"></i>
+            <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
             <h2 class="mt-3">AttenZen</h2>
-            <p class="text-muted">World Class Attendance Management System</p>
+            <p class="text-muted">Multi-Course Attendance Management</p>
         </div>
         <form id="loginForm">
             <div class="mb-4">
-                <label for="username" class="form-label">Username</label>
+                <label class="form-label">Email</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                    <input type="text" class="form-control" id="username" required placeholder="Enter your username">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="username" required placeholder="Enter email">
                 </div>
             </div>
             <div class="mb-4">
-                <label for="password" class="form-label">Password</label>
+                <label class="form-label">Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                    <input type="password" class="form-control" id="password" required placeholder="Enter your password">
+                    <input type="password" class="form-control" id="password" required placeholder="Enter password">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-modern w-100 py-3">
-                <i class="fas fa-sign-in-alt me-2"></i>Login
-            </button>
+            <button type="submit" class="btn btn-primary btn-modern w-100 py-3"><i class="fas fa-sign-in-alt me-2"></i>Login</button>
         </form>
-        <div class="text-center mt-4">
-            <small class="text-muted">Default Admin: admin / admin123</small>
-        </div>
+        <div class="text-center mt-4"><small class="text-muted">Default: admin@attenzen.com / admin123</small></div>
     </div>
 
-    <!-- Admin Dashboard -->
+    <!-- ADMIN DASHBOARD -->
     <div id="adminDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <i class="fas fa-calendar-check"></i>
-                    AttenZen
-                </a>
+                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen</a>
                 <div class="d-flex align-items-center gap-3">
                     <span class="text-white" id="adminWelcome">Welcome, Admin</span>
-                    <button class="btn btn-light btn-modern" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                    </button>
+                    <button class="btn btn-light btn-modern" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
                 </div>
             </div>
         </nav>
 
         <div class="container-fluid">
-            <!-- Quick Stats -->
+            <!-- QUICK STATS -->
             <div class="row g-4 mb-4">
-                <div class="col-md-3">
-                    <div class="stats-card">
-                        <i class="fas fa-users fa-2x mb-3"></i>
-                        <div class="stats-number" id="totalStudents">0</div>
-                        <div class="stats-label">Total Students</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stats-card" style="background: linear-gradient(135deg, #4cc9f0, #4895ef);">
-                        <i class="fas fa-check-circle fa-2x mb-3"></i>
-                        <div class="stats-number" id="presentToday">0</div>
-                        <div class="stats-label">Present Today</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stats-card" style="background: linear-gradient(135deg, #f72585, #b5179e);">
-                        <i class="fas fa-times-circle fa-2x mb-3"></i>
-                        <div class="stats-number" id="absentToday">0</div>
-                        <div class="stats-label">Absent Today</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stats-card" style="background: linear-gradient(135deg, #f8961e, #f3722c);">
-                        <i class="fas fa-calendar-alt fa-2x mb-3"></i>
-                        <div class="stats-number" id="totalAttendanceDays">0</div>
-                        <div class="stats-label">Attendance Days</div>
-                    </div>
-                </div>
+                <div class="col-md-3"><div class="stats-card"><i class="fas fa-users fa-2x mb-3"></i><div class="stats-number" id="totalStudents">0</div><div class="stats-label">Total Students</div></div></div>
+                <div class="col-md-3"><div class="stats-card" style="background:linear-gradient(135deg,#4cc9f0,#4895ef)"><i class="fas fa-check-circle fa-2x mb-3"></i><div class="stats-number" id="presentToday">0</div><div class="stats-label">Present Today</div></div></div>
+                <div class="col-md-3"><div class="stats-card" style="background:linear-gradient(135deg,#f72585,#b5179e)"><i class="fas fa-times-circle fa-2x mb-3"></i><div class="stats-number" id="absentToday">0</div><div class="stats-label">Absent Today</div></div></div>
+                <div class="col-md-3"><div class="stats-card" style="background:linear-gradient(135deg,#f8961e,#f3722c)"><i class="fas fa-calendar-alt fa-2x mb-3"></i><div class="stats-number" id="totalAttendanceDays">0</div><div class="stats-label">Attendance Days</div></div></div>
             </div>
 
-            <!-- Quick Action Buttons -->
+            <!-- QUICK ACTIONS -->
             <div class="quick-action-buttons mb-4">
-                <button class="quick-action-btn" id="quickAddDateBtn">
-                    <i class="fas fa-calendar-plus fa-2x"></i>
-                    <span>Add Date</span>
-                </button>
-                <button class="quick-action-btn" id="quickDeleteDateBtn">
-                    <i class="fas fa-calendar-minus fa-2x"></i>
-                    <span>Delete Date</span>
-                </button>
-                <button class="quick-action-btn" id="quickMarkHolidayBtn">
-                    <i class="fas fa-umbrella-beach fa-2x"></i>
-                    <span>Mark Holiday</span>
-                </button>
-                <button class="quick-action-btn" id="quickBulkUpdateBtn">
-                    <i class="fas fa-tasks fa-2x"></i>
-                    <span>Bulk Update</span>
-                </button>
-                <button class="quick-action-btn" id="quickExportPDFBtn">
-                    <i class="fas fa-file-pdf fa-2x"></i>
-                    <span>Export PDF</span>
-                </button>
-                <button class="quick-action-btn" id="quickSendReminderBtn">
-                    <i class="fas fa-bell fa-2x"></i>
-                    <span>Send Reminder</span>
-                </button>
+                <button class="quick-action-btn" id="quickAddDateBtn"><i class="fas fa-calendar-plus fa-2x"></i><span>Add Date</span></button>
+                <button class="quick-action-btn" id="quickDeleteDateBtn"><i class="fas fa-calendar-minus fa-2x"></i><span>Delete Date</span></button>
+                <button class="quick-action-btn" id="quickMarkHolidayBtn"><i class="fas fa-umbrella-beach fa-2x"></i><span>Mark Holiday</span></button>
+                <button class="quick-action-btn" id="quickBulkUpdateBtn"><i class="fas fa-tasks fa-2x"></i><span>Bulk Update</span></button>
+                <button class="quick-action-btn" id="quickExportPDFBtn"><i class="fas fa-file-pdf fa-2x"></i><span>Export PDF</span></button>
+                <button class="quick-action-btn" id="quickSendReminderBtn"><i class="fas fa-bell fa-2x"></i><span>Send Reminder</span></button>
             </div>
 
-            <!-- Date Management -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-calendar-alt me-2"></i>Advanced Date Management
-                </div>
-                <div class="card-body">
+            <!-- USER MANAGEMENT TABS (updated with Courses tab) -->
+            <div class="user-management-section">
+                <h4><i class="fas fa-users me-2"></i>Management</h4>
+                <ul class="nav nav-tabs" id="userTabs">
+                    <li class="nav-item"><a class="nav-link active" href="#manageUsers" data-bs-toggle="tab">Manage Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#coursesTab" data-bs-toggle="tab">Courses & Subjects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#attendanceTab" data-bs-toggle="tab">Attendance</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#reportsTab" data-bs-toggle="tab">Reports</a></li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+                <!-- MANAGE USERS TAB (unchanged) -->
+                <div class="tab-pane fade show active" id="manageUsers">
                     <div class="row">
+                        <div class="col-md-5">
+                            <div class="card">
+                                <div class="card-header"><i class="fas fa-user-plus me-2"></i>Add New User</div>
+                                <div class="card-body">
+                                    <form id="addUserForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Role</label>
+                                            <select class="form-control" id="newUserRole" required>
+                                                <option value="admin">Admin</option>
+                                                <option value="student" selected>Student</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Username (display name)</label>
+                                            <input type="text" class="form-control" id="newUsername" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Email (login)</label>
+                                            <input type="email" class="form-control" id="newEmail" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="newPassword" required>
+                                        </div>
+                                        <div class="mb-3" id="rollNoSection">
+                                            <label class="form-label">Roll Number (for students)</label>
+                                            <input type="text" class="form-control" id="newRollNo">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Full Name</label>
+                                            <input type="text" class="form-control" id="newFullName" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-success w-100"><i class="fas fa-plus me-2"></i>Add User</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- Bulk Add Students -->
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-users me-2"></i>Bulk Add Students</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="bulkRollInput" class="form-label">Roll Numbers (comma separated)</label>
+                                        <textarea class="form-control bulk-roll-input" id="bulkRollInput" rows="3" placeholder="e.g., 38,14,44,18,17"></textarea>
+                                        <small class="text-muted">Accounts created with email: roll@attenzen.com, password: roll123</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary w-100" type="button" id="addRollNumbersBtn"><i class="fas fa-user-plus me-2"></i>Add Students</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-users me-2"></i>Existing Users</span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showPasswords">
+                                        <label class="form-check-label" for="showPasswords">Show Emails</label>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="user-list">
+                                        <table class="table table-striped">
+                                            <thead><tr><th>Email</th><th>Role</th><th>Name</th><th>Roll No</th><th>Actions</th></tr></thead>
+                                            <tbody id="usersList"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COURSES & SUBJECTS TAB (NEW) -->
+                <div class="tab-pane fade" id="coursesTab">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <!-- Add Course -->
+                            <div class="card">
+                                <div class="card-header"><i class="fas fa-book me-2"></i>Add Course</div>
+                                <div class="card-body">
+                                    <input type="text" id="courseName" class="form-control mb-2" placeholder="Course Name (e.g., Computer Science)">
+                                    <input type="text" id="courseCode" class="form-control mb-2" placeholder="Course Code (e.g., CS)">
+                                    <button class="btn btn-primary w-100" onclick="addCourse()">Add Course</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Add Semester -->
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-layer-group me-2"></i>Add Semester</div>
+                                <div class="card-body">
+                                    <select id="semesterCourse" class="form-control mb-2">
+                                        <option value="">Select Course</option>
+                                    </select>
+                                    <input type="text" id="semesterName" class="form-control mb-2" placeholder="Semester Name (e.g., Semester 1)">
+                                    <button class="btn btn-primary w-100" onclick="addSemester()">Add Semester</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Add Subject -->
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-book-open me-2"></i>Add Subject</div>
+                                <div class="card-body">
+                                    <select id="subjectCourse" class="form-control mb-2">
+                                        <option value="">Select Course</option>
+                                    </select>
+                                    <select id="subjectSemester" class="form-control mb-2">
+                                        <option value="">Select Semester</option>
+                                    </select>
+                                    <input type="text" id="subjectName" class="form-control mb-2" placeholder="Subject Name (e.g., Programming)">
+                                    <input type="text" id="subjectCode" class="form-control mb-2" placeholder="Subject Code (e.g., CS101)">
+                                    <input type="number" id="subjectCredits" class="form-control mb-2" placeholder="Credits (e.g., 3)">
+                                    <button class="btn btn-primary w-100" onclick="addSubject()">Add Subject</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <!-- Display Course Structure -->
+                            <div class="card">
+                                <div class="card-header"><i class="fas fa-sitemap me-2"></i>Course Structure</div>
+                                <div class="card-body course-structure" id="courseStructure">
+                                    <p class="text-muted text-center">No courses added yet</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Assign Students to Courses -->
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-user-graduate me-2"></i>Assign Students to Courses</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <select id="assignStudent" class="form-control mb-2">
+                                                <option value="">Select Student</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <select id="assignCourse" class="form-control mb-2" onchange="loadSemestersForAssignment()">
+                                                <option value="">Select Course</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <select id="assignSemester" class="form-control mb-2" onchange="loadSubjectsForAssignment()">
+                                                <option value="">Select Semester</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <label class="form-label">Select Subjects:</label>
+                                    <div id="subjectCheckboxes" class="subject-checkbox-group border p-3 mb-3">
+                                        <p class="text-muted">Select course and semester first</p>
+                                    </div>
+                                    <button class="btn btn-success w-100" onclick="assignStudentToCourse()">Assign Student to Course</button>
+                                </div>
+                            </div>
+                            
+                            <!-- View Assigned Students -->
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-clipboard-list me-2"></i>Student Course Assignments</div>
+                                <div class="card-body">
+                                    <select id="viewAssignmentsCourse" class="form-control mb-2" onchange="viewAssignments()">
+                                        <option value="">Select Course</option>
+                                    </select>
+                                    <select id="viewAssignmentsSemester" class="form-control mb-2" onchange="viewAssignments()">
+                                        <option value="">Select Semester</option>
+                                    </select>
+                                    <div id="assignmentsList"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATTENDANCE TAB (UPDATED with subject selector) -->
+                <div class="tab-pane fade" id="attendanceTab">
+                    <!-- Date Management Cards -->
+                    <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="date-picker-container">
                                 <h5 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Add New Date</h5>
                                 <div class="d-flex gap-3">
-                                    <input type="date" id="newDateInput" class="form-control">
-                                    <button class="btn btn-light btn-modern" id="addNewDateBtn">
-                                        <i class="fas fa-plus me-2"></i>Add Date
-                                    </button>
+                                    <input type="date" id="newDateInput2" class="form-control">
+                                    <button class="btn btn-light btn-modern" id="addNewDateBtn2"><i class="fas fa-plus me-2"></i>Add</button>
                                 </div>
-                                <p class="mt-2 small">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Add a new date column to track attendance
-                                </p>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="date-picker-container" style="background: linear-gradient(135deg, #f72585, #b5179e);">
+                            <div class="date-picker-container" style="background:linear-gradient(135deg,#f72585,#b5179e)">
                                 <h5 class="mb-3"><i class="fas fa-minus-circle me-2"></i>Delete Date</h5>
                                 <div class="d-flex gap-3">
-                                    <select id="deleteDateSelect" class="form-control">
-                                        <option value="">Select date to delete</option>
-                                    </select>
-                                    <button class="btn btn-light btn-modern" id="deleteDateBtn">
-                                        <i class="fas fa-trash me-2"></i>Delete
-                                    </button>
+                                    <select id="deleteDateSelect2" class="form-control"><option value="">Select date</option></select>
+                                    <button class="btn btn-light btn-modern" id="deleteDateBtn2"><i class="fas fa-trash me-2"></i>Delete</button>
                                 </div>
-                                <p class="mt-2 small">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>
-                                    Warning: This will permanently delete all attendance for this date
-                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject Selection for Attendance -->
+                    <div class="card mb-3">
+                        <div class="card-header"><i class="fas fa-filter me-2"></i>Select Course & Subject</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <select id="attendanceCourse" class="form-control" onchange="loadSemestersForAttendance()">
+                                        <option value="">Select Course</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="attendanceSemester" class="form-control" onchange="loadSubjectsForAttendance()">
+                                        <option value="">Select Semester</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="attendanceSubject" class="form-control">
+                                        <option value="">Select Subject</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Legend -->
+                    <div class="attendance-legend">
+                        <div class="legend-item"><div class="legend-color present"></div><span>Present</span></div>
+                        <div class="legend-item"><div class="legend-color absent"></div><span>Absent</span></div>
+                        <div class="legend-item"><div class="legend-color holiday"></div><span>Holiday</span></div>
+                    </div>
+
+                    <!-- Main Attendance Table -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-table me-2"></i>Attendance Management</span>
+                            <div class="d-flex gap-2">
+                                <input type="date" id="dateSelector" class="form-control date-selector">
+                                <button class="btn btn-light btn-modern" id="markTodayBtn"><i class="fas fa-calendar-check me-2"></i>Today</button>
+                                <button class="btn btn-light btn-modern" id="markAllPresentBtn"><i class="fas fa-check-double me-2"></i>All Present</button>
+                                <button class="btn btn-light btn-modern" id="downloadExcelBtn"><i class="fas fa-file-excel me-2"></i>Export</button>
+                                <button class="btn btn-light btn-modern" id="refreshTableBtn"><i class="fas fa-sync-alt me-2"></i>Refresh</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="loading-spinner" id="tableLoading"><div class="spinner"></div><p class="mt-3">Loading attendance data...</p></div>
+                            <div class="table-responsive" id="tableContainer">
+                                <table class="table attendance-table" id="attendanceTable">
+                                    <thead><tr><th>Roll No</th><th>Student Name</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Chart -->
+                    <div class="chart-container">
+                        <h5 class="mb-4"><i class="fas fa-chart-line me-2"></i>Attendance Analytics</h5>
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- REPORTS TAB (UPDATED with subject filter) -->
+                <div class="tab-pane fade" id="reportsTab">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>Course</label>
+                                    <select id="reportCourse" class="form-control" onchange="loadSemestersForReport()">
+                                        <option value="">All Courses</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Semester</label>
+                                    <select id="reportSemester" class="form-control" onchange="loadSubjectsForReport()">
+                                        <option value="">All Semesters</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Subject</label>
+                                    <select id="reportSubject" class="form-control">
+                                        <option value="">All Subjects</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><label>From Date</label><input type="date" class="form-control" id="reportFromDate"></div>
+                                <div class="col-md-4"><label>To Date</label><input type="date" class="form-control" id="reportToDate"></div>
+                                <div class="col-md-4"><label>&nbsp;</label><button class="btn btn-primary w-100" id="generateReportBtn"><i class="fas fa-chart-pie me-2"></i>Generate Report</button></div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="reportTable">
+                                    <thead><tr><th>Roll No</th><th>Student Name</th><th>Present</th><th>Absent</th><th>Total</th><th>Percentage</th></tr></thead>
+                                    <tbody id="reportData"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Bulk Update Modal -->
-            <div class="bulk-update-modal" id="bulkUpdateModal">
-                <div class="bulk-update-content">
-                    <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
-                    <div class="mb-3">
-                        <label class="form-label">Select Date</label>
-                        <select class="form-control" id="bulkUpdateDate">
-                            <option value="">Choose date...</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Select Students</label>
-                        <select class="form-control" id="bulkUpdateStudents" multiple size="5">
-                            <!-- Will be populated dynamically -->
-                        </select>
-                        <small class="text-muted">Hold Ctrl to select multiple</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mark as</label>
-                        <select class="form-control" id="bulkUpdateStatus">
-                            <option value="P">Present</option>
-                            <option value="A">Absent</option>
-                            <option value="H">Holiday</option>
-                        </select>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary btn-modern flex-grow-1" id="applyBulkUpdate">
-                            <i class="fas fa-check me-2"></i>Apply
-                        </button>
-                        <button class="btn btn-secondary btn-modern" id="closeBulkUpdate">
-                            <i class="fas fa-times me-2"></i>Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Attendance Legend -->
-            <div class="attendance-legend">
-                <div class="legend-item">
-                    <div class="legend-color present"></div>
-                    <span>Present</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color absent"></div>
-                    <span>Absent</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color holiday"></div>
-                    <span>Holiday</span>
-                </div>
-            </div>
-
-            <!-- Main Attendance Table Card -->
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-table me-2"></i>Attendance Management</span>
-                    <div class="d-flex gap-2">
-                        <input type="date" id="dateSelector" class="form-control date-selector">
-                        <button class="btn btn-light btn-modern" id="markTodayBtn">
-                            <i class="fas fa-calendar-check me-2"></i>Today
-                        </button>
-                        <button class="btn btn-light btn-modern" id="markAllPresentBtn">
-                            <i class="fas fa-check-double me-2"></i>All Present
-                        </button>
-                        <button class="btn btn-light btn-modern" id="downloadExcelBtn">
-                            <i class="fas fa-file-excel me-2"></i>Export
-                        </button>
-                        <button class="btn btn-light btn-modern" id="refreshTableBtn">
-                            <i class="fas fa-sync-alt me-2"></i>Refresh
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="loading-spinner" id="tableLoading">
-                        <div class="spinner"></div>
-                        <p class="mt-3">Loading attendance data...</p>
-                    </div>
-                    <div class="table-responsive" id="tableContainer">
-                        <table class="table attendance-table" id="attendanceTable">
-                            <thead>
-                                <tr>
-                                    <th>Roll No</th>
-                                    <th>Student Name</th>
-                                    <!-- Dates will be dynamically added here -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Student data will be dynamically added here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analytics Chart -->
-            <div class="chart-container">
-                <h5 class="mb-4"><i class="fas fa-chart-line me-2"></i>Attendance Analytics</h5>
-                <canvas id="attendanceChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Student Dashboard -->
+    <!-- STUDENT DASHBOARD (UPDATED with subject selector) -->
     <div id="studentDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <i class="fas fa-calendar-check"></i>
-                    AttenZen
-                </a>
+                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen</a>
                 <div class="d-flex align-items-center gap-3">
                     <span class="text-white" id="studentWelcome">Welcome, Student</span>
-                    <button class="btn btn-light btn-modern" id="studentLogoutBtn">
-                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                    </button>
+                    <button class="btn btn-light btn-modern" id="studentLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
                 </div>
             </div>
         </nav>
-
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-history me-2"></i>My Attendance Record
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-history me-2"></i>My Attendance Record</span>
+                            <select id="studentSubjectSelector" class="form-control w-auto" onchange="renderStudentDashboard()">
+                                <option value="">Select Subject</option>
+                            </select>
                         </div>
                         <div class="card-body">
-                            <div class="loading-spinner" id="studentTableLoading">
-                                <div class="spinner"></div>
-                                <p class="mt-3">Loading your attendance data...</p>
-                            </div>
+                            <div class="loading-spinner" id="studentTableLoading"><div class="spinner"></div><p class="mt-3">Loading...</p></div>
                             <div class="table-responsive" id="studentTableContainer">
                                 <table class="table attendance-table" id="studentAttendanceTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Day</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Student attendance data will be dynamically added here -->
-                                    </tbody>
+                                    <thead><tr><th>Date</th><th>Day</th><th>Status</th></tr></thead>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                         </div>
@@ -798,40 +691,24 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card">
-                        <div class="card-header">
-                            <i class="fas fa-chart-pie me-2"></i>Attendance Summary
-                        </div>
+                        <div class="card-header"><i class="fas fa-chart-pie me-2"></i>Attendance Summary</div>
                         <div class="card-body">
-                            <div class="attendance-summary text-center">
-                                <div class="stats-number" id="presentCount">0</div>
-                                <div class="stats-label">Present Days</div>
-                            </div>
-                            <div class="attendance-summary text-center" style="background: linear-gradient(135deg, #f72585, #b5179e);">
-                                <div class="stats-number" id="absentCount">0</div>
-                                <div class="stats-label">Absent Days</div>
-                            </div>
-                            <div class="progress mb-3" style="height: 25px;">
-                                <div id="attendancePercentage" class="progress-bar bg-success" 
-                                     role="progressbar" style="width: 0%">0%</div>
-                            </div>
+                            <div class="attendance-summary text-center"><div class="stats-number" id="presentCount">0</div><div class="stats-label">Present</div></div>
+                            <div class="attendance-summary text-center" style="background:linear-gradient(135deg,#f72585,#b5179e)"><div class="stats-number" id="absentCount">0</div><div class="stats-label">Absent</div></div>
+                            <div class="progress mb-3" style="height:25px"><div id="attendancePercentage" class="progress-bar bg-success" style="width:0%">0%</div></div>
                             <p id="attendanceMessage" class="text-muted text-center"></p>
                         </div>
                     </div>
                     <div class="card mt-3">
-                        <div class="card-header">
-                            <i class="fas fa-user-circle me-2"></i>My Profile
-                        </div>
+                        <div class="card-header"><i class="fas fa-user-circle me-2"></i>My Profile</div>
                         <div class="card-body">
-                            <div class="text-center mb-4">
-                                <i class="fas fa-user-circle fa-4x" style="color: var(--primary-color);"></i>
-                            </div>
+                            <div class="text-center mb-4"><i class="fas fa-user-circle fa-4x" style="color:var(--primary)"></i></div>
                             <p><strong>Name:</strong> <span id="studentName">-</span></p>
                             <p><strong>Roll No:</strong> <span id="studentRollNo">-</span></p>
-                            <p><strong>Username:</strong> <span id="studentUsername">-</span></p>
                             <p><strong>Email:</strong> <span id="studentEmail">-</span></p>
-                            <button class="btn btn-primary btn-modern w-100 mt-3" id="changePasswordBtn">
-                                <i class="fas fa-key me-2"></i>Change Password
-                            </button>
+                            <p><strong>Course:</strong> <span id="studentCourse">-</span></p>
+                            <p><strong>Semester:</strong> <span id="studentSemester">-</span></p>
+                            <button class="btn btn-primary btn-modern w-100 mt-3" id="changePasswordBtn"><i class="fas fa-key me-2"></i>Change Password</button>
                         </div>
                     </div>
                 </div>
@@ -839,108 +716,1189 @@
         </div>
     </div>
 
-    <!-- Cloud Sync Button -->
-    <div class="cloud-sync" id="cloudSyncBtn" title="Sync with Cloud">
-        <i class="fas fa-cloud-upload-alt fa-2x"></i>
+    <!-- CLOUD SYNC BUTTON -->
+    <div class="cloud-sync" id="cloudSyncBtn" title="Refresh from cloud"><i class="fas fa-sync-alt fa-2x"></i></div>
+
+    <!-- BULK UPDATE MODAL -->
+    <div class="bulk-update-modal" id="bulkUpdateModal">
+        <div class="bulk-update-content">
+            <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
+            <div class="mb-3">
+                <label class="form-label">Select Date</label>
+                <select class="form-control" id="bulkUpdateDate"><option value="">Choose date...</option></select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Select Subject</label>
+                <select class="form-control" id="bulkUpdateSubject"><option value="">Choose subject...</option></select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Select Students</label>
+                <select class="form-control" id="bulkUpdateStudents" multiple size="5"></select>
+                <small class="text-muted">Hold Ctrl to select multiple</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mark as</label>
+                <select class="form-control" id="bulkUpdateStatus">
+                    <option value="P">Present</option>
+                    <option value="A">Absent</option>
+                    <option value="H">Holiday</option>
+                </select>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-modern flex-grow-1" id="applyBulkUpdate"><i class="fas fa-check me-2"></i>Apply</button>
+                <button class="btn btn-secondary btn-modern" id="closeBulkUpdate"><i class="fas fa-times me-2"></i>Cancel</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Add Bootstrap JS and other scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // Cloud Storage with JSONBin
-        const JSONBIN_CONFIG = {
-            BIN_ID: '6909ff4bae596e708f43e309',
-            API_KEY: '$2a$10$7S5t9oueGkZTg0iJRE7Eyu9PwBWZp7BxD4zB07bhtRJt8RcyaUsL6'
+        // ==================== FIREBASE INIT ====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUp_BfymlqYgL_5aX3aj8V0vFBBO58DS8",
+            authDomain: "attenzen-1305f.firebaseapp.com",
+            databaseURL: "https://attenzen-1305f-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "attenzen-1305f",
+            storageBucket: "attenzen-1305f.firebasestorage.app",
+            messagingSenderId: "476285952313",
+            appId: "1:476285952313:web:01454bf180fcd237a148e8"
         };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-        class CloudStorage {
-            constructor() {
-                this.BIN_ID = '6909ff4bae596e708f43e309';
-                this.API_KEY = '$2a$10$7S5t9oueGkZTg0iJRE7Eyu9PwBWZp7BxD4zB07bhtRJt8RcyaUsL6';
-                this.BASE_URL = 'https://api.jsonbin.io/v3/b';
+        // Global state
+        let currentUser = null;
+        let users = {};
+        let students = {};
+        let attendance = {};
+        let holidays = {};
+        let courses = {};
+        let studentCourses = {};
+        let attendanceChart = null;
+
+        // DOM elements
+        const loginSection = document.getElementById('loginSection');
+        const adminDash = document.getElementById('adminDashboard');
+        const studentDash = document.getElementById('studentDashboard');
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const studentLogoutBtn = document.getElementById('studentLogoutBtn');
+        const dateSelector = document.getElementById('dateSelector');
+        const markTodayBtn = document.getElementById('markTodayBtn');
+        const markAllPresentBtn = document.getElementById('markAllPresentBtn');
+        const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+        const refreshTableBtn = document.getElementById('refreshTableBtn');
+        const attendanceTable = document.getElementById('attendanceTable');
+        const studentAttendanceTable = document.getElementById('studentAttendanceTable');
+        const cloudSyncBtn = document.getElementById('cloudSyncBtn');
+        const presentCount = document.getElementById('presentCount');
+        const absentCount = document.getElementById('absentCount');
+        const attendancePercentage = document.getElementById('attendancePercentage');
+        const attendanceMessage = document.getElementById('attendanceMessage');
+        const tableLoading = document.getElementById('tableLoading');
+        const tableContainer = document.getElementById('tableContainer');
+        const studentTableLoading = document.getElementById('studentTableLoading');
+        const studentTableContainer = document.getElementById('studentTableContainer');
+        const adminWelcome = document.getElementById('adminWelcome');
+        const studentWelcome = document.getElementById('studentWelcome');
+        const studentName = document.getElementById('studentName');
+        const studentRollNo = document.getElementById('studentRollNo');
+        const studentEmail = document.getElementById('studentEmail');
+        const studentCourse = document.getElementById('studentCourse');
+        const studentSemester = document.getElementById('studentSemester');
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        const totalStudents = document.getElementById('totalStudents');
+        const presentToday = document.getElementById('presentToday');
+        const absentToday = document.getElementById('absentToday');
+        const totalAttendanceDays = document.getElementById('totalAttendanceDays');
+
+        // ==================== HELPERS ====================
+        function formatDate(dateString) {
+            const d = new Date(dateString);
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+        function getDayName(dateString) {
+            return new Date(dateString).toLocaleDateString(undefined, { weekday: 'long' });
+        }
+        function showToast(msg, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center ${type === 'success' ? 'toast-success' : type === 'error' ? 'toast-error' : 'toast-warning'}`;
+            toast.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+            document.querySelector('.toast-container').appendChild(toast);
+            new bootstrap.Toast(toast, { delay: 3000 }).show();
+            toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+
+        // Load all data from Firebase
+        async function loadAllData() {
+            const snapStudents = await db.ref('students').once('value');
+            students = snapStudents.val() || {};
+            const snapAttendance = await db.ref('attendance').once('value');
+            attendance = snapAttendance.val() || {};
+            const snapHolidays = await db.ref('holidays').once('value');
+            holidays = snapHolidays.val() || {};
+            const snapCourses = await db.ref('courses').once('value');
+            courses = snapCourses.val() || {};
+            const snapStudentCourses = await db.ref('student_courses').once('value');
+            studentCourses = snapStudentCourses.val() || {};
+        }
+
+        // Save to Firebase
+        async function saveAllData() {
+            const updates = {};
+            updates['/students'] = students;
+            updates['/attendance'] = attendance;
+            updates['/holidays'] = holidays;
+            updates['/courses'] = courses;
+            updates['/student_courses'] = studentCourses;
+            try {
+                await db.ref().update(updates);
+                showToast('Data saved to cloud!', 'success');
+            } catch (error) {
+                showToast('Save failed: ' + error.message, 'error');
             }
+            updateStats();
+        }
 
-            async saveAllData(data) {
-                try {
-                    console.log('🔄 Saving to cloud...');
-                    const response = await fetch(`${this.BASE_URL}/${this.BIN_ID}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Master-Key': this.API_KEY,
-                            'X-Bin-Name': 'Attendance System',
-                            'X-Bin-Private': 'true'
-                        },
-                        body: JSON.stringify(data)
+        function updateStats() {
+            totalStudents.textContent = Object.keys(students).length;
+            const today = new Date().toISOString().split('T')[0];
+            let p = 0, a = 0;
+            if (attendance[today]) {
+                Object.values(attendance[today]).forEach(subjectAttendance => {
+                    Object.values(subjectAttendance || {}).forEach(s => { 
+                        if (s === 'P') p++; 
+                        else if (s === 'A') a++; 
                     });
-                    
-                    const result = await response.json();
-                    
-                    if (!response.ok) {
-                        console.error('❌ Cloud save failed:', result);
-                        throw new Error(result.message || 'Cloud save failed');
-                    }
-                    
-                    console.log('✅ Cloud save successful:', result);
-                    return { success: true, data: result };
-                } catch (error) {
-                    console.error('❌ Cloud save error:', error);
-                    localStorage.setItem('attendanceSystemData', JSON.stringify(data));
-                    return { success: false, error: error.message };
-                }
+                });
             }
+            presentToday.textContent = p;
+            absentToday.textContent = a;
+            totalAttendanceDays.textContent = Object.keys(attendance).length;
+        }
 
-            async loadAllData() {
+        // ==================== AUTH ====================
+        // Create default admin if none exists
+        async function createDefaultAdminIfNeeded() {
+            const adminSnapshot = await db.ref('users').orderByChild('role').equalTo('admin').once('value');
+            if (!adminSnapshot.exists()) {
                 try {
-                    console.log('🔄 Loading from cloud...');
-                    const response = await fetch(`${this.BASE_URL}/${this.BIN_ID}/latest`, {
-                        headers: {
-                            'X-Master-Key': this.API_KEY,
-                            'Content-Type': 'application/json'
-                        }
+                    const userCredential = await auth.createUserWithEmailAndPassword('admin@attenzen.com', 'admin123');
+                    const uid = userCredential.user.uid;
+                    await db.ref('users/' + uid).set({
+                        email: 'admin@attenzen.com',
+                        role: 'admin',
+                        fullName: 'System Administrator',
+                        username: 'admin',
+                        rollNo: null
                     });
-                    
-                    const result = await response.json();
-                    
-                    if (!response.ok) {
-                        console.error('❌ Cloud load failed:', result);
-                        throw new Error(result.message || 'Cloud load failed');
-                    }
-                    
-                    console.log('✅ Cloud load successful:', result);
-                    return result.record || this.getDefaultData();
+                    console.log('Default admin created');
                 } catch (error) {
-                    console.error('❌ Cloud load error:', error);
-                    const localData = localStorage.getItem('attendanceSystemData');
-                    return localData ? JSON.parse(localData) : this.getDefaultData();
-                }
-            }
-
-            getDefaultData() {
-                return {
-                    users: {
-                        'admin': { 
-                            username: 'admin', 
-                            password: 'admin123', 
-                            role: 'admin', 
-                            fullName: 'System Administrator',
-                            email: 'admin@attenzen.com'
-                        }
-                    },
-                    students: {},
-                    attendance: {},
-                    holidays: {},
-                    settings: {
-                        institutionName: 'AttenZen Academy',
-                        academicYear: new Date().getFullYear()
+                    if (error.code !== 'auth/email-already-in-use') {
+                        console.error('Failed to create default admin:', error);
                     }
-                };
+                }
             }
         }
 
-        // Initialize Cloud Storage
-        const cloudStorage = new CloudStorage();
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                const userSnap = await db.ref('users/' + uid).once('value');
+                const userData = userSnap.val();
+                if (!userData) {
+                    showToast('User data not found', 'error');
+                    return;
+                }
+                currentUser = { uid, ...userData };
+                await loadAllData();
+                loginSection.style.display = 'none';
+                if (currentUser.role === 'admin') {
+                    adminDash.style.display = 'block';
+                    adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    renderAdminDashboard();
+                    renderUsersList();
+                    loadCoursesForDropdowns();
+                } else {
+                    studentDash.style.display = 'block';
+                    studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    studentName.textContent = currentUser.fullName;
+                    studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                    studentEmail.textContent = currentUser.email || 'N/A';
+                    
+                    // Load student's course info
+                    const studentCourseData = studentCourses[currentUser.rollNo];
+                    if (studentCourseData) {
+                        const course = courses[studentCourseData.courseId];
+                        const semester = course?.semesters[studentCourseData.semester];
+                        studentCourse.textContent = course?.name || 'N/A';
+                        studentSemester.textContent = semester?.name || 'N/A';
+                        
+                        // Load subjects for student dropdown
+                        const subjectSelect = document.getElementById('studentSubjectSelector');
+                        subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                        studentCourseData.subjects.forEach(subId => {
+                            const subject = semester?.subjects[subId];
+                            if (subject) {
+                                subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                            }
+                        });
+                    }
+                    
+                    renderStudentDashboard();
+                }
+                showToast('Login successful!', 'success');
+            } catch (error) {
+                showToast('Login failed: ' + error.message, 'error');
+            }
+        });
 
-        // DOM Elements
+        function logout() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                adminDash.style.display = 'none';
+                studentDash.style.display = 'none';
+                loginSection.style.display = 'block';
+                showToast('Logged out', 'success');
+            }).catch(showToast);
+        }
+        logoutBtn.addEventListener('click', logout);
+        studentLogoutBtn.addEventListener('click', logout);
+
+        // ==================== COURSE MANAGEMENT FUNCTIONS ====================
+        window.addCourse = async function() {
+            const name = document.getElementById('courseName').value;
+            const code = document.getElementById('courseCode').value;
+            if (!name || !code) {
+                showToast('Please enter course name and code', 'error');
+                return;
+            }
+            
+            const courseId = code.toLowerCase().replace(/\s+/g, '_');
+            await db.ref('courses/' + courseId).set({
+                name: name,
+                code: code,
+                semesters: {}
+            });
+            showToast('Course added', 'success');
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseCode').value = '';
+            await loadAllData();
+            loadCoursesForDropdowns();
+            displayCourseStructure();
+        }
+
+        window.addSemester = async function() {
+            const courseId = document.getElementById('semesterCourse').value;
+            const name = document.getElementById('semesterName').value;
+            if (!courseId || !name) {
+                showToast('Please select course and enter semester name', 'error');
+                return;
+            }
+            
+            const semesterId = 'sem_' + Date.now();
+            await db.ref(`courses/${courseId}/semesters/${semesterId}`).set({
+                name: name,
+                subjects: {}
+            });
+            showToast('Semester added', 'success');
+            document.getElementById('semesterName').value = '';
+            await loadAllData();
+            loadCoursesForDropdowns();
+            displayCourseStructure();
+        }
+
+        window.addSubject = async function() {
+            const courseId = document.getElementById('subjectCourse').value;
+            const semesterId = document.getElementById('subjectSemester').value;
+            const name = document.getElementById('subjectName').value;
+            const code = document.getElementById('subjectCode').value;
+            const credits = document.getElementById('subjectCredits').value;
+            
+            if (!courseId || !semesterId || !name || !code) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+            
+            const subjectId = code.toLowerCase().replace(/\s+/g, '_');
+            await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).set({
+                name: name,
+                code: code,
+                credits: credits || 0
+            });
+            showToast('Subject added', 'success');
+            document.getElementById('subjectName').value = '';
+            document.getElementById('subjectCode').value = '';
+            document.getElementById('subjectCredits').value = '';
+            await loadAllData();
+            loadCoursesForDropdowns();
+            displayCourseStructure();
+        }
+
+        function displayCourseStructure() {
+            let html = '';
+            Object.entries(courses).forEach(([courseId, course]) => {
+                html += `<div class="card mb-2">
+                    <div class="card-header bg-primary text-white">
+                        <strong>${course.name}</strong> (${course.code})
+                    </div>
+                    <div class="card-body">`;
+                
+                if (course.semesters && Object.keys(course.semesters).length > 0) {
+                    Object.entries(course.semesters).forEach(([semId, sem]) => {
+                        html += `<h6 class="mt-2">📚 ${sem.name}</h6>`;
+                        if (sem.subjects && Object.keys(sem.subjects).length > 0) {
+                            html += '<ul>';
+                            Object.values(sem.subjects).forEach(sub => {
+                                html += `<li>📖 ${sub.name} (${sub.code}) - ${sub.credits} credits</li>`;
+                            });
+                            html += '</ul>';
+                        } else {
+                            html += '<p class="text-muted">No subjects added</p>';
+                        }
+                    });
+                } else {
+                    html += '<p class="text-muted">No semesters added</p>';
+                }
+                html += `</div></div>`;
+            });
+            document.getElementById('courseStructure').innerHTML = html || '<p class="text-muted text-center">No courses added yet</p>';
+        }
+
+        function loadCoursesForDropdowns() {
+            const courseSelects = [
+                'semesterCourse', 'subjectCourse', 'assignCourse', 
+                'attendanceCourse', 'viewAssignmentsCourse', 'reportCourse'
+            ];
+            
+            courseSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.innerHTML = '<option value="">Select Course</option>';
+                    Object.entries(courses).forEach(([id, course]) => {
+                        select.innerHTML += `<option value="${id}">${course.name} (${course.code})</option>`;
+                    });
+                }
+            });
+            
+            // Load students for assignment
+            const studentSelect = document.getElementById('assignStudent');
+            if (studentSelect) {
+                studentSelect.innerHTML = '<option value="">Select Student</option>';
+                Object.entries(students).forEach(([roll, student]) => {
+                    studentSelect.innerHTML += `<option value="${roll}">${roll} - ${student.name}</option>`;
+                });
+            }
+        }
+
+        window.loadSemestersForAssignment = async function() {
+            const courseId = document.getElementById('assignCourse').value;
+            if (!courseId) return;
+            
+            const semSelect = document.getElementById('assignSemester');
+            semSelect.innerHTML = '<option value="">Select Semester</option>';
+            
+            const course = courses[courseId];
+            if (course && course.semesters) {
+                Object.entries(course.semesters).forEach(([id, sem]) => {
+                    semSelect.innerHTML += `<option value="${id}">${sem.name}</option>`;
+                });
+            }
+        }
+
+        window.loadSubjectsForAssignment = async function() {
+            const courseId = document.getElementById('assignCourse').value;
+            const semesterId = document.getElementById('assignSemester').value;
+            if (!courseId || !semesterId) return;
+            
+            const subjects = courses[courseId]?.semesters[semesterId]?.subjects || {};
+            let html = '';
+            Object.entries(subjects).forEach(([id, sub]) => {
+                html += `<div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${id}" id="sub_${id}">
+                    <label class="form-check-label" for="sub_${id}">
+                        ${sub.name} (${sub.code})
+                    </label>
+                </div>`;
+            });
+            document.getElementById('subjectCheckboxes').innerHTML = html || '<p class="text-muted">No subjects in this semester</p>';
+        }
+
+        window.assignStudentToCourse = async function() {
+            const studentRoll = document.getElementById('assignStudent').value;
+            const courseId = document.getElementById('assignCourse').value;
+            const semesterId = document.getElementById('assignSemester').value;
+            
+            const subjects = [];
+            document.querySelectorAll('#subjectCheckboxes input:checked').forEach(cb => {
+                subjects.push(cb.value);
+            });
+            
+            if (!studentRoll || !courseId || !semesterId || subjects.length === 0) {
+                showToast('Please select all fields and at least one subject', 'error');
+                return;
+            }
+            
+            await db.ref(`student_courses/${studentRoll}`).set({
+                courseId: courseId,
+                semester: semesterId,
+                subjects: subjects
+            });
+            
+            showToast('Student assigned successfully', 'success');
+            await loadAllData();
+            viewAssignments();
+        }
+
+        window.viewAssignments = async function() {
+            const courseId = document.getElementById('viewAssignmentsCourse').value;
+            const semesterId = document.getElementById('viewAssignmentsSemester').value;
+            
+            let html = '<table class="table table-sm"><tr><th>Roll No</th><th>Student</th><th>Subjects</th></tr>';
+            
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if ((!courseId || data.courseId === courseId) && 
+                    (!semesterId || data.semester === semesterId)) {
+                    const student = students[roll];
+                    const subjectNames = data.subjects.map(sId => {
+                        const sub = courses[data.courseId]?.semesters[data.semester]?.subjects[sId];
+                        return sub ? sub.name : sId;
+                    }).join(', ');
+                    
+                    html += `<tr>
+                        <td>${roll}</td>
+                        <td>${student?.name || 'Unknown'}</td>
+                        <td>${subjectNames}</td>
+                    </tr>`;
+                }
+            });
+            
+            html += '</table>';
+            document.getElementById('assignmentsList').innerHTML = html || '<p class="text-muted">No assignments found</p>';
+        }
+
+        // ==================== ATTENDANCE FUNCTIONS ====================
+        window.loadSemestersForAttendance = function() {
+            const courseId = document.getElementById('attendanceCourse').value;
+            if (!courseId) return;
+            
+            const semSelect = document.getElementById('attendanceSemester');
+            semSelect.innerHTML = '<option value="">Select Semester</option>';
+            
+            const course = courses[courseId];
+            if (course && course.semesters) {
+                Object.entries(course.semesters).forEach(([id, sem]) => {
+                    semSelect.innerHTML += `<option value="${id}">${sem.name}</option>`;
+                });
+            }
+        }
+
+        window.loadSubjectsForAttendance = function() {
+            const courseId = document.getElementById('attendanceCourse').value;
+            const semesterId = document.getElementById('attendanceSemester').value;
+            if (!courseId || !semesterId) return;
+            
+            const subSelect = document.getElementById('attendanceSubject');
+            subSelect.innerHTML = '<option value="">Select Subject</option>';
+            
+            const subjects = courses[courseId]?.semesters[semesterId]?.subjects || {};
+            Object.entries(subjects).forEach(([id, sub]) => {
+                subSelect.innerHTML += `<option value="${id}">${sub.name} (${sub.code})</option>`;
+            });
+        }
+
+        // Modified renderAdminDashboard for subject-specific attendance
+        function renderAdminDashboard() {
+            const subjectId = document.getElementById('attendanceSubject')?.value;
+            if (!subjectId) {
+                showToast('Please select a subject first', 'warning');
+                return;
+            }
+            
+            tableLoading.style.display = 'none';
+            tableContainer.style.display = 'block';
+            const thead = attendanceTable.querySelector('thead tr');
+            thead.innerHTML = '<th>Roll No</th><th>Student Name</th>';
+            const tbody = attendanceTable.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            // Get students assigned to this subject
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subjectId)) {
+                    studentsForSubject.push(roll);
+                }
+            });
+
+            const dates = Object.keys(attendance).sort();
+            const today = new Date().toISOString().split('T')[0];
+            dates.forEach(date => {
+                const th = document.createElement('th');
+                th.textContent = formatDate(date);
+                th.setAttribute('data-date', date);
+                if (date === today) th.classList.add('today-column');
+                thead.appendChild(th);
+            });
+            if (!dates.includes(today)) {
+                const th = document.createElement('th');
+                th.textContent = formatDate(today);
+                th.setAttribute('data-date', today);
+                th.classList.add('today-column');
+                thead.appendChild(th);
+                dates.push(today);
+            }
+
+            studentsForSubject.forEach(roll => {
+                const student = students[roll];
+                if (!student) return;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${roll}</td><td>${student.name}</td>`;
+                dates.forEach(date => {
+                    const td = document.createElement('td');
+                    const status = (attendance[date]?.[subjectId]?.[roll]) || 'A';
+                    td.innerHTML = `<span class="status-toggle ${status==='P'?'present':status==='H'?'holiday':'absent'}" data-student="${roll}" data-date="${date}" data-subject="${subjectId}">${status}</span>`;
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+
+            document.querySelectorAll('.status-toggle').forEach(t => {
+                t.addEventListener('click', async function() {
+                    const student = this.dataset.student;
+                    const date = this.dataset.date;
+                    const subject = this.dataset.subject;
+                    const cur = this.textContent;
+                    const next = cur === 'P' ? 'A' : cur === 'A' ? 'H' : 'P';
+                    this.textContent = next;
+                    this.className = `status-toggle ${next==='P'?'present':next==='H'?'holiday':'absent'}`;
+                    
+                    if (!attendance[date]) attendance[date] = {};
+                    if (!attendance[date][subject]) attendance[date][subject] = {};
+                    attendance[date][subject][student] = next;
+                    
+                    await saveAllData();
+                });
+            });
+
+            updateDateSelects();
+            renderAttendanceChart(subjectId);
+        }
+
+        function updateDateSelects() {
+            const dates = Object.keys(attendance).sort();
+            [deleteDateSelect2, bulkUpdateDate].forEach(sel => {
+                if (!sel) return;
+                sel.innerHTML = '<option value="">Select date</option>';
+                dates.forEach(d => sel.innerHTML += `<option value="${d}">${formatDate(d)}</option>`);
+            });
+        }
+
+        // ==================== STUDENT DASHBOARD RENDER ====================
+        function renderStudentDashboard() {
+            studentTableLoading.style.display = 'none';
+            studentTableContainer.style.display = 'block';
+            const roll = currentUser.rollNo;
+            const selectedSubject = document.getElementById('studentSubjectSelector')?.value;
+            
+            if (!roll) { 
+                studentTableContainer.innerHTML = '<p class="text-center">No roll number assigned</p>'; 
+                return; 
+            }
+            
+            const tbody = studentAttendanceTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            const dates = Object.keys(attendance).sort().reverse();
+            let present = 0;
+            
+            dates.forEach(date => {
+                let status = 'A';
+                if (selectedSubject) {
+                    status = (attendance[date]?.[selectedSubject]?.[roll]) || 'A';
+                } else {
+                    // If no subject selected, check if any subject has present for this student
+                    const subjects = attendance[date] || {};
+                    for (let subId in subjects) {
+                        if (subjects[subId][roll] === 'P') {
+                            status = 'P';
+                            break;
+                        }
+                    }
+                }
+                
+                if (status === 'P') present++;
+                tbody.innerHTML += `<tr>
+                    <td>${formatDate(date)}</td>
+                    <td>${getDayName(date)}</td>
+                    <td class="${status==='P'?'present':status==='H'?'holiday':'absent'}">
+                        ${status==='P'?'Present':status==='H'?'Holiday':'Absent'}
+                    </td>
+                </tr>`;
+            });
+            
+            presentCount.textContent = present;
+            absentCount.textContent = dates.length - present;
+            const percent = dates.length ? Math.round((present/dates.length)*100) : 0;
+            attendancePercentage.style.width = percent+'%';
+            attendancePercentage.textContent = percent+'%';
+            attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
+        }
+
+        // ==================== DATE MANAGEMENT ====================
+        async function addDateHandler() {
+            const date = newDateInput2?.value;
+            if (!date) { showToast('Select a date', 'error'); return; }
+            if (attendance[date]) { showToast('Date already exists', 'warning'); return; }
+            attendance[date] = {};
+            await saveAllData();
+            renderAdminDashboard();
+            showToast(`Date ${formatDate(date)} added`, 'success');
+        }
+        if (addNewDateBtn2) addNewDateBtn2.addEventListener('click', addDateHandler);
+        if (quickAddDateBtn) quickAddDateBtn.addEventListener('click', addDateHandler);
+
+        async function deleteDateHandler() {
+            const date = deleteDateSelect2?.value;
+            if (!date) { showToast('Select a date', 'error'); return; }
+            if (confirm(`Delete attendance for ${formatDate(date)}?`)) {
+                delete attendance[date];
+                await saveAllData();
+                renderAdminDashboard();
+                showToast('Date deleted', 'success');
+            }
+        }
+        if (deleteDateBtn2) deleteDateBtn2.addEventListener('click', deleteDateHandler);
+        if (quickDeleteDateBtn) quickDeleteDateBtn.addEventListener('click', deleteDateHandler);
+
+        // Bulk update
+        quickBulkUpdateBtn.addEventListener('click', async () => {
+            // Load subjects for bulk update
+            const subjectSelect = document.getElementById('bulkUpdateSubject');
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+            
+            // Flatten all subjects from all courses
+            Object.values(courses).forEach(course => {
+                Object.values(course.semesters || {}).forEach(sem => {
+                    Object.entries(sem.subjects || {}).forEach(([id, sub]) => {
+                        subjectSelect.innerHTML += `<option value="${id}">${course.name} - ${sem.name} - ${sub.name}</option>`;
+                    });
+                });
+            });
+            
+            bulkUpdateStudents.innerHTML = '';
+            Object.values(students).forEach(s => bulkUpdateStudents.innerHTML += `<option value="${s.rollNo}">${s.rollNo} - ${s.name}</option>`);
+            bulkUpdateModal.style.display = 'flex';
+        });
+        
+        closeBulkUpdate.addEventListener('click', () => bulkUpdateModal.style.display = 'none');
+        
+        applyBulkUpdate.addEventListener('click', async () => {
+            const date = bulkUpdateDate.value;
+            const subject = document.getElementById('bulkUpdateSubject').value;
+            const selected = Array.from(bulkUpdateStudents.selectedOptions).map(o => o.value);
+            const status = bulkUpdateStatus.value;
+            
+            if (!date || !subject || !selected.length) { 
+                showToast('Select date, subject, and students', 'error'); 
+                return; 
+            }
+            
+            if (!attendance[date]) attendance[date] = {};
+            if (!attendance[date][subject]) attendance[date][subject] = {};
+            
+            selected.forEach(roll => attendance[date][subject][roll] = status);
+            await saveAllData();
+            renderAdminDashboard();
+            bulkUpdateModal.style.display = 'none';
+            showToast('Bulk update applied', 'success');
+        });
+
+        // Mark today
+        markTodayBtn.addEventListener('click', () => {
+            const today = new Date().toISOString().split('T')[0];
+            if (!attendance[today]) attendance[today] = {};
+            renderAdminDashboard();
+            showToast('Today\'s column added', 'success');
+        });
+
+        // Mark all present
+        markAllPresentBtn.addEventListener('click', async () => {
+            const date = dateSelector.value;
+            const subject = document.getElementById('attendanceSubject')?.value;
+            
+            if (!date) { showToast('Select a date', 'error'); return; }
+            if (!subject) { showToast('Select a subject', 'error'); return; }
+            
+            if (!attendance[date]) attendance[date] = {};
+            if (!attendance[date][subject]) attendance[date][subject] = {};
+            
+            // Get students for this subject
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subject)) {
+                    studentsForSubject.push(roll);
+                }
+            });
+            
+            studentsForSubject.forEach(roll => attendance[date][subject][roll] = 'P');
+            await saveAllData();
+            renderAdminDashboard();
+            showToast(`All present for ${formatDate(date)}`, 'success');
+        });
+
+        // Refresh
+        refreshTableBtn.addEventListener('click', renderAdminDashboard);
+
+        // ==================== EXPORTS ====================
+        downloadExcelBtn.addEventListener('click', () => {
+            const subject = document.getElementById('attendanceSubject')?.value;
+            if (!subject) {
+                showToast('Please select a subject first', 'error');
+                return;
+            }
+            
+            const dates = Object.keys(attendance).sort();
+            const headers = ['Roll No', 'Student Name', ...dates.map(d => formatDate(d))];
+            
+            // Get students for this subject
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subject)) {
+                    studentsForSubject.push(roll);
+                }
+            });
+            
+            const data = studentsForSubject.map(roll => {
+                const student = students[roll];
+                return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
+            });
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...data]), 'Attendance');
+            XLSX.writeFile(wb, `attendance_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('Excel downloaded', 'success');
+        });
+
+        quickExportPDFBtn.addEventListener('click', () => {
+            const subject = document.getElementById('attendanceSubject')?.value;
+            if (!subject) {
+                showToast('Please select a subject first', 'error');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text('Attendance Report', 14, 16);
+            
+            const dates = Object.keys(attendance).sort();
+            const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d).slice(0,5))]];
+            
+            // Get students for this subject
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subject)) {
+                    studentsForSubject.push(roll);
+                }
+            });
+            
+            const body = studentsForSubject.map(roll => {
+                const student = students[roll];
+                return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
+            });
+            
+            doc.autoTable({ head: headers, body, startY: 20 });
+            doc.save('attendance.pdf');
+            showToast('PDF downloaded', 'success');
+        });
+
+        // ==================== REPORTS ====================
+        window.loadSemestersForReport = function() {
+            const courseId = document.getElementById('reportCourse').value;
+            if (!courseId) return;
+            
+            const semSelect = document.getElementById('reportSemester');
+            semSelect.innerHTML = '<option value="">All Semesters</option>';
+            
+            const course = courses[courseId];
+            if (course && course.semesters) {
+                Object.entries(course.semesters).forEach(([id, sem]) => {
+                    semSelect.innerHTML += `<option value="${id}">${sem.name}</option>`;
+                });
+            }
+        }
+
+        window.loadSubjectsForReport = function() {
+            const courseId = document.getElementById('reportCourse').value;
+            const semesterId = document.getElementById('reportSemester').value;
+            if (!courseId || !semesterId) return;
+            
+            const subSelect = document.getElementById('reportSubject');
+            subSelect.innerHTML = '<option value="">All Subjects</option>';
+            
+            const subjects = courses[courseId]?.semesters[semesterId]?.subjects || {};
+            Object.entries(subjects).forEach(([id, sub]) => {
+                subSelect.innerHTML += `<option value="${id}">${sub.name}</option>`;
+            });
+        }
+
+        generateReportBtn.addEventListener('click', () => {
+            const from = reportFromDate.value;
+            const to = reportToDate.value;
+            const courseId = document.getElementById('reportCourse').value;
+            const semesterId = document.getElementById('reportSemester').value;
+            const subjectId = document.getElementById('reportSubject').value;
+            
+            if (!from || !to) { showToast('Select date range', 'error'); return; }
+            
+            reportData.innerHTML = '';
+            
+            // Get students based on filters
+            let studentsToShow = [];
+            if (courseId && semesterId && subjectId) {
+                // Show only students enrolled in this subject
+                Object.entries(studentCourses).forEach(([roll, data]) => {
+                    if (data.courseId === courseId && data.semester === semesterId && 
+                        data.subjects.includes(subjectId)) {
+                        studentsToShow.push(roll);
+                    }
+                });
+            } else {
+                // Show all students
+                studentsToShow = Object.keys(students);
+            }
+            
+            studentsToShow.forEach(roll => {
+                const student = students[roll];
+                if (!student) return;
+                
+                let present = 0, total = 0;
+                Object.keys(attendance).forEach(date => {
+                    if (date >= from && date <= to) {
+                        if (subjectId) {
+                            // Count for specific subject
+                            if (attendance[date]?.[subjectId]?.[roll]) {
+                                total++;
+                                if (attendance[date][subjectId][roll] === 'P') present++;
+                            }
+                        } else {
+                            // Count for any subject
+                            const dateAttendance = attendance[date] || {};
+                            let hasAttendance = false;
+                            Object.values(dateAttendance).forEach(subAttendance => {
+                                if (subAttendance[roll]) {
+                                    hasAttendance = true;
+                                    if (subAttendance[roll] === 'P') present++;
+                                }
+                            });
+                            if (hasAttendance) total++;
+                        }
+                    }
+                });
+                
+                const percent = total ? Math.round((present/total)*100) : 0;
+                reportData.innerHTML += `<tr>
+                    <td>${roll}</td>
+                    <td>${student.name}</td>
+                    <td>${present}</td>
+                    <td>${total-present}</td>
+                    <td>${total}</td>
+                    <td><div class="progress" style="height:20px"><div class="progress-bar ${percent>=75?'bg-success':percent>=50?'bg-warning':'bg-danger'}" style="width:${percent}%">${percent}%</div></div></td>
+                </tr>`;
+            });
+            showToast('Report generated', 'success');
+        });
+
+        // ==================== CHART ====================
+        function renderAttendanceChart(subjectId) {
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            if (attendanceChart) attendanceChart.destroy();
+            
+            const dates = Object.keys(attendance).sort().slice(-10);
+            
+            // Get students for this subject
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subjectId)) {
+                    studentsForSubject.push(roll);
+                }
+            });
+            
+            const presentData = dates.map(d => {
+                return studentsForSubject.filter(roll => 
+                    attendance[d]?.[subjectId]?.[roll] === 'P'
+                ).length;
+            });
+            
+            const absentData = dates.map(d => {
+                return studentsForSubject.filter(roll => 
+                    attendance[d]?.[subjectId]?.[roll] === 'A'
+                ).length;
+            });
+            
+            attendanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => formatDate(d)),
+                    datasets: [
+                        { label: 'Present', data: presentData, borderColor: '#4cc9f0', tension: 0.4 },
+                        { label: 'Absent', data: absentData, borderColor: '#f72585', tension: 0.4 }
+                    ]
+                }
+            });
+        }
+
+        // ==================== HOLIDAY / REMINDER ====================
+        quickMarkHolidayBtn.addEventListener('click', async () => {
+            const date = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+            const subject = document.getElementById('attendanceSubject')?.value;
+            
+            if (date && subject) {
+                if (!attendance[date]) attendance[date] = {};
+                if (!attendance[date][subject]) attendance[date][subject] = {};
+                
+                // Get students for this subject
+                const studentsForSubject = [];
+                Object.entries(studentCourses).forEach(([roll, data]) => {
+                    if (data.subjects && data.subjects.includes(subject)) {
+                        studentsForSubject.push(roll);
+                    }
+                });
+                
+                studentsForSubject.forEach(roll => attendance[date][subject][roll] = 'H');
+                holidays[date] = true;
+                await saveAllData();
+                renderAdminDashboard();
+                showToast(`Holiday marked for ${formatDate(date)}`, 'success');
+            } else {
+                showToast('Please select a subject first', 'error');
+            }
+        });
+
+        quickSendReminderBtn.addEventListener('click', () => {
+            showToast('Reminder sent (demo)', 'success');
+        });
+
+        // ==================== CLOUD SYNC ====================
+        cloudSyncBtn.addEventListener('click', async () => {
+            await loadAllData();
+            if (currentUser) {
+                if (currentUser.role === 'admin') { 
+                    renderAdminDashboard(); 
+                    renderUsersList();
+                    displayCourseStructure();
+                    loadCoursesForDropdowns();
+                }
+                else renderStudentDashboard();
+            }
+            updateStats();
+            updateDateSelects();
+            showToast('Data refreshed from cloud', 'success');
+        });
+
+        // ==================== USER MANAGEMENT ====================
+        document.getElementById('newUserRole').addEventListener('change', function() {
+            document.getElementById('rollNoSection').style.display = this.value === 'student' ? 'block' : 'none';
+        });
+
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const role = document.getElementById('newUserRole').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const username = document.getElementById('newUsername').value;
+            const roll = document.getElementById('newRollNo').value;
+            const fullName = document.getElementById('newFullName').value;
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                const userData = {
+                    email,
+                    role,
+                    fullName,
+                    username: username || fullName,
+                    rollNo: role === 'student' ? roll : null
+                };
+                await db.ref('users/' + uid).set(userData);
+                if (role === 'student' && roll) {
+                    await db.ref('students/' + roll).set({ uid, name: fullName });
+                    students[roll] = { uid, name: fullName };
+                }
+                showToast('User added', 'success');
+                e.target.reset();
+                renderUsersList();
+                loadCoursesForDropdowns();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        });
+
+        async function renderUsersList() {
+            const snap = await db.ref('users').once('value');
+            users = snap.val() || {};
+            const tbody = document.getElementById('usersList');
+            tbody.innerHTML = '';
+            
+            Object.entries(users).forEach(([uid, u]) => {
+                tbody.innerHTML += `<tr>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${u.role==='admin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
+                    <td>${u.fullName}</td>
+                    <td>${u.rollNo || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-warning" onclick="resetPassword('${uid}')"><i class="fas fa-key"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${uid}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        window.resetPassword = async (uid) => {
+            const email = users[uid]?.email;
+            if (!email) return;
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('Password reset email sent', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        window.deleteUser = async (uid) => {
+            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
+            if (!confirm('Delete user?')) return;
+            try {
+                const userData = users[uid];
+                if (userData.role === 'student' && userData.rollNo) {
+                    await db.ref('students/' + userData.rollNo).remove();
+                    delete students[userData.rollNo];
+                }
+                await db.ref('users/' + uid).remove();
+                showToast('User removed', 'success');
+                renderUsersList();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        document.getElementById('showPasswords').addEventListener('change', renderUsersList);
+
+        document.getElementById('addRollNumbersBtn').addEventListener('click', async () => {
+            const text = document.getElementById('bulkRollInput').value.trim();
+            if (!text) { showToast('Enter roll numbers', 'error'); return; }
+            const rolls = text.split(',').map(r => r.trim()).filter(r => r);
+            let added = 0;
+            
+            for (let roll of rolls) {
+                if (students[roll]) continue;
+                const email = `${roll}@attenzen.com`;
+                const password = `${roll}123`;
+                const fullName = `Student ${roll}`;
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const uid = userCredential.user.uid;
+                    const userData = {
+                        email,
+                        role: 'student',
+                        fullName,
+                        username: fullName,
+                        rollNo: roll
+                    };
+                    await db.ref('users/' + uid).set(userData);
+                    await db.ref('students/' + roll).set({ uid, name: fullName });
+                    students[roll] = { uid, name: fullName };
+                    added++;
+                } catch (error) {
+                    showToast(`Failed for ${roll}: ${error.message}`, 'error');
+                }
+            }
+            if (added) {
+                document.getElementById('bulkRollInput').value = '';
+                showToast(`${added} students added`, 'success');
+                renderUsersList();
+                loadCoursesForDropdowns();
+            }
+        });
+
+        // ==================== CHANGE PASSWORD ====================
+        changePasswordBtn.addEventListener('click', async () => {
+            const newPassword = prompt('Enter new password (min 6 chars):');
+            if (newPassword && newPassword.length >= 6) {
+                try {
+                    await auth.currentUser.updatePassword(newPassword);
+                    showToast('Password changed', 'success');
+                } catch (error) {
+                    showToast(error.message, 'error');
+                }
+            }
+        });
+
+        // ==================== INIT ====================
+        async function init() {
+            await createDefaultAdminIfNeeded();
+            
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    const userSnap = await db.ref('users/' + user.uid).once('value');
+                    const userData = userSnap.val();
+                    if (userData) {
+                        currentUser = { uid: user.uid, ...userData };
+                        await loadAllData();
+                        loginSection.style.display = 'none';
+                        if (currentUser.role === 'admin') {
+                            adminDash.style.display = 'block';
+                            adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                            displayCourseStructure();
+                            loadCoursesForDropdowns();
+                            renderAdminDashboard();
+                            renderUsersList();
+                        } else {
+                            studentDash.style.display = 'block';
+                            studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                            studentName.textContent = currentUser.fullName;
+                            studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                            studentEmail.textContent = currentUser.email || 'N/A';
+                            
+                            const studentCourseData = studentCourses[currentUser.rollNo];
+                            if (studentCourseData) {
+                                const course = courses[studentCourseData.courseId];
+                                const semester = course?.semesters[studentCourseData.semester];
+                                studentCourse.textContent = course?.name || 'N/A';
+                                studentSemester.textContent = semester?.name || 'N/A';
+                                
+                                const subjectSelect = document.getElementById('studentSubjectSelector');
+                                subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                                studentCourseData.subjects.forEach(subId => {
+                                    const subject = semester?.subjects[subId];
+                                    if (subject) {
+                                        subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                                    }
+                                });
+                            }
+                            
+                            renderStudentDashboard();
+                        }
+                        showToast('Auto-login successful!', 'success');
+                    }
+                }
+            });
+            
+            // Set default dates
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            if (reportFromDate) reportFromDate.valueAsDate = thirtyDaysAgo;
+            if (reportToDate) reportToDate.valueAsDate = today;
+            if (dateSelector) dateSelector.valueAsDate = today;
+        }
+        
+        init();
+    </script>
+</body>
+</html>
