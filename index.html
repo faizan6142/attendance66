@@ -376,7 +376,7 @@
                 <button class="quick-action-btn" id="quickSendReminderBtn"><i class="fas fa-bell fa-2x"></i><span>Send Reminder</span></button>
             </div>
 
-            <!-- USER MANAGEMENT TABS -->
+            <!-- MANAGEMENT TABS -->
             <div class="user-management-section">
                 <h4><i class="fas fa-users me-2"></i>Management</h4>
                 <ul class="nav nav-tabs" id="userTabs">
@@ -462,7 +462,7 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB (WITH EDIT/DELETE) -->
+                <!-- COURSES & SUBJECTS TAB (FIXED) -->
                 <div class="tab-pane fade" id="coursesTab">
                     <div class="row">
                         <div class="col-md-4">
@@ -488,19 +488,19 @@
                                 </div>
                             </div>
                             
-                            <!-- Add Subject -->
+                            <!-- Add Subject - FIXED with onchange event -->
                             <div class="card mt-3">
                                 <div class="card-header"><i class="fas fa-book-open me-2"></i>Add Subject</div>
                                 <div class="card-body">
-                                    <select id="subjectCourse" class="form-control mb-2">
+                                    <select id="subjectCourse" class="form-control mb-2" onchange="loadSemestersForSubject()">
                                         <option value="">Select Course</option>
                                     </select>
                                     <select id="subjectSemester" class="form-control mb-2">
                                         <option value="">Select Semester</option>
                                     </select>
-                                    <input type="text" id="subjectName" class="form-control mb-2" placeholder="Subject Name">
-                                    <input type="text" id="subjectCode" class="form-control mb-2" placeholder="Subject Code">
-                                    <input type="number" id="subjectCredits" class="form-control mb-2" placeholder="Credits">
+                                    <input type="text" id="subjectName" class="form-control mb-2" placeholder="Subject Name (e.g., Programming)">
+                                    <input type="text" id="subjectCode" class="form-control mb-2" placeholder="Subject Code (e.g., CS101)">
+                                    <input type="number" id="subjectCredits" class="form-control mb-2" placeholder="Credits (e.g., 3)">
                                     <button class="btn btn-primary w-100" onclick="addSubject()">Add Subject</button>
                                 </div>
                             </div>
@@ -509,7 +509,7 @@
                         <div class="col-md-8">
                             <!-- Display Course Structure with Edit/Delete -->
                             <div class="card">
-                                <div class="card-header"><i class="fas fa-sitemap me-2"></i>Course Structure (Click to Edit)</div>
+                                <div class="card-header"><i class="fas fa-sitemap me-2"></i>Course Structure</div>
                                 <div class="card-body course-structure" id="courseStructure">
                                     <p class="text-muted text-center">Loading courses...</p>
                                 </div>
@@ -563,7 +563,7 @@
                     </div>
                 </div>
 
-                <!-- ATTENDANCE TAB (FIXED) -->
+                <!-- ATTENDANCE TAB -->
                 <div class="tab-pane fade" id="attendanceTab">
                     <!-- Date Management Cards -->
                     <div class="row mb-4">
@@ -871,16 +871,21 @@
 
         // Load all data from Firebase
         async function loadAllData() {
-            const snapStudents = await db.ref('students').once('value');
-            students = snapStudents.val() || {};
-            const snapAttendance = await db.ref('attendance').once('value');
-            attendance = snapAttendance.val() || {};
-            const snapHolidays = await db.ref('holidays').once('value');
-            holidays = snapHolidays.val() || {};
-            const snapCourses = await db.ref('courses').once('value');
-            courses = snapCourses.val() || {};
-            const snapStudentCourses = await db.ref('student_courses').once('value');
-            studentCourses = snapStudentCourses.val() || {};
+            try {
+                const snapStudents = await db.ref('students').once('value');
+                students = snapStudents.val() || {};
+                const snapAttendance = await db.ref('attendance').once('value');
+                attendance = snapAttendance.val() || {};
+                const snapHolidays = await db.ref('holidays').once('value');
+                holidays = snapHolidays.val() || {};
+                const snapCourses = await db.ref('courses').once('value');
+                courses = snapCourses.val() || {};
+                const snapStudentCourses = await db.ref('student_courses').once('value');
+                studentCourses = snapStudentCourses.val() || {};
+                console.log('Data loaded:', { courses, students, studentCourses });
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
         }
 
         // Save to Firebase
@@ -1050,31 +1055,88 @@
             displayCourseStructure();
         }
 
+        // FIXED: Function to load semesters for subject dropdown
+        window.loadSemestersForSubject = function() {
+            const courseId = document.getElementById('subjectCourse').value;
+            const semSelect = document.getElementById('subjectSemester');
+            
+            console.log('Loading semesters for course:', courseId); // Debug log
+            
+            if (!courseId) {
+                semSelect.innerHTML = '<option value="">Select Semester</option>';
+                return;
+            }
+            
+            semSelect.innerHTML = '<option value="">Select Semester</option>';
+            const course = courses[courseId];
+            if (course && course.semesters) {
+                Object.entries(course.semesters).forEach(([id, sem]) => {
+                    semSelect.innerHTML += `<option value="${id}">${sem.name}</option>`;
+                });
+                console.log('Semesters loaded:', course.semesters); // Debug log
+            } else {
+                console.log('No semesters found for course:', courseId);
+            }
+        }
+
+        // FIXED: addSubject function
         window.addSubject = async function() {
+            console.log('addSubject called'); // Debug log
+            
             const courseId = document.getElementById('subjectCourse').value;
             const semesterId = document.getElementById('subjectSemester').value;
             const name = document.getElementById('subjectName').value;
             const code = document.getElementById('subjectCode').value;
             const credits = document.getElementById('subjectCredits').value;
             
-            if (!courseId || !semesterId || !name || !code) {
-                showToast('Please fill all fields', 'error');
+            console.log('Values:', { courseId, semesterId, name, code, credits }); // Debug log
+            
+            if (!courseId) {
+                showToast('Please select a course', 'error');
                 return;
             }
             
-            const subjectId = code.toLowerCase().replace(/\s+/g, '_');
-            await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).set({
-                name: name,
-                code: code,
-                credits: credits || 0
-            });
-            showToast('Subject added', 'success');
-            document.getElementById('subjectName').value = '';
-            document.getElementById('subjectCode').value = '';
-            document.getElementById('subjectCredits').value = '';
-            await loadAllData();
-            loadCoursesForDropdowns();
-            displayCourseStructure();
+            if (!semesterId) {
+                showToast('Please select a semester', 'error');
+                return;
+            }
+            
+            if (!name || !code) {
+                showToast('Please enter subject name and code', 'error');
+                return;
+            }
+            
+            try {
+                const subjectId = code.toLowerCase().replace(/\s+/g, '_');
+                
+                // Log the path we're writing to
+                console.log('Writing to:', `courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`);
+                
+                await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).set({
+                    name: name,
+                    code: code,
+                    credits: credits || 0
+                });
+                
+                showToast('Subject added successfully', 'success');
+                
+                // Clear form
+                document.getElementById('subjectName').value = '';
+                document.getElementById('subjectCode').value = '';
+                document.getElementById('subjectCredits').value = '';
+                
+                // Reload data and refresh display
+                await loadAllData();
+                loadCoursesForDropdowns();
+                displayCourseStructure();
+                
+                // Reset the semester dropdown
+                document.getElementById('subjectSemester').innerHTML = '<option value="">Select Semester</option>';
+                
+            } catch (error) {
+                console.error('Error adding subject:', error);
+                showToast('Error adding subject: ' + error.message, 'error');
+            }
         }
 
         // Edit Course
@@ -1195,6 +1257,11 @@
         // Display course structure with edit/delete buttons
         function displayCourseStructure() {
             let html = '';
+            if (!courses || Object.keys(courses).length === 0) {
+                document.getElementById('courseStructure').innerHTML = '<p class="text-muted text-center">No courses added yet. Click "Add Course" to get started.</p>';
+                return;
+            }
+            
             Object.entries(courses).forEach(([courseId, course]) => {
                 html += `<div class="course-item">
                     <div class="d-flex justify-content-between align-items-center">
@@ -1236,7 +1303,7 @@
                 }
                 html += `</div>`;
             });
-            document.getElementById('courseStructure').innerHTML = html || '<p class="text-muted text-center">No courses added yet. Click "Add Course" to get started.</p>';
+            document.getElementById('courseStructure').innerHTML = html;
         }
 
         function loadCoursesForDropdowns() {
@@ -1249,9 +1316,11 @@
                 const select = document.getElementById(id);
                 if (select) {
                     select.innerHTML = '<option value="">Select Course</option>';
-                    Object.entries(courses).forEach(([id, course]) => {
-                        select.innerHTML += `<option value="${id}">${course.name} (${course.code})</option>`;
-                    });
+                    if (courses && Object.keys(courses).length > 0) {
+                        Object.entries(courses).forEach(([id, course]) => {
+                            select.innerHTML += `<option value="${id}">${course.name} (${course.code})</option>`;
+                        });
+                    }
                 }
             });
             
@@ -1259,9 +1328,11 @@
             const studentSelect = document.getElementById('assignStudent');
             if (studentSelect) {
                 studentSelect.innerHTML = '<option value="">Select Student</option>';
-                Object.entries(students).forEach(([roll, student]) => {
-                    studentSelect.innerHTML += `<option value="${roll}">${roll} - ${student.name}</option>`;
-                });
+                if (students && Object.keys(students).length > 0) {
+                    Object.entries(students).forEach(([roll, student]) => {
+                        studentSelect.innerHTML += `<option value="${roll}">${roll} - ${student.name}</option>`;
+                    });
+                }
             }
         }
 
@@ -1351,16 +1422,18 @@
             document.getElementById('assignmentsList').innerHTML = html || '<p class="text-muted">No assignments found</p>';
         }
 
-        // ==================== FIXED ATTENDANCE FUNCTIONS ====================
+        // ==================== ATTENDANCE FUNCTIONS ====================
         function initAttendanceDropdowns() {
             const courseSelect = document.getElementById('attendanceCourse');
             if (!courseSelect) return;
             
             // Clear and populate courses
             courseSelect.innerHTML = '<option value="">Select Course</option>';
-            Object.entries(courses).forEach(([id, course]) => {
-                courseSelect.innerHTML += `<option value="${id}">${course.name} (${course.code})</option>`;
-            });
+            if (courses && Object.keys(courses).length > 0) {
+                Object.entries(courses).forEach(([id, course]) => {
+                    courseSelect.innerHTML += `<option value="${id}">${course.name} (${course.code})</option>`;
+                });
+            }
             
             // Remove existing event listeners by cloning and replacing
             const newCourseSelect = courseSelect.cloneNode(true);
@@ -1667,8 +1740,9 @@
                     });
                 });
                 
-                bulkUpdateStudents.innerHTML = '';
-                Object.values(students).forEach(s => bulkUpdateStudents.innerHTML += `<option value="${s.rollNo}">${s.rollNo} - ${s.name}</option>`);
+                const studentsSelect = document.getElementById('bulkUpdateStudents');
+                studentsSelect.innerHTML = '';
+                Object.values(students).forEach(s => studentsSelect.innerHTML += `<option value="${s.rollNo}">${s.rollNo} - ${s.name}</option>`);
                 bulkUpdateModal.style.display = 'flex';
             });
         }
