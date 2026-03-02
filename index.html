@@ -85,6 +85,12 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
         .stats-card::before {
             content: '';
@@ -226,6 +232,8 @@
             border-radius: 15px;
             max-width: 500px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .user-list { max-height: 400px; overflow-y: auto; }
         .quick-action-buttons {
@@ -313,48 +321,102 @@
             border: 1px solid #ced4da;
             border-radius: 4px;
         }
+        .student-list-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .student-list-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 1200px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .student-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            position: sticky;
+            top: 0;
+        }
+        .student-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .student-table tr:hover {
+            background: #f8f9fa;
+        }
+        .edit-student-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .subject-code-badge {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin: 2px;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
     <div class="toast-container"></div>
 
     <!-- LOGIN SECTION -->
-<div id="loginSection" class="login-container">
-    <div class="text-center mb-4">
-        <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
-        <h2 class="mt-3">AttenZen</h2>
-        <p class="text-muted">Multi-Course Attendance Management</p>
-    </div>
-    <form id="loginForm">
-        <div class="mb-4">
-            <label class="form-label">Email</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                <input type="email" class="form-control" id="username" required placeholder="Enter email">
+    <div id="loginSection" class="login-container">
+        <div class="text-center mb-4">
+            <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
+            <h2 class="mt-3">AttenZen</h2>
+            <p class="text-muted">Multi-Course Attendance Management</p>
+        </div>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="username" required placeholder="Enter email">
+                </div>
             </div>
-        </div>
-        <div class="mb-4">
-            <label class="form-label">Password</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                <input type="password" class="form-control" id="password" required placeholder="Enter password">
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" required placeholder="Enter password">
+                </div>
             </div>
+            
+            <!-- Remember Me Checkbox -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="rememberMe" checked>
+                <label class="form-check-label" for="rememberMe">Remember me (stay logged in)</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-modern w-100 py-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </button>
+        </form>
+        <div class="text-center mt-4">
+            <small class="text-muted">contact faizanameenshah.dt@gmail.com</small>
         </div>
-        
-        <!-- Remember Me Checkbox - NEW -->
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="rememberMe" checked>
-            <label class="form-check-label" for="rememberMe">Remember me (stay logged in)</label>
-        </div>
-        
-        <button type="submit" class="btn btn-primary btn-modern w-100 py-3">
-            <i class="fas fa-sign-in-alt me-2"></i>Login
-        </button>
-    </form>
-    <div class="text-center mt-4">
-        <small class="text-muted">contact faizanameenshah.dt@gmail.com</small>
     </div>
-</div>
 
     <!-- ADMIN DASHBOARD -->
     <div id="adminDashboard" class="dashboard-container">
@@ -369,12 +431,37 @@
         </nav>
 
         <div class="container-fluid">
-            <!-- QUICK STATS -->
+            <!-- QUICK STATS - Total Students card now clickable -->
             <div class="row g-4 mb-4">
-                <div class="col-md-3"><div class="stats-card"><i class="fas fa-users fa-2x mb-3"></i><div class="stats-number" id="totalStudents">0</div><div class="stats-label">Total Students</div></div></div>
-                <div class="col-md-3"><div class="stats-card" style="background:linear-gradient(135deg,#4cc9f0,#4895ef)"><i class="fas fa-check-circle fa-2x mb-3"></i><div class="stats-number" id="presentToday">0</div><div class="stats-label">Present Today</div></div></div>
-                <div class="col-md-3"><div class="stats-card" style="background:linear-gradient(135deg,#f72585,#b5179e)"><i class="fas fa-times-circle fa-2x mb-3"></i><div class="stats-number" id="absentToday">0</div><div class="stats-label">Absent Today</div></div></div>
-                <div class="col-md-3"><div class="stats-card" style="background:linear-gradient(135deg,#f8961e,#f3722c)"><i class="fas fa-calendar-alt fa-2x mb-3"></i><div class="stats-number" id="totalAttendanceDays">0</div><div class="stats-label">Attendance Days</div></div></div>
+                <div class="col-md-3">
+                    <div class="stats-card" id="totalStudentsCard">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <div class="stats-number" id="totalStudents">0</div>
+                        <div class="stats-label">Total Students Enrolled</div>
+                        <small class="text-white-50">Click to view details</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" style="background:linear-gradient(135deg,#4cc9f0,#4895ef)">
+                        <i class="fas fa-check-circle fa-2x mb-3"></i>
+                        <div class="stats-number" id="presentToday">0</div>
+                        <div class="stats-label">Present Today</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" style="background:linear-gradient(135deg,#f72585,#b5179e)">
+                        <i class="fas fa-times-circle fa-2x mb-3"></i>
+                        <div class="stats-number" id="absentToday">0</div>
+                        <div class="stats-label">Absent Today</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" style="background:linear-gradient(135deg,#f8961e,#f3722c)">
+                        <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                        <div class="stats-number" id="totalAttendanceDays">0</div>
+                        <div class="stats-label">Attendance Days</div>
+                    </div>
+                </div>
             </div>
 
             <!-- QUICK ACTIONS -->
@@ -473,7 +560,7 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB (FIXED) -->
+                <!-- COURSES & SUBJECTS TAB -->
                 <div class="tab-pane fade" id="coursesTab">
                     <div class="row">
                         <div class="col-md-4">
@@ -499,7 +586,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Add Subject - FIXED with onchange event -->
+                            <!-- Add Subject -->
                             <div class="card mt-3">
                                 <div class="card-header"><i class="fas fa-book-open me-2"></i>Add Subject</div>
                                 <div class="card-body">
@@ -769,58 +856,157 @@
     <!-- CLOUD SYNC BUTTON -->
     <div class="cloud-sync" id="cloudSyncBtn" title="Refresh from cloud"><i class="fas fa-sync-alt fa-2x"></i></div>
 
-    <!-- BULK UPDATE MODAL -->
-    <!-- BULK UPDATE MODAL (UPDATED with checkboxes) -->
-<!-- BULK UPDATE MODAL (UPDATED with calendar and date status) -->
-<div class="bulk-update-modal" id="bulkUpdateModal">
-    <div class="bulk-update-content">
-        <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
-        
-        <div class="mb-3">
-            <label class="form-label">Select Date</label>
-            <input type="date" class="form-control" id="bulkUpdateDate">
-            <small class="text-muted date-status" id="bulkUpdateDateStatus"></small>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Select Subject</label>
-            <select class="form-control" id="bulkUpdateSubject">
-                <option value="">Choose subject...</option>
-            </select>
-            <small class="text-muted subject-status" id="bulkUpdateSubjectStatus"></small>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Select Students</label>
-            <div class="border p-3" style="max-height: 300px; overflow-y: auto;" id="bulkUpdateStudentsContainer">
-                <!-- Student checkboxes will be loaded here -->
-                <p class="text-muted text-center">Select date and subject first</p>
+    <!-- BULK UPDATE MODAL (UPDATED with calendar and date status) -->
+    <div class="bulk-update-modal" id="bulkUpdateModal">
+        <div class="bulk-update-content">
+            <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
+            
+            <div class="mb-3">
+                <label class="form-label">Select Date</label>
+                <input type="date" class="form-control" id="bulkUpdateDate">
+                <small class="text-muted date-status" id="bulkUpdateDateStatus"></small>
             </div>
-            <div class="mt-2">
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllStudents()">Select All</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllStudents()">Deselect All</button>
+            
+            <div class="mb-3">
+                <label class="form-label">Select Subject</label>
+                <select class="form-control" id="bulkUpdateSubject">
+                    <option value="">Choose subject...</option>
+                </select>
+                <small class="text-muted subject-status" id="bulkUpdateSubjectStatus"></small>
             </div>
-        </div>
-        
-        <div class="mb-3">
-            <label class="form-label">Mark as</label>
-            <select class="form-control" id="bulkUpdateStatus">
-                <option value="P">Present</option>
-                <option value="A">Absent</option>
-                <option value="H">Holiday</option>
-            </select>
-        </div>
-        
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary btn-modern flex-grow-1" id="applyBulkUpdate">
-                <i class="fas fa-check me-2"></i>Apply
-            </button>
-            <button class="btn btn-secondary btn-modern" id="closeBulkUpdate">
-                <i class="fas fa-times me-2"></i>Cancel
-            </button>
+            
+            <div class="mb-3">
+                <label class="form-label">Select Students</label>
+                <div class="border p-3" style="max-height: 300px; overflow-y: auto;" id="bulkUpdateStudentsContainer">
+                    <!-- Student checkboxes will be loaded here -->
+                    <p class="text-muted text-center">Select date and subject first</p>
+                </div>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllStudents()">Select All</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllStudents()">Deselect All</button>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Mark as</label>
+                <select class="form-control" id="bulkUpdateStatus">
+                    <option value="P">Present</option>
+                    <option value="A">Absent</option>
+                    <option value="H">Holiday</option>
+                </select>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-modern flex-grow-1" id="applyBulkUpdate">
+                    <i class="fas fa-check me-2"></i>Apply
+                </button>
+                <button class="btn btn-secondary btn-modern" id="closeBulkUpdate">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+            </div>
         </div>
     </div>
+
+    <!-- STUDENT LIST MODAL (NEW) -->
+    <div class="student-list-modal" id="studentListModal">
+        <div class="student-list-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4><i class="fas fa-users me-2"></i>Enrolled Students</h4>
+                <button class="btn-close" onclick="closeStudentListModal()"></button>
+            </div>
+            
+            <!-- Student Edit Form (updated with email/password change) -->
+<div id="studentEditForm" class="edit-student-form" style="display: none;">
+    <h5 class="mb-3">Edit Student Details</h5>
+    <input type="hidden" id="editStudentRoll">
+    <input type="hidden" id="editStudentUid">
+    
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Roll Number</label>
+            <input type="text" class="form-control" id="editRollNo" readonly>
+            <small class="text-muted">Cannot be changed</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="editFullName">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" id="editUsername">
+            <small class="text-muted">Display name only</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Current Email</label>
+            <input type="email" class="form-control" id="editEmail" readonly>
+        </div>
+    </div>
+    
+    <!-- Toggle for password/email change -->
+    <div class="mb-3">
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="togglePasswordChange()">
+            <i class="fas fa-key me-2"></i>Change Login Credentials
+        </button>
+    </div>
+    
+    <!-- Password Change Section (hidden by default) -->
+    <div id="passwordChangeSection" style="display: none;" class="border-top pt-3 mt-2">
+        <h6 class="mb-3">Update Login Credentials</h6>
+        
+        <div class="mb-3">
+            <label class="form-label">Current Password <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="editPassword" placeholder="Enter current password">
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">New Email (optional)</label>
+                <input type="email" class="form-control" id="editNewEmail" placeholder="Enter new email">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">New Password (optional)</label>
+                <input type="password" class="form-control" id="editNewPassword" placeholder="Enter new password">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" class="form-control" id="editConfirmPassword" placeholder="Confirm new password">
+            </div>
+        </div>
+        <small class="text-muted d-block mb-3">
+            <i class="fas fa-info-circle me-1"></i>
+            Leave fields empty if you don't want to change them. Current password is required for any changes.
+        </small>
+    </div>
+    
+    <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-success" onclick="saveStudentChanges()">
+            <i class="fas fa-save me-2"></i>Save Changes
+        </button>
+        <button class="btn btn-secondary" onclick="cancelStudentEdit()">
+            <i class="fas fa-times me-2"></i>Cancel
+        </button>
+    </div>
 </div>
+            
+            <!-- Students Table -->
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Subjects Enrolled</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentListTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -883,6 +1069,9 @@
         const presentToday = document.getElementById('presentToday');
         const absentToday = document.getElementById('absentToday');
         const totalAttendanceDays = document.getElementById('totalAttendanceDays');
+        const totalStudentsCard = document.getElementById('totalStudentsCard');
+        const studentListModal = document.getElementById('studentListModal');
+        const studentListTableBody = document.getElementById('studentListTableBody');
 
         // ==================== HELPERS ====================
         function formatDate(dateString) {
@@ -915,6 +1104,9 @@
                 const snapStudentCourses = await db.ref('student_courses').once('value');
                 studentCourses = snapStudentCourses.val() || {};
                 console.log('Data loaded:', { courses, students, studentCourses });
+                
+                // Update total students count
+                updateStats();
             } catch (error) {
                 console.error('Error loading data:', error);
             }
@@ -954,6 +1146,197 @@
             totalAttendanceDays.textContent = Object.keys(attendance).length;
         }
 
+        // ==================== STUDENT LIST MODAL FUNCTIONS ====================
+        function openStudentListModal() {
+            renderStudentList();
+            studentListModal.style.display = 'flex';
+        }
+
+        function closeStudentListModal() {
+            studentListModal.style.display = 'none';
+            document.getElementById('studentEditForm').style.display = 'none';
+        }
+
+        function renderStudentList() {
+            let html = '';
+            Object.entries(students).forEach(([roll, student]) => {
+                // Get subjects enrolled for this student
+                const studentCourseData = studentCourses[roll];
+                let subjectsList = '';
+                if (studentCourseData) {
+                    const subjects = studentCourseData.subjects || [];
+                    subjectsList = subjects.map(subId => {
+                        // Find subject code from courses
+                        for (const courseId in courses) {
+                            const course = courses[courseId];
+                            for (const semId in course.semesters || {}) {
+                                const sem = course.semesters[semId];
+                                if (sem.subjects && sem.subjects[subId]) {
+                                    return `<span class="subject-code-badge">${sem.subjects[subId].code}</span>`;
+                                }
+                            }
+                        }
+                        return `<span class="subject-code-badge">${subId}</span>`;
+                    }).join(' ');
+                } else {
+                    subjectsList = '<span class="text-muted">No subjects</span>';
+                }
+                
+                html += `<tr>
+                    <td><strong>${roll}</strong></td>
+                    <td>${student.name}</td>
+                    <td>${student.email || 'N/A'}</td>
+                    <td>${subjectsList}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editStudent('${roll}')">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            studentListTableBody.innerHTML = html || '<tr><td colspan="5" class="text-center">No students found</td></tr>';
+        }
+
+        // ==================== STUDENT EDIT WITH EMAIL UPDATE ====================
+window.editStudent = function(roll) {
+    const student = students[roll];
+    const uid = Object.keys(users).find(uid => users[uid].rollNo === roll);
+    const userEntry = users[uid];
+    
+    document.getElementById('editStudentRoll').value = roll;
+    document.getElementById('editStudentUid').value = uid || '';
+    document.getElementById('editRollNo').value = roll;
+    document.getElementById('editFullName').value = student.name || '';
+    document.getElementById('editUsername').value = userEntry?.username || '';
+    document.getElementById('editEmail').value = userEntry?.email || '';
+    document.getElementById('editPassword').value = '';
+    
+    // Hide password change section by default
+    document.getElementById('passwordChangeSection').style.display = 'none';
+    
+    document.getElementById('studentEditForm').style.display = 'block';
+}
+
+window.togglePasswordChange = function() {
+    const section = document.getElementById('passwordChangeSection');
+    if (section.style.display === 'none') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editNewEmail').value = '';
+        document.getElementById('editNewPassword').value = '';
+        document.getElementById('editConfirmPassword').value = '';
+    }
+}
+
+window.saveStudentChanges = async function() {
+    const roll = document.getElementById('editStudentRoll').value;
+    const uid = document.getElementById('editStudentUid').value;
+    const newName = document.getElementById('editFullName').value;
+    const newUsername = document.getElementById('editUsername').value;
+    const newEmail = document.getElementById('editNewEmail').value;
+    const currentPassword = document.getElementById('editPassword').value;
+    const newPassword = document.getElementById('editNewPassword').value;
+    const confirmPassword = document.getElementById('editConfirmPassword').value;
+    
+    if (!newName) {
+        showToast('Name cannot be empty', 'error');
+        return;
+    }
+    
+    try {
+        // Check if email or password change is requested
+        const emailChanged = newEmail && newEmail !== document.getElementById('editEmail').value;
+        const passwordChanged = newPassword || confirmPassword;
+        
+        if (emailChanged || passwordChanged) {
+            if (!currentPassword) {
+                showToast('Current password is required to change email or password', 'error');
+                return;
+            }
+            
+            if (passwordChanged && newPassword !== confirmPassword) {
+                showToast('New passwords do not match', 'error');
+                return;
+            }
+            
+            if (passwordChanged && newPassword.length < 6) {
+                showToast('New password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            // Re-authenticate user
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                user.email,
+                currentPassword
+            );
+            
+            try {
+                await user.reauthenticateWithCredential(credential);
+                
+                // Update email if changed
+                if (emailChanged) {
+                    await user.updateEmail(newEmail);
+                }
+                
+                // Update password if changed
+                if (passwordChanged) {
+                    await user.updatePassword(newPassword);
+                }
+                
+                showToast('Login credentials updated successfully', 'success');
+            } catch (authError) {
+                showToast('Authentication failed: ' + authError.message, 'error');
+                return;
+            }
+        }
+        
+        // Update database records
+        const updates = {};
+        
+        // Update students object
+        if (students[roll]) {
+            students[roll].name = newName;
+            updates['/students/' + roll + '/name'] = newName;
+        }
+        
+        // Update users object
+        if (uid) {
+            const userUpdates = {
+                fullName: newName,
+                username: newUsername || users[uid].username
+            };
+            
+            if (emailChanged) {
+                userUpdates.email = newEmail;
+            }
+            
+            users[uid] = { ...users[uid], ...userUpdates };
+            updates['/users/' + uid] = users[uid];
+        }
+        
+        // Apply all updates to database
+        if (Object.keys(updates).length > 0) {
+            await db.ref().update(updates);
+        }
+        
+        showToast('Student updated successfully', 'success');
+        document.getElementById('studentEditForm').style.display = 'none';
+        renderStudentList();
+        renderUsersList();
+        
+    } catch (error) {
+        showToast('Error updating student: ' + error.message, 'error');
+    }
+}
+
+        // Make total students card clickable
+        if (totalStudentsCard) {
+            totalStudentsCard.addEventListener('click', openStudentListModal);
+        }
+
         // ==================== AUTH ====================
         async function createDefaultAdminIfNeeded() {
             const adminSnapshot = await db.ref('users').orderByChild('role').equalTo('admin').once('value');
@@ -978,75 +1361,71 @@
         }
 
         loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const rememberMe = document.getElementById('rememberMe').checked;
-    
-    try {
-        // Set persistence based on remember me choice
-        if (rememberMe) {
-            // LOCAL persistence - stays logged in even after browser close
-            await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            console.log('Using LOCAL persistence - will stay logged in');
-        } else {
-            // SESSION persistence - logs out when browser/tab is closed
-            await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-            console.log('Using SESSION persistence - will logout on browser close');
-        }
-        
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const uid = userCredential.user.uid;
-        const userSnap = await db.ref('users/' + uid).once('value');
-        const userData = userSnap.val();
-        
-        if (!userData) {
-            showToast('User data not found', 'error');
-            return;
-        }
-        
-        currentUser = { uid, ...userData };
-        await loadAllData();
-        loginSection.style.display = 'none';
-        
-        if (currentUser.role === 'admin') {
-            adminDash.style.display = 'block';
-            adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-            loadCoursesForDropdowns();
-            displayCourseStructure();
-            initAttendanceDropdowns();
-            renderUsersList();
-        } else {
-            studentDash.style.display = 'block';
-            studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-            studentName.textContent = currentUser.fullName;
-            studentRollNo.textContent = currentUser.rollNo || 'N/A';
-            studentEmail.textContent = currentUser.email || 'N/A';
+            e.preventDefault();
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
             
-            const studentCourseData = studentCourses[currentUser.rollNo];
-            if (studentCourseData) {
-                const course = courses[studentCourseData.courseId];
-                const semester = course?.semesters[studentCourseData.semester];
-                studentCourse.textContent = course?.name || 'N/A';
-                studentSemester.textContent = semester?.name || 'N/A';
+            try {
+                // Set persistence based on remember me choice
+                if (rememberMe) {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                } else {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+                }
                 
-                const subjectSelect = document.getElementById('studentSubjectSelector');
-                subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                studentCourseData.subjects.forEach(subId => {
-                    const subject = semester?.subjects[subId];
-                    if (subject) {
-                        subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                const userSnap = await db.ref('users/' + uid).once('value');
+                const userData = userSnap.val();
+                
+                if (!userData) {
+                    showToast('User data not found', 'error');
+                    return;
+                }
+                
+                currentUser = { uid, ...userData };
+                await loadAllData();
+                loginSection.style.display = 'none';
+                
+                if (currentUser.role === 'admin') {
+                    adminDash.style.display = 'block';
+                    adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    loadCoursesForDropdowns();
+                    displayCourseStructure();
+                    initAttendanceDropdowns();
+                    renderUsersList();
+                } else {
+                    studentDash.style.display = 'block';
+                    studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    studentName.textContent = currentUser.fullName;
+                    studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                    studentEmail.textContent = currentUser.email || 'N/A';
+                    
+                    const studentCourseData = studentCourses[currentUser.rollNo];
+                    if (studentCourseData) {
+                        const course = courses[studentCourseData.courseId];
+                        const semester = course?.semesters[studentCourseData.semester];
+                        studentCourse.textContent = course?.name || 'N/A';
+                        studentSemester.textContent = semester?.name || 'N/A';
+                        
+                        const subjectSelect = document.getElementById('studentSubjectSelector');
+                        subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                        studentCourseData.subjects.forEach(subId => {
+                            const subject = semester?.subjects[subId];
+                            if (subject) {
+                                subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                            }
+                        });
                     }
-                });
+                    
+                    renderStudentDashboard();
+                }
+                showToast('Login successful!', 'success');
+            } catch (error) {
+                showToast('Login failed: ' + error.message, 'error');
             }
-            
-            renderStudentDashboard();
-        }
-        showToast('Login successful!', 'success');
-    } catch (error) {
-        showToast('Login failed: ' + error.message, 'error');
-    }
-});
+        });
 
         function logout() {
             auth.signOut().then(() => {
@@ -1060,7 +1439,7 @@
         logoutBtn.addEventListener('click', logout);
         studentLogoutBtn.addEventListener('click', logout);
 
-        // ==================== COURSE MANAGEMENT WITH EDIT/DELETE ====================
+        // ==================== COURSE MANAGEMENT ====================
         window.addCourse = async function() {
             const name = document.getElementById('courseName').value;
             const code = document.getElementById('courseCode').value;
@@ -1103,12 +1482,9 @@
             displayCourseStructure();
         }
 
-        // FIXED: Function to load semesters for subject dropdown
         window.loadSemestersForSubject = function() {
             const courseId = document.getElementById('subjectCourse').value;
             const semSelect = document.getElementById('subjectSemester');
-            
-            console.log('Loading semesters for course:', courseId); // Debug log
             
             if (!courseId) {
                 semSelect.innerHTML = '<option value="">Select Semester</option>';
@@ -1121,23 +1497,15 @@
                 Object.entries(course.semesters).forEach(([id, sem]) => {
                     semSelect.innerHTML += `<option value="${id}">${sem.name}</option>`;
                 });
-                console.log('Semesters loaded:', course.semesters); // Debug log
-            } else {
-                console.log('No semesters found for course:', courseId);
             }
         }
 
-        // FIXED: addSubject function
         window.addSubject = async function() {
-            console.log('addSubject called'); // Debug log
-            
             const courseId = document.getElementById('subjectCourse').value;
             const semesterId = document.getElementById('subjectSemester').value;
             const name = document.getElementById('subjectName').value;
             const code = document.getElementById('subjectCode').value;
             const credits = document.getElementById('subjectCredits').value;
-            
-            console.log('Values:', { courseId, semesterId, name, code, credits }); // Debug log
             
             if (!courseId) {
                 showToast('Please select a course', 'error');
@@ -1157,9 +1525,6 @@
             try {
                 const subjectId = code.toLowerCase().replace(/\s+/g, '_');
                 
-                // Log the path we're writing to
-                console.log('Writing to:', `courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`);
-                
                 await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).set({
                     name: name,
                     code: code,
@@ -1168,17 +1533,13 @@
                 
                 showToast('Subject added successfully', 'success');
                 
-                // Clear form
                 document.getElementById('subjectName').value = '';
                 document.getElementById('subjectCode').value = '';
                 document.getElementById('subjectCredits').value = '';
                 
-                // Reload data and refresh display
                 await loadAllData();
                 loadCoursesForDropdowns();
                 displayCourseStructure();
-                
-                // Reset the semester dropdown
                 document.getElementById('subjectSemester').innerHTML = '<option value="">Select Semester</option>';
                 
             } catch (error) {
@@ -1187,7 +1548,6 @@
             }
         }
 
-        // Edit Course
         window.editCourse = function(courseId) {
             const course = courses[courseId];
             const newName = prompt('Enter new course name:', course.name);
@@ -1207,11 +1567,9 @@
             }
         }
 
-        // Delete Course
         window.deleteCourse = async function(courseId) {
             if (!confirm('Are you sure you want to delete this course? This will also delete all semesters and subjects in this course.')) return;
             
-            // Check if any students are assigned to this course
             const hasAssignments = Object.values(studentCourses).some(sc => sc.courseId === courseId);
             if (hasAssignments) {
                 if (!confirm('This course has students assigned. Deleting it will remove their assignments. Continue?')) return;
@@ -1224,7 +1582,6 @@
             displayCourseStructure();
         }
 
-        // Edit Semester
         window.editSemester = function(courseId, semesterId) {
             const semester = courses[courseId]?.semesters[semesterId];
             const newName = prompt('Enter new semester name:', semester.name);
@@ -1242,11 +1599,9 @@
             }
         }
 
-        // Delete Semester
         window.deleteSemester = async function(courseId, semesterId) {
             if (!confirm('Are you sure you want to delete this semester? This will also delete all subjects in this semester.')) return;
             
-            // Check if any students are assigned to this semester
             const hasAssignments = Object.values(studentCourses).some(sc => 
                 sc.courseId === courseId && sc.semester === semesterId
             );
@@ -1261,7 +1616,6 @@
             displayCourseStructure();
         }
 
-        // Edit Subject
         window.editSubject = function(courseId, semesterId, subjectId) {
             const subject = courses[courseId]?.semesters[semesterId]?.subjects[subjectId];
             const newName = prompt('Enter new subject name:', subject.name);
@@ -1283,11 +1637,9 @@
             }
         }
 
-        // Delete Subject
         window.deleteSubject = async function(courseId, semesterId, subjectId) {
             if (!confirm('Are you sure you want to delete this subject?')) return;
             
-            // Check if any students are assigned to this subject
             const hasAssignments = Object.values(studentCourses).some(sc => 
                 sc.courseId === courseId && sc.semester === semesterId && sc.subjects.includes(subjectId)
             );
@@ -1302,7 +1654,6 @@
             displayCourseStructure();
         }
 
-        // Display course structure with edit/delete buttons
         function displayCourseStructure() {
             let html = '';
             if (!courses || Object.keys(courses).length === 0) {
@@ -1372,7 +1723,6 @@
                 }
             });
             
-            // Load students for assignment
             const studentSelect = document.getElementById('assignStudent');
             if (studentSelect) {
                 studentSelect.innerHTML = '<option value="">Select Student</option>';
@@ -1475,7 +1825,6 @@
             const courseSelect = document.getElementById('attendanceCourse');
             if (!courseSelect) return;
             
-            // Clear and populate courses
             courseSelect.innerHTML = '<option value="">Select Course</option>';
             if (courses && Object.keys(courses).length > 0) {
                 Object.entries(courses).forEach(([id, course]) => {
@@ -1483,11 +1832,9 @@
                 });
             }
             
-            // Remove existing event listeners by cloning and replacing
             const newCourseSelect = courseSelect.cloneNode(true);
             courseSelect.parentNode.replaceChild(newCourseSelect, courseSelect);
             
-            // Add new event listener
             newCourseSelect.addEventListener('change', function() {
                 const semSelect = document.getElementById('attendanceSemester');
                 const subSelect = document.getElementById('attendanceSubject');
@@ -1506,7 +1853,6 @@
                 }
             });
             
-            // Semester change handler
             const semSelect = document.getElementById('attendanceSemester');
             if (semSelect) {
                 const newSemSelect = semSelect.cloneNode(true);
@@ -1528,13 +1874,11 @@
                 });
             }
             
-            // Set default date
             if (dateSelector) {
                 dateSelector.valueAsDate = new Date();
             }
         }
 
-        // Load attendance button handler
         document.getElementById('loadAttendanceBtn')?.addEventListener('click', function() {
             const subjectId = document.getElementById('attendanceSubject').value;
             if (!subjectId) {
@@ -1553,7 +1897,6 @@
             const tbody = attendanceTable.querySelector('tbody');
             tbody.innerHTML = '';
 
-            // Get students assigned to this subject
             const studentsForSubject = [];
             Object.entries(studentCourses).forEach(([roll, data]) => {
                 if (data.subjects && data.subjects.includes(subjectId)) {
@@ -1569,7 +1912,6 @@
             const dates = Object.keys(attendance).sort();
             const today = new Date().toISOString().split('T')[0];
             
-            // Add date columns
             dates.forEach(date => {
                 const th = document.createElement('th');
                 th.textContent = formatDate(date);
@@ -1578,7 +1920,6 @@
                 thead.appendChild(th);
             });
             
-            // Add today if not exists
             if (!dates.includes(today)) {
                 const th = document.createElement('th');
                 th.textContent = formatDate(today);
@@ -1588,7 +1929,6 @@
                 dates.push(today);
             }
 
-            // Create rows for each student
             studentsForSubject.forEach(roll => {
                 const student = students[roll];
                 if (!student) return;
@@ -1606,7 +1946,6 @@
                 tbody.appendChild(row);
             });
 
-            // Add click handlers for status toggles
             document.querySelectorAll('.status-toggle').forEach(t => {
                 t.addEventListener('click', async function() {
                     const student = this.dataset.student;
@@ -1639,7 +1978,6 @@
             });
         }
 
-        // Update markAllPresentBtn handler
         if (markAllPresentBtn) {
             markAllPresentBtn.addEventListener('click', async () => {
                 const date = dateSelector.value;
@@ -1658,7 +1996,6 @@
                 if (!attendance[date]) attendance[date] = {};
                 if (!attendance[date][subjectId]) attendance[date][subjectId] = {};
                 
-                // Get students for this subject
                 const studentsForSubject = [];
                 Object.entries(studentCourses).forEach(([roll, data]) => {
                     if (data.subjects && data.subjects.includes(subjectId)) {
@@ -1673,7 +2010,6 @@
             });
         }
 
-        // Refresh button handler
         if (refreshTableBtn) {
             refreshTableBtn.addEventListener('click', () => {
                 const subjectId = document.getElementById('attendanceSubject').value;
@@ -1685,7 +2021,6 @@
             });
         }
 
-        // Date management handlers
         async function addDateHandler() {
             const date = newDateInput2?.value;
             if (!date) { showToast('Select a date', 'error'); return; }
@@ -1713,7 +2048,6 @@
         if (deleteDateBtn2) deleteDateBtn2.addEventListener('click', deleteDateHandler);
         if (quickDeleteDateBtn) quickDeleteDateBtn.addEventListener('click', deleteDateHandler);
 
-        // Mark today button
         if (markTodayBtn) {
             markTodayBtn.addEventListener('click', () => {
                 const today = new Date().toISOString().split('T')[0];
@@ -1721,6 +2055,184 @@
                 showToast('Date set to today', 'success');
             });
         }
+
+        // ==================== BULK UPDATE WITH CALENDAR AND DATE STATUS ====================
+        if (quickBulkUpdateBtn) {
+            quickBulkUpdateBtn.addEventListener('click', async () => {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('bulkUpdateDate').value = today;
+                
+                const subjectSelect = document.getElementById('bulkUpdateSubject');
+                subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+                
+                Object.values(courses).forEach(course => {
+                    Object.values(course.semesters || {}).forEach(sem => {
+                        Object.entries(sem.subjects || {}).forEach(([id, sub]) => {
+                            subjectSelect.innerHTML += `<option value="${id}">${course.name} - ${sem.name} - ${sub.name}</option>`;
+                        });
+                    });
+                });
+                
+                document.getElementById('bulkUpdateDateStatus').textContent = '';
+                document.getElementById('bulkUpdateSubjectStatus').textContent = '';
+                document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
+                
+                bulkUpdateModal.style.display = 'flex';
+            });
+        }
+
+        document.getElementById('bulkUpdateDate')?.addEventListener('change', function() {
+            const date = this.value;
+            const subjectId = document.getElementById('bulkUpdateSubject').value;
+            
+            const dateStatus = document.getElementById('bulkUpdateDateStatus');
+            if (attendance[date]) {
+                const totalSubjects = Object.keys(attendance[date]).length;
+                dateStatus.textContent = `✓ Attendance exists for ${totalSubjects} subject(s) on this date`;
+                dateStatus.style.color = '#28a745';
+            } else {
+                dateStatus.textContent = '⚠ No attendance marked for this date yet';
+                dateStatus.style.color = '#ffc107';
+            }
+            
+            if (subjectId) {
+                loadStudentsForBulkUpdate(subjectId, date);
+            }
+        });
+
+        document.getElementById('bulkUpdateSubject')?.addEventListener('change', function() {
+            const subjectId = this.value;
+            const date = document.getElementById('bulkUpdateDate').value;
+            
+            const subjectStatus = document.getElementById('bulkUpdateSubjectStatus');
+            if (subjectId && date && attendance[date]?.[subjectId]) {
+                const totalStudents = Object.keys(attendance[date][subjectId]).length;
+                subjectStatus.textContent = `✓ Attendance already marked for ${totalStudents} students`;
+                subjectStatus.style.color = '#28a745';
+            } else if (subjectId && date) {
+                subjectStatus.textContent = '⚠ No attendance marked for this subject yet';
+                subjectStatus.style.color = '#ffc107';
+            } else {
+                subjectStatus.textContent = '';
+            }
+            
+            if (!date || !subjectId) {
+                document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
+                return;
+            }
+            
+            loadStudentsForBulkUpdate(subjectId, date);
+        });
+
+        function loadStudentsForBulkUpdate(subjectId, date) {
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subjectId)) {
+                    studentsForSubject.push(roll);
+                }
+            });
+            
+            if (studentsForSubject.length === 0) {
+                document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">No students assigned to this subject</p>';
+                return;
+            }
+            
+            let html = '';
+            let markedCount = 0;
+            let unmarkedCount = 0;
+            
+            studentsForSubject.forEach(roll => {
+                const student = students[roll];
+                if (!student) return;
+                
+                const currentStatus = attendance[date]?.[subjectId]?.[roll];
+                const isMarked = currentStatus !== undefined;
+                const statusDisplay = isMarked ? 
+                    (currentStatus === 'P' ? 'Present' : currentStatus === 'A' ? 'Absent' : 'Holiday') : 
+                    'Not marked';
+                const statusClass = isMarked ? 
+                    (currentStatus === 'P' ? 'bg-success' : currentStatus === 'A' ? 'bg-danger' : 'bg-warning') : 
+                    'bg-secondary';
+                
+                if (isMarked) markedCount++;
+                else unmarkedCount++;
+                
+                html += `<div class="form-check mb-2">
+                    <input class="form-check-input student-checkbox" type="checkbox" value="${roll}" id="student_${roll}">
+                    <label class="form-check-label" for="student_${roll}">
+                        <strong>${roll}</strong> - ${student.name} 
+                        <span class="badge ${statusClass}">
+                            ${statusDisplay}
+                        </span>
+                    </label>
+                </div>`;
+            });
+            
+            html = `<div class="alert alert-info py-2 mb-2">
+                <strong>Summary:</strong> ${markedCount} marked, ${unmarkedCount} unmarked
+            </div>` + html;
+            
+            document.getElementById('bulkUpdateStudentsContainer').innerHTML = html;
+            
+            const subjectStatus = document.getElementById('bulkUpdateSubjectStatus');
+            if (markedCount > 0) {
+                subjectStatus.textContent = `✓ ${markedCount} students already marked (${unmarkedCount} unmarked)`;
+                subjectStatus.style.color = '#28a745';
+            } else {
+                subjectStatus.textContent = '⚠ No attendance marked for any student yet';
+                subjectStatus.style.color = '#ffc107';
+            }
+        }
+
+        window.selectAllStudents = function() {
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
+        }
+
+        window.deselectAllStudents = function() {
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        if (applyBulkUpdate) {
+            applyBulkUpdate.addEventListener('click', async () => {
+                const date = bulkUpdateDate.value;
+                const subject = document.getElementById('bulkUpdateSubject').value;
+                const selected = [];
+                document.querySelectorAll('.student-checkbox:checked').forEach(cb => {
+                    selected.push(cb.value);
+                });
+                const status = bulkUpdateStatus.value;
+                
+                if (!date || !subject || selected.length === 0) { 
+                    showToast('Select date, subject, and at least one student', 'error'); 
+                    return; 
+                }
+                
+                if (!attendance[date]) attendance[date] = {};
+                if (!attendance[date][subject]) attendance[date][subject] = {};
+                
+                selected.forEach(roll => attendance[date][subject][roll] = status);
+                await saveAllData();
+                
+                const currentSubject = document.getElementById('attendanceSubject').value;
+                if (currentSubject === subject) {
+                    renderSubjectAttendance(subject);
+                }
+                
+                loadStudentsForBulkUpdate(subject, date);
+                
+                showToast(`Bulk update applied for ${selected.length} students`, 'success');
+            });
+        }
+
+        if (closeBulkUpdate) {
+            closeBulkUpdate.addEventListener('click', () => bulkUpdateModal.style.display = 'none');
+        }
+
+        bulkUpdateModal.addEventListener('click', (e) => {
+            if (e.target === bulkUpdateModal) {
+                bulkUpdateModal.style.display = 'none';
+            }
+        });
 
         // ==================== STUDENT DASHBOARD RENDER ====================
         function renderStudentDashboard() {
@@ -1744,7 +2256,6 @@
                 if (selectedSubject) {
                     status = (attendance[date]?.[selectedSubject]?.[roll]) || 'A';
                 } else {
-                    // If no subject selected, check if any subject has present for this student
                     const subjects = attendance[date] || {};
                     for (let subId in subjects) {
                         if (subjects[subId][roll] === 'P') {
@@ -1772,202 +2283,6 @@
             attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
         }
 
-        // ==================== BULK UPDATE ====================
-        // ==================== BULK UPDATE WITH CHECKBOXES ====================
-// ==================== BULK UPDATE WITH CALENDAR AND DATE STATUS ====================
-if (quickBulkUpdateBtn) {
-    quickBulkUpdateBtn.addEventListener('click', async () => {
-        // Set today's date as default in calendar
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('bulkUpdateDate').value = today;
-        
-        // Load subjects for bulk update
-        const subjectSelect = document.getElementById('bulkUpdateSubject');
-        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
-        
-        // Flatten all subjects from all courses
-        Object.values(courses).forEach(course => {
-            Object.values(course.semesters || {}).forEach(sem => {
-                Object.entries(sem.subjects || {}).forEach(([id, sub]) => {
-                    subjectSelect.innerHTML += `<option value="${id}">${course.name} - ${sem.name} - ${sub.name}</option>`;
-                });
-            });
-        });
-        
-        // Clear status messages
-        document.getElementById('bulkUpdateDateStatus').textContent = '';
-        document.getElementById('bulkUpdateSubjectStatus').textContent = '';
-        document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
-        
-        bulkUpdateModal.style.display = 'flex';
-    });
-}
-
-// Check date status when date changes
-document.getElementById('bulkUpdateDate')?.addEventListener('change', function() {
-    const date = this.value;
-    const subjectId = document.getElementById('bulkUpdateSubject').value;
-    
-    // Update date status
-    const dateStatus = document.getElementById('bulkUpdateDateStatus');
-    if (attendance[date]) {
-        const totalSubjects = Object.keys(attendance[date]).length;
-        dateStatus.textContent = `✓ Attendance exists for ${totalSubjects} subject(s) on this date`;
-        dateStatus.style.color = '#28a745';
-    } else {
-        dateStatus.textContent = '⚠ No attendance marked for this date yet';
-        dateStatus.style.color = '#ffc107';
-    }
-    
-    if (subjectId) {
-        loadStudentsForBulkUpdate(subjectId, date);
-    }
-});
-
-// Load students when subject is selected
-document.getElementById('bulkUpdateSubject')?.addEventListener('change', function() {
-    const subjectId = this.value;
-    const date = document.getElementById('bulkUpdateDate').value;
-    
-    // Update subject status
-    const subjectStatus = document.getElementById('bulkUpdateSubjectStatus');
-    if (subjectId && date && attendance[date]?.[subjectId]) {
-        const totalStudents = Object.keys(attendance[date][subjectId]).length;
-        subjectStatus.textContent = `✓ Attendance already marked for ${totalStudents} students`;
-        subjectStatus.style.color = '#28a745';
-    } else if (subjectId && date) {
-        subjectStatus.textContent = '⚠ No attendance marked for this subject yet';
-        subjectStatus.style.color = '#ffc107';
-    } else {
-        subjectStatus.textContent = '';
-    }
-    
-    if (!date || !subjectId) {
-        document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">Select date and subject first</p>';
-        return;
-    }
-    
-    loadStudentsForBulkUpdate(subjectId, date);
-});
-
-function loadStudentsForBulkUpdate(subjectId, date) {
-    // Get students assigned to this subject
-    const studentsForSubject = [];
-    Object.entries(studentCourses).forEach(([roll, data]) => {
-        if (data.subjects && data.subjects.includes(subjectId)) {
-            studentsForSubject.push(roll);
-        }
-    });
-    
-    if (studentsForSubject.length === 0) {
-        document.getElementById('bulkUpdateStudentsContainer').innerHTML = '<p class="text-muted text-center">No students assigned to this subject</p>';
-        return;
-    }
-    
-    let html = '';
-    let markedCount = 0;
-    let unmarkedCount = 0;
-    
-    studentsForSubject.forEach(roll => {
-        const student = students[roll];
-        if (!student) return;
-        
-        const currentStatus = attendance[date]?.[subjectId]?.[roll];
-        const isMarked = currentStatus !== undefined;
-        const statusDisplay = isMarked ? 
-            (currentStatus === 'P' ? 'Present' : currentStatus === 'A' ? 'Absent' : 'Holiday') : 
-            'Not marked';
-        const statusClass = isMarked ? 
-            (currentStatus === 'P' ? 'bg-success' : currentStatus === 'A' ? 'bg-danger' : 'bg-warning') : 
-            'bg-secondary';
-        
-        if (isMarked) markedCount++;
-        else unmarkedCount++;
-        
-        html += `<div class="form-check mb-2">
-            <input class="form-check-input student-checkbox" type="checkbox" value="${roll}" id="student_${roll}">
-            <label class="form-check-label" for="student_${roll}">
-                <strong>${roll}</strong> - ${student.name} 
-                <span class="badge ${statusClass}">
-                    ${statusDisplay}
-                </span>
-            </label>
-        </div>`;
-    });
-    
-    // Add summary at the top
-    html = `<div class="alert alert-info py-2 mb-2">
-        <strong>Summary:</strong> ${markedCount} marked, ${unmarkedCount} unmarked
-    </div>` + html;
-    
-    document.getElementById('bulkUpdateStudentsContainer').innerHTML = html;
-    
-    // Update subject status with more detail
-    const subjectStatus = document.getElementById('bulkUpdateSubjectStatus');
-    if (markedCount > 0) {
-        subjectStatus.textContent = `✓ ${markedCount} students already marked (${unmarkedCount} unmarked)`;
-        subjectStatus.style.color = '#28a745';
-    } else {
-        subjectStatus.textContent = '⚠ No attendance marked for any student yet';
-        subjectStatus.style.color = '#ffc107';
-    }
-}
-
-// Select all students
-window.selectAllStudents = function() {
-    document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
-}
-
-// Deselect all students
-window.deselectAllStudents = function() {
-    document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
-}
-
-// Apply bulk update
-if (applyBulkUpdate) {
-    applyBulkUpdate.addEventListener('click', async () => {
-        const date = bulkUpdateDate.value;
-        const subject = document.getElementById('bulkUpdateSubject').value;
-        const selected = [];
-        document.querySelectorAll('.student-checkbox:checked').forEach(cb => {
-            selected.push(cb.value);
-        });
-        const status = bulkUpdateStatus.value;
-        
-        if (!date || !subject || selected.length === 0) { 
-            showToast('Select date, subject, and at least one student', 'error'); 
-            return; 
-        }
-        
-        if (!attendance[date]) attendance[date] = {};
-        if (!attendance[date][subject]) attendance[date][subject] = {};
-        
-        selected.forEach(roll => attendance[date][subject][roll] = status);
-        await saveAllData();
-        
-        // Refresh the current view if the same subject is selected
-        const currentSubject = document.getElementById('attendanceSubject').value;
-        if (currentSubject === subject) {
-            renderSubjectAttendance(subject);
-        }
-        
-        // Update the display after saving
-        loadStudentsForBulkUpdate(subject, date);
-        
-        showToast(`Bulk update applied for ${selected.length} students`, 'success');
-    });
-}
-
-if (closeBulkUpdate) {
-    closeBulkUpdate.addEventListener('click', () => bulkUpdateModal.style.display = 'none');
-}
-
-// Close modal when clicking outside
-bulkUpdateModal.addEventListener('click', (e) => {
-    if (e.target === bulkUpdateModal) {
-        bulkUpdateModal.style.display = 'none';
-    }
-});
         // ==================== EXPORTS ====================
         if (downloadExcelBtn) {
             downloadExcelBtn.addEventListener('click', () => {
@@ -1980,7 +2295,6 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 const dates = Object.keys(attendance).sort();
                 const headers = ['Roll No', 'Student Name', ...dates.map(d => formatDate(d))];
                 
-                // Get students for this subject
                 const studentsForSubject = [];
                 Object.entries(studentCourses).forEach(([roll, data]) => {
                     if (data.subjects && data.subjects.includes(subject)) {
@@ -2015,7 +2329,6 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 const dates = Object.keys(attendance).sort();
                 const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d).slice(0,5))]];
                 
-                // Get students for this subject
                 const studentsForSubject = [];
                 Object.entries(studentCourses).forEach(([roll, data]) => {
                     if (data.subjects && data.subjects.includes(subject)) {
@@ -2076,10 +2389,8 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 
                 reportData.innerHTML = '';
                 
-                // Get students based on filters
                 let studentsToShow = [];
                 if (courseId && semesterId && subjectId) {
-                    // Show only students enrolled in this subject
                     Object.entries(studentCourses).forEach(([roll, data]) => {
                         if (data.courseId === courseId && data.semester === semesterId && 
                             data.subjects.includes(subjectId)) {
@@ -2087,7 +2398,6 @@ bulkUpdateModal.addEventListener('click', (e) => {
                         }
                     });
                 } else {
-                    // Show all students
                     studentsToShow = Object.keys(students);
                 }
                 
@@ -2099,13 +2409,11 @@ bulkUpdateModal.addEventListener('click', (e) => {
                     Object.keys(attendance).forEach(date => {
                         if (date >= from && date <= to) {
                             if (subjectId) {
-                                // Count for specific subject
                                 if (attendance[date]?.[subjectId]?.[roll]) {
                                     total++;
                                     if (attendance[date][subjectId][roll] === 'P') present++;
                                 }
                             } else {
-                                // Count for any subject
                                 const dateAttendance = attendance[date] || {};
                                 let hasAttendance = false;
                                 Object.values(dateAttendance).forEach(subAttendance => {
@@ -2140,7 +2448,6 @@ bulkUpdateModal.addEventListener('click', (e) => {
             
             const dates = Object.keys(attendance).sort().slice(-10);
             
-            // Get students for this subject
             const studentsForSubject = [];
             Object.entries(studentCourses).forEach(([roll, data]) => {
                 if (data.subjects && data.subjects.includes(subjectId)) {
@@ -2182,7 +2489,6 @@ bulkUpdateModal.addEventListener('click', (e) => {
                     if (!attendance[date]) attendance[date] = {};
                     if (!attendance[date][subject]) attendance[date][subject] = {};
                     
-                    // Get students for this subject
                     const studentsForSubject = [];
                     Object.entries(studentCourses).forEach(([roll, data]) => {
                         if (data.subjects && data.subjects.includes(subject)) {
@@ -2259,6 +2565,7 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 e.target.reset();
                 renderUsersList();
                 loadCoursesForDropdowns();
+                updateStats(); // Update total students count immediately
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');
             }
@@ -2307,6 +2614,7 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 await db.ref('users/' + uid).remove();
                 showToast('User removed', 'success');
                 renderUsersList();
+                updateStats(); // Update total students count
             } catch (error) {
                 showToast(error.message, 'error');
             }
@@ -2348,6 +2656,7 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 showToast(`${added} students added`, 'success');
                 renderUsersList();
                 loadCoursesForDropdowns();
+                updateStats(); // Update total students count
             }
         });
 
@@ -2417,7 +2726,6 @@ bulkUpdateModal.addEventListener('click', (e) => {
                 }
             });
             
-            // Set default dates
             const today = new Date();
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(today.getDate() - 30);
