@@ -525,7 +525,18 @@
                                     </form>
                                 </div>
                             </div>
-                           
+                            <!-- Bulk Add Students -->
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-users me-2"></i>Bulk Add Students</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="bulkRollInput" class="form-label">Roll Numbers (comma separated)</label>
+                                        <textarea class="form-control bulk-roll-input" id="bulkRollInput" rows="3" placeholder="e.g., 38,14,44,18,17"></textarea>
+                                        <small class="text-muted">Accounts created with email: roll@attenzen.com, password: roll123</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary w-100" type="button" id="addRollNumbersBtn"><i class="fas fa-user-plus me-2"></i>Add Students</button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-7">
                             <div class="card">
@@ -733,84 +744,55 @@
                         </div>
                     </div>
 
-                <!-- REPORTS TAB (UPDATED) -->
-<div class="tab-pane fade" id="reportsTab">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-chart-bar me-2"></i>Attendance Reports</span>
-        </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label>Course</label>
-                    <select id="reportCourse" class="form-control" onchange="loadSemestersForReport()">
-                        <option value="">All Courses</option>
-                    </select>
+                    <!-- Analytics Chart -->
+                    <div class="chart-container">
+                        <h5 class="mb-4"><i class="fas fa-chart-line me-2"></i>Attendance Analytics</h5>
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <label>Semester</label>
-                    <select id="reportSemester" class="form-control" onchange="loadSubjectsForReport()">
-                        <option value="">All Semesters</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label>Subject</label>
-                    <select id="reportSubject" class="form-control">
-                        <option value="">All Subjects</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label>Student</label>
-                    <select id="reportStudent" class="form-control">
-                        <option value="">All Students</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label>From Date</label>
-                    <input type="date" class="form-control" id="reportFromDate">
-                </div>
-                <div class="col-md-4">
-                    <label>To Date</label>
-                    <input type="date" class="form-control" id="reportToDate">
-                </div>
-                <div class="col-md-4">
-                    <label>&nbsp;</label>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary flex-grow-1" id="generateReportBtn">
-                            <i class="fas fa-chart-pie me-2"></i>Generate
-                        </button>
-                        <button class="btn btn-success" id="downloadReportBtn" title="Download Excel">
-                            <i class="fas fa-file-excel"></i>
-                        </button>
+
+                <!-- REPORTS TAB -->
+                <div class="tab-pane fade" id="reportsTab">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>Course</label>
+                                    <select id="reportCourse" class="form-control" onchange="loadSemestersForReport()">
+                                        <option value="">All Courses</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Semester</label>
+                                    <select id="reportSemester" class="form-control" onchange="loadSubjectsForReport()">
+                                        <option value="">All Semesters</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Subject</label>
+                                    <select id="reportSubject" class="form-control">
+                                        <option value="">All Subjects</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><label>From Date</label><input type="date" class="form-control" id="reportFromDate"></div>
+                                <div class="col-md-4"><label>To Date</label><input type="date" class="form-control" id="reportToDate"></div>
+                                <div class="col-md-4"><label>&nbsp;</label><button class="btn btn-primary w-100" id="generateReportBtn"><i class="fas fa-chart-pie me-2"></i>Generate Report</button></div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="reportTable">
+                                    <thead><tr><th>Roll No</th><th>Student Name</th><th>Present</th><th>Absent</th><th>Total</th><th>Percentage</th></tr></thead>
+                                    <tbody id="reportData"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="reportTable">
-                    <thead class="table-primary">
-                        <tr>
-                            <th>Roll No</th>
-                            <th>Student Name</th>
-                            <th>Present</th>
-                            <th>Absent</th>
-                            <th>Total Classes</th>
-                            <th>Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportData">
-                        <tr><td colspan="6" class="text-center text-muted">Generate a report to see data</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-3 text-muted small">
-                <i class="fas fa-info-circle me-1"></i>
-                Total classes count is based on dates with attendance records in the selected range.
-            </div>
         </div>
     </div>
-</div>
 
     <!-- STUDENT DASHBOARD -->
     <div id="studentDashboard" class="dashboard-container">
@@ -2302,217 +2284,39 @@ window.saveStudentChanges = async function() {
             });
         }
 
-        // ==================== FIXED PDF EXPORT (LANDSCAPE) ====================
-if (quickExportPDFBtn) {
-    quickExportPDFBtn.addEventListener('click', () => {
-        const subject = document.getElementById('attendanceSubject')?.value;
-        if (!subject) {
-            showToast('Please select a subject first', 'error');
-            return;
-        }
-        
-        const { jsPDF } = window.jspdf;
-        // Create PDF in landscape orientation
-        const doc = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4'
-        });
-        
-        // Add title
-        doc.setFontSize(16);
-        doc.text('Attendance Report', 14, 16);
-        
-        // Add metadata
-        doc.setFontSize(10);
-        const subjectName = getSubjectName(subject);
-        const today = new Date().toLocaleDateString();
-        doc.text(`Subject: ${subjectName}`, 14, 24);
-        doc.text(`Generated: ${today}`, 14, 30);
-        
-        // Get data
-        const dates = Object.keys(attendance).sort();
-        const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d))]];
-        
-        // Get students for this subject
-        const studentsForSubject = [];
-        Object.entries(studentCourses).forEach(([roll, data]) => {
-            if (data.subjects && data.subjects.includes(subject)) {
-                studentsForSubject.push(roll);
-            }
-        });
-        
-        const body = studentsForSubject.map(roll => {
-            const student = students[roll];
-            return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
-        });
-        
-        // Generate table with landscape orientation
-        doc.autoTable({
-            head: headers,
-            body: body,
-            startY: 35,
-            styles: { fontSize: 8, cellPadding: 2 },
-            headStyles: { fillColor: [67, 97, 238], textColor: 255 },
-            alternateRowStyles: { fillColor: [240, 240, 240] },
-            margin: { top: 35 }
-        });
-        
-        // Save with descriptive filename
-        const filename = `attendance_${subjectName.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-        doc.save(filename);
-        showToast('PDF downloaded (landscape)', 'success');
-    });
-}
-
-// Helper to get subject name from ID
-function getSubjectName(subjectId) {
-    for (const courseId in courses) {
-        for (const semId in courses[courseId]?.semesters || {}) {
-            const sub = courses[courseId].semesters[semId].subjects?.[subjectId];
-            if (sub) return `${sub.name} (${sub.code})`;
-        }
-    }
-    return subjectId;
-}
-
-// ==================== FIXED REPORT EXCEL DOWNLOAD ====================
-// Add download button handler
-document.getElementById('downloadReportBtn')?.addEventListener('click', downloadReportExcel);
-
-function downloadReportExcel() {
-    // Get current report data from the table
-    const table = document.getElementById('reportTable');
-    const rows = table.querySelectorAll('tbody tr');
-    
-    if (!rows.length || rows.length === 1 && rows[0].querySelector('td[colspan]')) {
-        showToast('Generate a report first', 'error');
-        return;
-    }
-    
-    // Get filter values
-    const from = document.getElementById('reportFromDate').value;
-    const to = document.getElementById('reportToDate').value;
-    const courseId = document.getElementById('reportCourse').value;
-    const semesterId = document.getElementById('reportSemester').value;
-    const subjectId = document.getElementById('reportSubject').value;
-    
-    // Get subject name
-    let subjectName = 'All Subjects';
-    if (subjectId) {
-        for (const courseId in courses) {
-            for (const semId in courses[courseId]?.semesters || {}) {
-                const sub = courses[courseId].semesters[semId].subjects?.[subjectId];
-                if (sub) {
-                    subjectName = `${sub.name} (${sub.code})`;
-                    break;
+        if (quickExportPDFBtn) {
+            quickExportPDFBtn.addEventListener('click', () => {
+                const subject = document.getElementById('attendanceSubject')?.value;
+                if (!subject) {
+                    showToast('Please select a subject first', 'error');
+                    return;
                 }
-            }
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text('Attendance Report', 14, 16);
+                
+                const dates = Object.keys(attendance).sort();
+                const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d).slice(0,5))]];
+                
+                const studentsForSubject = [];
+                Object.entries(studentCourses).forEach(([roll, data]) => {
+                    if (data.subjects && data.subjects.includes(subject)) {
+                        studentsForSubject.push(roll);
+                    }
+                });
+                
+                const body = studentsForSubject.map(roll => {
+                    const student = students[roll];
+                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
+                });
+                
+                doc.autoTable({ head: headers, body, startY: 20 });
+                doc.save('attendance.pdf');
+                showToast('PDF downloaded', 'success');
+            });
         }
-    }
-    
-    // Calculate total class days
-    const allDates = Object.keys(attendance).filter(date => date >= from && date <= to).sort();
-    let relevantDates = allDates;
-    if (subjectId) {
-        relevantDates = allDates.filter(date => attendance[date]?.[subjectId]);
-    }
-    const totalClassDays = relevantDates.length;
-    
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    
-    // Prepare data arrays
-    const metadata = [
-        ['ATTENDANCE REPORT'],
-        ['Generated On', new Date().toLocaleString()],
-        ['Date Range', `${from || 'All'} to ${to || 'All'}`],
-        ['Subject', subjectName],
-        ['Total Class Days', totalClassDays],
-        ['Course', courseId ? (courses[courseId]?.name || courseId) : 'All'],
-        ['Semester', semesterId ? (courses[courseId]?.semesters?.[semesterId]?.name || semesterId) : 'All'],
-        [],
-        ['STUDENT PERFORMANCE SUMMARY'],
-        []
-    ];
-    
-    // Extract data from table
-    const tableData = [];
-    rows.forEach(row => {
-        if (row.querySelector('td[colspan]')) return; // Skip summary rows
-        
-        const cells = row.querySelectorAll('td');
-        if (cells.length >= 6) {
-            const rowData = [
-                cells[0].innerText.trim(), // Roll No
-                cells[1].innerText.trim(), // Name
-                cells[2].innerText.trim(), // Present
-                cells[3].innerText.trim(), // Absent
-                cells[4].innerText.trim(), // Total Classes
-                cells[5].innerText.trim().replace('%', '') // Percentage
-            ];
-            tableData.push(rowData);
-        }
-    });
-    
-    // Add summary row if exists
-    let summaryRow = [];
-    rows.forEach(row => {
-        if (row.querySelector('td[colspan]')) {
-            const summaryCell = row.querySelector('td');
-            if (summaryCell) {
-                summaryRow = [summaryCell.innerText.trim()];
-            }
-        }
-    });
-    
-    // Combine all data
-    const ws_data = [
-        ...metadata,
-        ['Roll No', 'Student Name', 'Present', 'Absent', 'Total Classes', 'Percentage'],
-        ...tableData,
-        [],
-        summaryRow
-    ];
-    
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    
-    // Style the header row
-    const headerRange = XLSX.utils.decode_range(ws['!ref']);
-    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-        const cell_address = XLSX.utils.encode_cell({ r: metadata.length + 1, c: C });
-        if (ws[cell_address]) {
-            ws[cell_address].s = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "4361EE" } }
-            };
-        }
-    }
-    
-    // Set column widths
-    ws['!cols'] = [
-        { wch: 15 }, // Roll No
-        { wch: 30 }, // Name
-        { wch: 10 }, // Present
-        { wch: 10 }, // Absent
-        { wch: 15 }, // Total Classes
-        { wch: 12 }  // Percentage
-    ];
-    
-    XLSX.utils.book_append_sheet(wb, ws, 'Report');
-    
-    // Generate filename
-    const dateStr = new Date().toISOString().split('T')[0];
-    const filename = `attendance_report_${from || 'start'}_to_${to || 'end'}_${dateStr}.xlsx`;
-    
-    // Download
-    XLSX.writeFile(wb, filename);
-    showToast('Report downloaded successfully', 'success');
-}
 
-// Also fix the generateReport function to ensure data is properly displayed
-// Add this to your existing generateReport function at the end
-// (after populating the table, store data for Excel)
         // ==================== REPORTS ====================
         window.loadSemestersForReport = function() {
             const courseId = document.getElementById('reportCourse').value;
@@ -2543,253 +2347,69 @@ function downloadReportExcel() {
             });
         }
 
-        // ==================== FIXED REPORTS WITH EXCEL DOWNLOAD ====================
-if (generateReportBtn) {
-    generateReportBtn.addEventListener('click', async () => {
-        const from = reportFromDate.value;
-        const to = reportToDate.value;
-        const courseId = document.getElementById('reportCourse').value;
-        const semesterId = document.getElementById('reportSemester').value;
-        const subjectId = document.getElementById('reportSubject').value;
-        
-        if (!from || !to) { 
-            showToast('Select date range', 'error'); 
-            return; 
-        }
-        
-        // Show loading
-        reportData.innerHTML = '<tr><td colspan="7" class="text-center">Generating report...</td></tr>';
-        
-        await generateAttendanceReport(from, to, courseId, semesterId, subjectId);
-    });
-}
-
-async function generateAttendanceReport(from, to, courseId, semesterId, subjectId) {
-    try {
-        // Get all attendance dates in range
-        const allDates = Object.keys(attendance).filter(date => date >= from && date <= to).sort();
-        
-        if (allDates.length === 0) {
-            reportData.innerHTML = '<tr><td colspan="7" class="text-center">No attendance records in this date range</td></tr>';
-            return;
-        }
-        
-        // Filter dates based on subject if selected
-        let relevantDates = allDates;
-        if (subjectId) {
-            relevantDates = allDates.filter(date => 
-                attendance[date] && attendance[date][subjectId]
-            );
-        }
-        
-        const totalClassDays = relevantDates.length;
-        
-        if (totalClassDays === 0) {
-            reportData.innerHTML = '<tr><td colspan="7" class="text-center">No classes held for selected subject in this date range</td></tr>';
-            return;
-        }
-        
-        // Get students to show
-        let studentsToShow = [];
-        if (courseId && semesterId && subjectId) {
-            // Show only students enrolled in this subject
-            Object.entries(studentCourses).forEach(([roll, data]) => {
-                if (data.courseId === courseId && data.semester === semesterId && 
-                    data.subjects && data.subjects.includes(subjectId)) {
-                    studentsToShow.push(roll);
-                }
-            });
-        } else {
-            // Show all students
-            studentsToShow = Object.keys(students);
-        }
-        
-        if (studentsToShow.length === 0) {
-            reportData.innerHTML = '<tr><td colspan="7" class="text-center">No students found</td></tr>';
-            return;
-        }
-        
-        let reportHtml = '';
-        let reportData_forExcel = [];
-        
-        // Add header for Excel
-        reportData_forExcel.push(['Roll No', 'Student Name', 'Present', 'Absent', 'Total Classes', 'Percentage']);
-        
-        studentsToShow.forEach(roll => {
-            const student = students[roll];
-            if (!student) return;
-            
-            let present = 0;
-            
-            // Count attendance only on days when class was held
-            relevantDates.forEach(date => {
-                if (subjectId) {
-                    // For specific subject
-                    if (attendance[date]?.[subjectId]?.[roll] === 'P') {
-                        present++;
-                    }
-                } else {
-                    // For any subject - check if student was present in any subject on that day
-                    const dateAttendance = attendance[date] || {};
-                    let wasPresent = false;
-                    Object.values(dateAttendance).forEach(subAttendance => {
-                        if (subAttendance[roll] === 'P') {
-                            wasPresent = true;
+        if (generateReportBtn) {
+            generateReportBtn.addEventListener('click', () => {
+                const from = reportFromDate.value;
+                const to = reportToDate.value;
+                const courseId = document.getElementById('reportCourse').value;
+                const semesterId = document.getElementById('reportSemester').value;
+                const subjectId = document.getElementById('reportSubject').value;
+                
+                if (!from || !to) { showToast('Select date range', 'error'); return; }
+                
+                reportData.innerHTML = '';
+                
+                let studentsToShow = [];
+                if (courseId && semesterId && subjectId) {
+                    Object.entries(studentCourses).forEach(([roll, data]) => {
+                        if (data.courseId === courseId && data.semester === semesterId && 
+                            data.subjects.includes(subjectId)) {
+                            studentsToShow.push(roll);
                         }
                     });
-                    if (wasPresent) present++;
+                } else {
+                    studentsToShow = Object.keys(students);
                 }
+                
+                studentsToShow.forEach(roll => {
+                    const student = students[roll];
+                    if (!student) return;
+                    
+                    let present = 0, total = 0;
+                    Object.keys(attendance).forEach(date => {
+                        if (date >= from && date <= to) {
+                            if (subjectId) {
+                                if (attendance[date]?.[subjectId]?.[roll]) {
+                                    total++;
+                                    if (attendance[date][subjectId][roll] === 'P') present++;
+                                }
+                            } else {
+                                const dateAttendance = attendance[date] || {};
+                                let hasAttendance = false;
+                                Object.values(dateAttendance).forEach(subAttendance => {
+                                    if (subAttendance[roll]) {
+                                        hasAttendance = true;
+                                        if (subAttendance[roll] === 'P') present++;
+                                    }
+                                });
+                                if (hasAttendance) total++;
+                            }
+                        }
+                    });
+                    
+                    const percent = total ? Math.round((present/total)*100) : 0;
+                    reportData.innerHTML += `<tr>
+                        <td>${roll}</td>
+                        <td>${student.name}</td>
+                        <td>${present}</td>
+                        <td>${total-present}</td>
+                        <td>${total}</td>
+                        <td><div class="progress" style="height:20px"><div class="progress-bar ${percent>=75?'bg-success':percent>=50?'bg-warning':'bg-danger'}" style="width:${percent}%">${percent}%</div></div></td>
+                    </tr>`;
+                });
+                showToast('Report generated', 'success');
             });
-            
-            const absent = totalClassDays - present;
-            const percent = totalClassDays ? Math.round((present / totalClassDays) * 100) : 0;
-            
-            // Determine color class based on percentage
-            let barClass = 'bg-success';
-            if (percent < 75) barClass = 'bg-warning';
-            if (percent < 50) barClass = 'bg-danger';
-            
-            reportHtml += `<tr>
-                <td>${roll}</td>
-                <td>${student.name}</td>
-                <td class="text-success fw-bold">${present}</td>
-                <td class="text-danger">${absent}</td>
-                <td>${totalClassDays}</td>
-                <td>
-                    <div class="progress" style="height: 20px;">
-                        <div class="progress-bar ${barClass}" style="width: ${percent}%;">
-                            ${percent}%
-                        </div>
-                    </div>
-                </td>
-            </tr>`;
-            
-            // Add to Excel data
-            reportData_forExcel.push([
-                roll,
-                student.name,
-                present,
-                absent,
-                totalClassDays,
-                `${percent}%`
-            ]);
-        });
-        
-        // Add summary row
-        reportHtml += `<tr class="table-info fw-bold">
-            <td colspan="2">SUMMARY</td>
-            <td colspan="4">Total Classes in selected period: ${totalClassDays} days</td>
-        </tr>`;
-        
-        reportData.innerHTML = reportHtml;
-        
-        // Store report data for Excel download
-        window.currentReportData = {
-            data: reportData_forExcel,
-            from: from,
-            to: to,
-            subjectId: subjectId,
-            totalDays: totalClassDays
-        };
-        
-        showToast(`Report generated for ${totalClassDays} class days`, 'success');
-        
-    } catch (error) {
-        console.error('Report error:', error);
-        showToast('Error generating report: ' + error.message, 'error');
-    }
-}
-
-// Add Excel download button for reports
-function addReportDownloadButton() {
-    const reportCard = document.querySelector('#reportsTab .card');
-    if (!reportCard) return;
-    
-    const header = reportCard.querySelector('.card-header');
-    if (header && !document.getElementById('downloadReportBtn')) {
-        const downloadBtn = document.createElement('button');
-        downloadBtn.id = 'downloadReportBtn';
-        downloadBtn.className = 'btn btn-sm btn-success float-end';
-        downloadBtn.innerHTML = '<i class="fas fa-file-excel me-1"></i>Download Excel';
-        downloadBtn.onclick = downloadReportExcel;
-        header.appendChild(downloadBtn);
-    }
-}
-
-// Download report as Excel
-function downloadReportExcel() {
-    if (!window.currentReportData || !window.currentReportData.data || window.currentReportData.data.length < 2) {
-        showToast('Generate a report first', 'error');
-        return;
-    }
-    
-    const { data, from, to, subjectId, totalDays } = window.currentReportData;
-    
-    // Get subject name if available
-    let subjectName = 'All Subjects';
-    if (subjectId) {
-        for (const courseId in courses) {
-            for (const semId in courses[courseId]?.semesters || {}) {
-                const sub = courses[courseId].semesters[semId].subjects?.[subjectId];
-                if (sub) {
-                    subjectName = `${sub.name} (${sub.code})`;
-                    break;
-                }
-            }
         }
-    }
-    
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    
-    // Add metadata sheet
-    const metadata = [
-        ['Report Generated On', new Date().toLocaleString()],
-        ['Date Range', `${from} to ${to}`],
-        ['Subject', subjectName],
-        ['Total Class Days', totalDays],
-        [],
-        ['Attendance Summary Report'],
-        []
-    ];
-    
-    // Add the main data
-    const ws_data = [...metadata, ...data];
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    
-    // Style the header row
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-        const cell_address = XLSX.utils.encode_cell({ r: 6, c: C }); // Header row at index 6
-        if (!ws[cell_address]) continue;
-        ws[cell_address].s = {
-            font: { bold: true, color: { rgb: "FFFFFF" } },
-            fill: { fgColor: { rgb: "4361EE" } }
-        };
-    }
-    
-    // Set column widths
-    ws['!cols'] = [
-        { wch: 15 }, // Roll No
-        { wch: 30 }, // Name
-        { wch: 10 }, // Present
-        { wch: 10 }, // Absent
-        { wch: 15 }, // Total Classes
-        { wch: 15 }  // Percentage
-    ];
-    
-    XLSX.utils.book_append_sheet(wb, ws, 'Attendance Report');
-    
-    // Generate filename
-    const filename = `attendance_report_${from}_to_${to}.xlsx`;
-    
-    // Download
-    XLSX.writeFile(wb, filename);
-    showToast('Report downloaded', 'success');
-}
-
-// Call this after reports tab is loaded
-setTimeout(addReportDownloadButton, 2000);
 
         // ==================== CHART ====================
         function renderAttendanceChart(subjectId) {
