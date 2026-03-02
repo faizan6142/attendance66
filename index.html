@@ -916,66 +916,37 @@
             </div>
             
             <!-- Student Edit Form (updated with email/password change) -->
+<!-- Student Edit Form (Simplified with Roll Number Validation) -->
 <div id="studentEditForm" class="edit-student-form" style="display: none;">
     <h5 class="mb-3">Edit Student Details</h5>
     <input type="hidden" id="editStudentRoll">
     <input type="hidden" id="editStudentUid">
+    <input type="hidden" id="editOldRoll">
+    
+    <div class="alert alert-info mb-3">
+        <i class="fas fa-info-circle me-2"></i>
+        You can change roll number, name, and username. Email changes may require manual update in Firebase Console.
+    </div>
     
     <div class="row">
         <div class="col-md-6 mb-3">
-            <label class="form-label">Roll Number</label>
-            <input type="text" class="form-control" id="editRollNo" readonly>
-            <small class="text-muted">Cannot be changed</small>
+            <label class="form-label">Roll Number <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="editRollNo" required>
+            <small class="text-muted">Changing roll number will update all attendance records</small>
         </div>
         <div class="col-md-6 mb-3">
-            <label class="form-label">Full Name</label>
-            <input type="text" class="form-control" id="editFullName">
+            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="editFullName" required>
         </div>
         <div class="col-md-6 mb-3">
-            <label class="form-label">Username</label>
+            <label class="form-label">Username (Display Name)</label>
             <input type="text" class="form-control" id="editUsername">
-            <small class="text-muted">Display name only</small>
         </div>
         <div class="col-md-6 mb-3">
-            <label class="form-label">Current Email</label>
-            <input type="email" class="form-control" id="editEmail" readonly>
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="editEmail">
+            <small class="text-muted">Email changes may need manual update in Firebase Console</small>
         </div>
-    </div>
-    
-    <!-- Toggle for password/email change -->
-    <div class="mb-3">
-        <button type="button" class="btn btn-outline-primary btn-sm" onclick="togglePasswordChange()">
-            <i class="fas fa-key me-2"></i>Change Login Credentials
-        </button>
-    </div>
-    
-    <!-- Password Change Section (hidden by default) -->
-    <div id="passwordChangeSection" style="display: none;" class="border-top pt-3 mt-2">
-        <h6 class="mb-3">Update Login Credentials</h6>
-        
-        <div class="mb-3">
-            <label class="form-label">Current Password <span class="text-danger">*</span></label>
-            <input type="password" class="form-control" id="editPassword" placeholder="Enter current password">
-        </div>
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">New Email (optional)</label>
-                <input type="email" class="form-control" id="editNewEmail" placeholder="Enter new email">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">New Password (optional)</label>
-                <input type="password" class="form-control" id="editNewPassword" placeholder="Enter new password">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Confirm New Password</label>
-                <input type="password" class="form-control" id="editConfirmPassword" placeholder="Confirm new password">
-            </div>
-        </div>
-        <small class="text-muted d-block mb-3">
-            <i class="fas fa-info-circle me-1"></i>
-            Leave fields empty if you don't want to change them. Current password is required for any changes.
-        </small>
     </div>
     
     <div class="d-flex gap-2 mt-3">
@@ -1198,6 +1169,7 @@
         }
 
         // ==================== STUDENT EDIT WITH EMAIL UPDATE ====================
+// ==================== SIMPLIFIED STUDENT EDIT WITH VALIDATION ====================
 window.editStudent = function(roll) {
     const student = students[roll];
     const uid = Object.keys(users).find(uid => users[uid].rollNo === roll);
@@ -1205,133 +1177,131 @@ window.editStudent = function(roll) {
     
     document.getElementById('editStudentRoll').value = roll;
     document.getElementById('editStudentUid').value = uid || '';
+    document.getElementById('editOldRoll').value = roll; // Store original roll for validation
     document.getElementById('editRollNo').value = roll;
     document.getElementById('editFullName').value = student.name || '';
     document.getElementById('editUsername').value = userEntry?.username || '';
     document.getElementById('editEmail').value = userEntry?.email || '';
-    document.getElementById('editPassword').value = '';
-    
-    // Hide password change section by default
-    document.getElementById('passwordChangeSection').style.display = 'none';
     
     document.getElementById('studentEditForm').style.display = 'block';
 }
 
-window.togglePasswordChange = function() {
-    const section = document.getElementById('passwordChangeSection');
-    if (section.style.display === 'none') {
-        section.style.display = 'block';
-    } else {
-        section.style.display = 'none';
-        document.getElementById('editPassword').value = '';
-        document.getElementById('editNewEmail').value = '';
-        document.getElementById('editNewPassword').value = '';
-        document.getElementById('editConfirmPassword').value = '';
-    }
-}
-
 window.saveStudentChanges = async function() {
-    const roll = document.getElementById('editStudentRoll').value;
+    const oldRoll = document.getElementById('editOldRoll').value;
+    const newRoll = document.getElementById('editRollNo').value;
     const uid = document.getElementById('editStudentUid').value;
     const newName = document.getElementById('editFullName').value;
     const newUsername = document.getElementById('editUsername').value;
-    const newEmail = document.getElementById('editNewEmail').value;
-    const currentPassword = document.getElementById('editPassword').value;
-    const newPassword = document.getElementById('editNewPassword').value;
-    const confirmPassword = document.getElementById('editConfirmPassword').value;
+    const newEmail = document.getElementById('editEmail').value;
     
+    // Validation
     if (!newName) {
         showToast('Name cannot be empty', 'error');
         return;
     }
     
+    if (!newRoll) {
+        showToast('Roll number cannot be empty', 'error');
+        return;
+    }
+    
+    // Check if roll number is being changed and if new roll already exists
+    if (newRoll !== oldRoll && students[newRoll]) {
+        showToast(`Roll number ${newRoll} already exists! Please use a different roll number.`, 'error');
+        return;
+    }
+    
     try {
-        // Check if email or password change is requested
-        const emailChanged = newEmail && newEmail !== document.getElementById('editEmail').value;
-        const passwordChanged = newPassword || confirmPassword;
-        
-        if (emailChanged || passwordChanged) {
-            if (!currentPassword) {
-                showToast('Current password is required to change email or password', 'error');
-                return;
-            }
-            
-            if (passwordChanged && newPassword !== confirmPassword) {
-                showToast('New passwords do not match', 'error');
-                return;
-            }
-            
-            if (passwordChanged && newPassword.length < 6) {
-                showToast('New password must be at least 6 characters', 'error');
-                return;
-            }
-            
-            // Re-authenticate user
-            const user = auth.currentUser;
-            const credential = firebase.auth.EmailAuthProvider.credential(
-                user.email,
-                currentPassword
-            );
-            
-            try {
-                await user.reauthenticateWithCredential(credential);
-                
-                // Update email if changed
-                if (emailChanged) {
-                    await user.updateEmail(newEmail);
-                }
-                
-                // Update password if changed
-                if (passwordChanged) {
-                    await user.updatePassword(newPassword);
-                }
-                
-                showToast('Login credentials updated successfully', 'success');
-            } catch (authError) {
-                showToast('Authentication failed: ' + authError.message, 'error');
-                return;
-            }
-        }
-        
-        // Update database records
         const updates = {};
         
-        // Update students object
-        if (students[roll]) {
-            students[roll].name = newName;
-            updates['/students/' + roll + '/name'] = newName;
-        }
-        
-        // Update users object
-        if (uid) {
-            const userUpdates = {
-                fullName: newName,
-                username: newUsername || users[uid].username
+        // If roll number is changing
+        if (newRoll !== oldRoll) {
+            // 1. Move student record to new roll
+            updates['/students/' + newRoll] = {
+                ...students[oldRoll],
+                name: newName,
+                uid: uid
             };
+            updates['/students/' + oldRoll] = null; // Delete old record
             
-            if (emailChanged) {
-                userUpdates.email = newEmail;
+            // 2. Update student_courses to use new roll
+            if (studentCourses[oldRoll]) {
+                updates['/student_courses/' + newRoll] = studentCourses[oldRoll];
+                updates['/student_courses/' + oldRoll] = null;
             }
             
-            users[uid] = { ...users[uid], ...userUpdates };
-            updates['/users/' + uid] = users[uid];
+            // 3. Update attendance records to use new roll
+            Object.keys(attendance).forEach(date => {
+                Object.keys(attendance[date] || {}).forEach(subject => {
+                    if (attendance[date][subject] && attendance[date][subject][oldRoll]) {
+                        if (!updates[`/attendance/${date}/${subject}/${newRoll}`]) {
+                            updates[`/attendance/${date}/${subject}/${newRoll}`] = attendance[date][subject][oldRoll];
+                        }
+                        updates[`/attendance/${date}/${subject}/${oldRoll}`] = null;
+                    }
+                });
+            });
+            
+            // 4. Update users record with new roll
+            if (uid) {
+                updates['/users/' + uid + '/rollNo'] = newRoll;
+            }
+        } else {
+            // Just update name if roll unchanged
+            updates['/students/' + oldRoll + '/name'] = newName;
+            if (uid) {
+                updates['/users/' + uid + '/fullName'] = newName;
+                updates['/users/' + uid + '/username'] = newUsername || users[uid].username;
+                updates['/users/' + uid + '/email'] = newEmail;
+            }
         }
         
-        // Apply all updates to database
+        // Update username/email even if roll didn't change
+        if (uid && newRoll === oldRoll) {
+            if (newUsername) {
+                updates['/users/' + uid + '/username'] = newUsername;
+            }
+            if (newEmail) {
+                updates['/users/' + uid + '/email'] = newEmail;
+                
+                // Try to update Auth email (may fail, but we still update DB)
+                try {
+                    // Note: This requires Admin SDK, but we'll try anyway
+                    const user = auth.currentUser;
+                    if (user && user.uid === uid) {
+                        // Can't update other users from client
+                        console.log('Auth email update not possible from client');
+                    }
+                } catch (authError) {
+                    console.log('Auth update failed (expected):', authError);
+                }
+            }
+        }
+        
+        // Apply all updates
         if (Object.keys(updates).length > 0) {
             await db.ref().update(updates);
         }
         
-        showToast('Student updated successfully', 'success');
+        // Reload data
+        await loadAllData();
+        
+        showToast('Student updated successfully!', 'success');
         document.getElementById('studentEditForm').style.display = 'none';
         renderStudentList();
         renderUsersList();
         
+        // Refresh attendance view if open
+        const currentSubject = document.getElementById('attendanceSubject')?.value;
+        if (currentSubject) {
+            renderSubjectAttendance(currentSubject);
+        }
+        
     } catch (error) {
         showToast('Error updating student: ' + error.message, 'error');
+        console.error('Update error:', error);
     }
 }
-
         // Make total students card clickable
         if (totalStudentsCard) {
             totalStudentsCard.addEventListener('click', openStudentListModal);
