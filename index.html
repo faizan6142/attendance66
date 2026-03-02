@@ -2309,39 +2309,217 @@ window.saveStudentChanges = async function() {
             });
         }
 
-        if (quickExportPDFBtn) {
-            quickExportPDFBtn.addEventListener('click', () => {
-                const subject = document.getElementById('attendanceSubject')?.value;
-                if (!subject) {
-                    showToast('Please select a subject first', 'error');
-                    return;
-                }
-                
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.text('Attendance Report', 14, 16);
-                
-                const dates = Object.keys(attendance).sort();
-                const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d).slice(0,5))]];
-                
-                const studentsForSubject = [];
-                Object.entries(studentCourses).forEach(([roll, data]) => {
-                    if (data.subjects && data.subjects.includes(subject)) {
-                        studentsForSubject.push(roll);
-                    }
-                });
-                
-                const body = studentsForSubject.map(roll => {
-                    const student = students[roll];
-                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
-                });
-                
-                doc.autoTable({ head: headers, body, startY: 20 });
-                doc.save('attendance.pdf');
-                showToast('PDF downloaded', 'success');
-            });
+        // ==================== FIXED PDF EXPORT (LANDSCAPE) ====================
+if (quickExportPDFBtn) {
+    quickExportPDFBtn.addEventListener('click', () => {
+        const subject = document.getElementById('attendanceSubject')?.value;
+        if (!subject) {
+            showToast('Please select a subject first', 'error');
+            return;
         }
+        
+        const { jsPDF } = window.jspdf;
+        // Create PDF in landscape orientation
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Add title
+        doc.setFontSize(16);
+        doc.text('Attendance Report', 14, 16);
+        
+        // Add metadata
+        doc.setFontSize(10);
+        const subjectName = getSubjectName(subject);
+        const today = new Date().toLocaleDateString();
+        doc.text(`Subject: ${subjectName}`, 14, 24);
+        doc.text(`Generated: ${today}`, 14, 30);
+        
+        // Get data
+        const dates = Object.keys(attendance).sort();
+        const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d))]];
+        
+        // Get students for this subject
+        const studentsForSubject = [];
+        Object.entries(studentCourses).forEach(([roll, data]) => {
+            if (data.subjects && data.subjects.includes(subject)) {
+                studentsForSubject.push(roll);
+            }
+        });
+        
+        const body = studentsForSubject.map(roll => {
+            const student = students[roll];
+            return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
+        });
+        
+        // Generate table with landscape orientation
+        doc.autoTable({
+            head: headers,
+            body: body,
+            startY: 35,
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: [67, 97, 238], textColor: 255 },
+            alternateRowStyles: { fillColor: [240, 240, 240] },
+            margin: { top: 35 }
+        });
+        
+        // Save with descriptive filename
+        const filename = `attendance_${subjectName.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(filename);
+        showToast('PDF downloaded (landscape)', 'success');
+    });
+}
 
+// Helper to get subject name from ID
+function getSubjectName(subjectId) {
+    for (const courseId in courses) {
+        for (const semId in courses[courseId]?.semesters || {}) {
+            const sub = courses[courseId].semesters[semId].subjects?.[subjectId];
+            if (sub) return `${sub.name} (${sub.code})`;
+        }
+    }
+    return subjectId;
+}
+
+// ==================== FIXED REPORT EXCEL DOWNLOAD ====================
+// Add download button handler
+document.getElementById('downloadReportBtn')?.addEventListener('click', downloadReportExcel);
+
+function downloadReportExcel() {
+    // Get current report data from the table
+    const table = document.getElementById('reportTable');
+    const rows = table.querySelectorAll('tbody tr');
+    
+    if (!rows.length || rows.length === 1 && rows[0].querySelector('td[colspan]')) {
+        showToast('Generate a report first', 'error');
+        return;
+    }
+    
+    // Get filter values
+    const from = document.getElementById('reportFromDate').value;
+    const to = document.getElementById('reportToDate').value;
+    const courseId = document.getElementById('reportCourse').value;
+    const semesterId = document.getElementById('reportSemester').value;
+    const subjectId = document.getElementById('reportSubject').value;
+    
+    // Get subject name
+    let subjectName = 'All Subjects';
+    if (subjectId) {
+        for (const courseId in courses) {
+            for (const semId in courses[courseId]?.semesters || {}) {
+                const sub = courses[courseId].semesters[semId].subjects?.[subjectId];
+                if (sub) {
+                    subjectName = `${sub.name} (${sub.code})`;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // Calculate total class days
+    const allDates = Object.keys(attendance).filter(date => date >= from && date <= to).sort();
+    let relevantDates = allDates;
+    if (subjectId) {
+        relevantDates = allDates.filter(date => attendance[date]?.[subjectId]);
+    }
+    const totalClassDays = relevantDates.length;
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Prepare data arrays
+    const metadata = [
+        ['ATTENDANCE REPORT'],
+        ['Generated On', new Date().toLocaleString()],
+        ['Date Range', `${from || 'All'} to ${to || 'All'}`],
+        ['Subject', subjectName],
+        ['Total Class Days', totalClassDays],
+        ['Course', courseId ? (courses[courseId]?.name || courseId) : 'All'],
+        ['Semester', semesterId ? (courses[courseId]?.semesters?.[semesterId]?.name || semesterId) : 'All'],
+        [],
+        ['STUDENT PERFORMANCE SUMMARY'],
+        []
+    ];
+    
+    // Extract data from table
+    const tableData = [];
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) return; // Skip summary rows
+        
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 6) {
+            const rowData = [
+                cells[0].innerText.trim(), // Roll No
+                cells[1].innerText.trim(), // Name
+                cells[2].innerText.trim(), // Present
+                cells[3].innerText.trim(), // Absent
+                cells[4].innerText.trim(), // Total Classes
+                cells[5].innerText.trim().replace('%', '') // Percentage
+            ];
+            tableData.push(rowData);
+        }
+    });
+    
+    // Add summary row if exists
+    let summaryRow = [];
+    rows.forEach(row => {
+        if (row.querySelector('td[colspan]')) {
+            const summaryCell = row.querySelector('td');
+            if (summaryCell) {
+                summaryRow = [summaryCell.innerText.trim()];
+            }
+        }
+    });
+    
+    // Combine all data
+    const ws_data = [
+        ...metadata,
+        ['Roll No', 'Student Name', 'Present', 'Absent', 'Total Classes', 'Percentage'],
+        ...tableData,
+        [],
+        summaryRow
+    ];
+    
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    
+    // Style the header row
+    const headerRange = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+        const cell_address = XLSX.utils.encode_cell({ r: metadata.length + 1, c: C });
+        if (ws[cell_address]) {
+            ws[cell_address].s = {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4361EE" } }
+            };
+        }
+    }
+    
+    // Set column widths
+    ws['!cols'] = [
+        { wch: 15 }, // Roll No
+        { wch: 30 }, // Name
+        { wch: 10 }, // Present
+        { wch: 10 }, // Absent
+        { wch: 15 }, // Total Classes
+        { wch: 12 }  // Percentage
+    ];
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Report');
+    
+    // Generate filename
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `attendance_report_${from || 'start'}_to_${to || 'end'}_${dateStr}.xlsx`;
+    
+    // Download
+    XLSX.writeFile(wb, filename);
+    showToast('Report downloaded successfully', 'success');
+}
+
+// Also fix the generateReport function to ensure data is properly displayed
+// Add this to your existing generateReport function at the end
+// (after populating the table, store data for Excel)
         // ==================== REPORTS ====================
         window.loadSemestersForReport = function() {
             const courseId = document.getElementById('reportCourse').value;
