@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
+        /* (your existing styles – unchanged) */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -380,7 +381,7 @@
 <body>
     <div class="toast-container"></div>
 
-    <!-- LOGIN SECTION -->
+    <!-- LOGIN SECTION (unchanged) -->
     <div id="loginSection" class="login-container">
         <div class="text-center mb-4">
             <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
@@ -431,7 +432,7 @@
         </nav>
 
         <div class="container-fluid">
-            <!-- QUICK STATS - Total Students card now clickable -->
+            <!-- QUICK STATS -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
                     <div class="stats-card" id="totalStudentsCard">
@@ -486,7 +487,7 @@
             </div>
 
             <div class="tab-content">
-                <!-- MANAGE USERS TAB -->
+                <!-- MANAGE USERS TAB (updated with registration number) -->
                 <div class="tab-pane fade show active" id="manageUsers">
                     <div class="row">
                         <div class="col-md-5">
@@ -516,6 +517,12 @@
                                         <div class="mb-3" id="rollNoSection">
                                             <label class="form-label">Roll Number (for students)</label>
                                             <input type="text" class="form-control" id="newRollNo">
+                                        </div>
+                                        <!-- NEW: Registration Number field for students -->
+                                        <div class="mb-3" id="regNoSection" style="display: none;">
+                                            <label class="form-label">Registration Number (for students)</label>
+                                            <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
+                                            <small class="text-muted">Used for profile photo</small>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Full Name</label>
@@ -560,8 +567,9 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB -->
+                <!-- COURSES & SUBJECTS TAB (unchanged) -->
                 <div class="tab-pane fade" id="coursesTab">
+                    <!-- ... (keep your existing code) ... -->
                     <div class="row">
                         <div class="col-md-4">
                             <!-- Add Course -->
@@ -661,9 +669,9 @@
                     </div>
                 </div>
 
-                <!-- ATTENDANCE TAB -->
+                <!-- ATTENDANCE TAB (unchanged) -->
                 <div class="tab-pane fade" id="attendanceTab">
-                    <!-- Date Management Cards -->
+                    <!-- ... (keep your existing code) ... -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="date-picker-container">
@@ -751,7 +759,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTS TAB -->
+                <!-- REPORTS TAB (unchanged) -->
                 <div class="tab-pane fade" id="reportsTab">
                     <div class="card">
                         <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
@@ -794,7 +802,7 @@
         </div>
     </div>
 
-    <!-- STUDENT DASHBOARD -->
+    <!-- STUDENT DASHBOARD (updated with photo) -->
     <div id="studentDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
@@ -812,7 +820,7 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span><i class="fas fa-history me-2"></i>My Attendance Record</span>
                             <select id="studentSubjectSelector" class="form-control w-auto" onchange="renderStudentDashboard()">
-                            <span><i class="fas fa-history me-2"></i>Select Subject first for individual records</span>
+                                <option value="">All Subjects</option>
                             </select>
                         </div>
                         <div class="card-body">
@@ -839,9 +847,15 @@
                     <div class="card mt-3">
                         <div class="card-header"><i class="fas fa-user-circle me-2"></i>My Profile</div>
                         <div class="card-body">
-                            <div class="text-center mb-4"><i class="fas fa-user-circle fa-4x" style="color:var(--primary)"></i></div>
+                            <!-- NEW: Student photo -->
+                            <div class="text-center mb-4">
+                                <img id="studentPhoto" src="" alt="Student Photo" 
+                                     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);"
+                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/120?text=No+Image';">
+                            </div>
                             <p><strong>Name:</strong> <span id="studentName">-</span></p>
                             <p><strong>Roll No:</strong> <span id="studentRollNo">-</span></p>
+                            <p><strong>Registration No:</strong> <span id="studentRegNo">-</span></p>
                             <p><strong>Email:</strong> <span id="studentEmail">-</span></p>
                             <p><strong>Course:</strong> <span id="studentCourse">-</span></p>
                             <p><strong>Semester:</strong> <span id="studentSemester">-</span></p>
@@ -856,7 +870,7 @@
     <!-- CLOUD SYNC BUTTON -->
     <div class="cloud-sync" id="cloudSyncBtn" title="Refresh from cloud"><i class="fas fa-sync-alt fa-2x"></i></div>
 
-    <!-- BULK UPDATE MODAL (UPDATED with calendar and date status) -->
+    <!-- BULK UPDATE MODAL -->
     <div class="bulk-update-modal" id="bulkUpdateModal">
         <div class="bulk-update-content">
             <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
@@ -907,7 +921,7 @@
         </div>
     </div>
 
-    <!-- STUDENT LIST MODAL (NEW) -->
+    <!-- STUDENT LIST MODAL (unchanged) -->
     <div class="student-list-modal" id="studentListModal">
         <div class="student-list-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -915,49 +929,53 @@
                 <button class="btn-close" onclick="closeStudentListModal()"></button>
             </div>
             
-            <!-- Student Edit Form (updated with email/password change) -->
-<!-- Student Edit Form (Simplified with Roll Number Validation) -->
-<div id="studentEditForm" class="edit-student-form" style="display: none;">
-    <h5 class="mb-3">Edit Student Details</h5>
-    <input type="hidden" id="editStudentRoll">
-    <input type="hidden" id="editStudentUid">
-    <input type="hidden" id="editOldRoll">
-    
-    <div class="alert alert-info mb-3">
-        <i class="fas fa-info-circle me-2"></i>
-        You can change roll number, name, and username. Email changes may require manual update in Firebase Console.
-    </div>
-    
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Roll Number <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="editRollNo" required>
-            <small class="text-muted">Changing roll number will update all attendance records</small>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Full Name <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="editFullName" required>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Username (Display Name)</label>
-            <input type="text" class="form-control" id="editUsername">
-        </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" id="editEmail">
-            <small class="text-muted">Email changes may need manual update in Firebase Console</small>
-        </div>
-    </div>
-    
-    <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-success" onclick="saveStudentChanges()">
-            <i class="fas fa-save me-2"></i>Save Changes
-        </button>
-        <button class="btn btn-secondary" onclick="cancelStudentEdit()">
-            <i class="fas fa-times me-2"></i>Cancel
-        </button>
-    </div>
-</div>
+            <!-- Student Edit Form (updated with registration number) -->
+            <div id="studentEditForm" class="edit-student-form" style="display: none;">
+                <h5 class="mb-3">Edit Student Details</h5>
+                <input type="hidden" id="editStudentRoll">
+                <input type="hidden" id="editStudentUid">
+                <input type="hidden" id="editOldRoll">
+                
+                <div class="alert alert-info mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    You can change roll number, registration number, name, and username. Email changes may require manual update in Firebase Console.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Roll Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editRollNo" required>
+                        <small class="text-muted">Changing roll number will update all attendance records</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editFullName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Registration Number</label>
+                        <input type="text" class="form-control" id="editRegNo" placeholder="e.g., 64100-ang-2022">
+                        <small class="text-muted">Used for profile photo</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Username (Display Name)</label>
+                        <input type="text" class="form-control" id="editUsername">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail">
+                        <small class="text-muted">Email changes may need manual update in Firebase Console</small>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-success" onclick="saveStudentChanges()">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    <button class="btn btn-secondary" onclick="cancelStudentEdit()">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                </div>
+            </div>
             
             <!-- Students Table -->
             <div class="table-responsive">
@@ -967,6 +985,7 @@
                             <th>Roll No</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Registration No</th>
                             <th>Subjects Enrolled</th>
                             <th>Actions</th>
                         </tr>
@@ -1032,6 +1051,7 @@
         const studentWelcome = document.getElementById('studentWelcome');
         const studentName = document.getElementById('studentName');
         const studentRollNo = document.getElementById('studentRollNo');
+        const studentRegNo = document.getElementById('studentRegNo'); // NEW
         const studentEmail = document.getElementById('studentEmail');
         const studentCourse = document.getElementById('studentCourse');
         const studentSemester = document.getElementById('studentSemester');
@@ -1043,6 +1063,7 @@
         const totalStudentsCard = document.getElementById('totalStudentsCard');
         const studentListModal = document.getElementById('studentListModal');
         const studentListTableBody = document.getElementById('studentListTableBody');
+        const studentPhoto = document.getElementById('studentPhoto'); // NEW
 
         // ==================== HELPERS ====================
         function formatDate(dateString) {
@@ -1128,6 +1149,7 @@
             document.getElementById('studentEditForm').style.display = 'none';
         }
 
+        // Updated renderStudentList to include registration number
         function renderStudentList() {
             let html = '';
             Object.entries(students).forEach(([roll, student]) => {
@@ -1157,6 +1179,7 @@
                     <td><strong>${roll}</strong></td>
                     <td>${student.name}</td>
                     <td>${student.email || 'N/A'}</td>
+                    <td>${student.regNo || '-'}</td>
                     <td>${subjectsList}</td>
                     <td>
                         <button class="btn btn-sm btn-primary" onclick="editStudent('${roll}')">
@@ -1165,143 +1188,146 @@
                     </td>
                 </tr>`;
             });
-            studentListTableBody.innerHTML = html || '<tr><td colspan="5" class="text-center">No students found</td></tr>';
+            studentListTableBody.innerHTML = html || '<tr><td colspan="6" class="text-center">No students found</td></tr>';
         }
 
-        // ==================== STUDENT EDIT WITH EMAIL UPDATE ====================
-// ==================== SIMPLIFIED STUDENT EDIT WITH VALIDATION ====================
-window.editStudent = function(roll) {
-    const student = students[roll];
-    const uid = Object.keys(users).find(uid => users[uid].rollNo === roll);
-    const userEntry = users[uid];
-    
-    document.getElementById('editStudentRoll').value = roll;
-    document.getElementById('editStudentUid').value = uid || '';
-    document.getElementById('editOldRoll').value = roll; // Store original roll for validation
-    document.getElementById('editRollNo').value = roll;
-    document.getElementById('editFullName').value = student.name || '';
-    document.getElementById('editUsername').value = userEntry?.username || '';
-    document.getElementById('editEmail').value = userEntry?.email || '';
-    
-    document.getElementById('studentEditForm').style.display = 'block';
-}
-
-window.saveStudentChanges = async function() {
-    const oldRoll = document.getElementById('editOldRoll').value;
-    const newRoll = document.getElementById('editRollNo').value;
-    const uid = document.getElementById('editStudentUid').value;
-    const newName = document.getElementById('editFullName').value;
-    const newUsername = document.getElementById('editUsername').value;
-    const newEmail = document.getElementById('editEmail').value;
-    
-    // Validation
-    if (!newName) {
-        showToast('Name cannot be empty', 'error');
-        return;
-    }
-    
-    if (!newRoll) {
-        showToast('Roll number cannot be empty', 'error');
-        return;
-    }
-    
-    // Check if roll number is being changed and if new roll already exists
-    if (newRoll !== oldRoll && students[newRoll]) {
-        showToast(`Roll number ${newRoll} already exists! Please use a different roll number.`, 'error');
-        return;
-    }
-    
-    try {
-        const updates = {};
-        
-        // If roll number is changing
-        if (newRoll !== oldRoll) {
-            // 1. Move student record to new roll
-            updates['/students/' + newRoll] = {
-                ...students[oldRoll],
-                name: newName,
-                uid: uid
-            };
-            updates['/students/' + oldRoll] = null; // Delete old record
+        // ==================== STUDENT EDIT (UPDATED WITH REG NO) ====================
+        window.editStudent = function(roll) {
+            const student = students[roll];
+            const uid = Object.keys(users).find(uid => users[uid].rollNo === roll);
+            const userEntry = users[uid];
             
-            // 2. Update student_courses to use new roll
-            if (studentCourses[oldRoll]) {
-                updates['/student_courses/' + newRoll] = studentCourses[oldRoll];
-                updates['/student_courses/' + oldRoll] = null;
-            }
+            document.getElementById('editStudentRoll').value = roll;
+            document.getElementById('editStudentUid').value = uid || '';
+            document.getElementById('editOldRoll').value = roll;
+            document.getElementById('editRollNo').value = roll;
+            document.getElementById('editFullName').value = student.name || '';
+            document.getElementById('editRegNo').value = student.regNo || ''; // NEW
+            document.getElementById('editUsername').value = userEntry?.username || '';
+            document.getElementById('editEmail').value = userEntry?.email || '';
             
-            // 3. Update attendance records to use new roll
-            Object.keys(attendance).forEach(date => {
-                Object.keys(attendance[date] || {}).forEach(subject => {
-                    if (attendance[date][subject] && attendance[date][subject][oldRoll]) {
-                        if (!updates[`/attendance/${date}/${subject}/${newRoll}`]) {
-                            updates[`/attendance/${date}/${subject}/${newRoll}`] = attendance[date][subject][oldRoll];
-                        }
-                        updates[`/attendance/${date}/${subject}/${oldRoll}`] = null;
-                    }
-                });
-            });
-            
-            // 4. Update users record with new roll
-            if (uid) {
-                updates['/users/' + uid + '/rollNo'] = newRoll;
-            }
-        } else {
-            // Just update name if roll unchanged
-            updates['/students/' + oldRoll + '/name'] = newName;
-            if (uid) {
-                updates['/users/' + uid + '/fullName'] = newName;
-                updates['/users/' + uid + '/username'] = newUsername || users[uid].username;
-                updates['/users/' + uid + '/email'] = newEmail;
-            }
+            document.getElementById('studentEditForm').style.display = 'block';
         }
-        
-        // Update username/email even if roll didn't change
-        if (uid && newRoll === oldRoll) {
-            if (newUsername) {
-                updates['/users/' + uid + '/username'] = newUsername;
+
+        window.saveStudentChanges = async function() {
+            const oldRoll = document.getElementById('editOldRoll').value;
+            const newRoll = document.getElementById('editRollNo').value;
+            const uid = document.getElementById('editStudentUid').value;
+            const newName = document.getElementById('editFullName').value;
+            const newRegNo = document.getElementById('editRegNo').value; // NEW
+            const newUsername = document.getElementById('editUsername').value;
+            const newEmail = document.getElementById('editEmail').value;
+            
+            // Validation
+            if (!newName) {
+                showToast('Name cannot be empty', 'error');
+                return;
             }
-            if (newEmail) {
-                updates['/users/' + uid + '/email'] = newEmail;
+            
+            if (!newRoll) {
+                showToast('Roll number cannot be empty', 'error');
+                return;
+            }
+            
+            // Check if roll number is being changed and if new roll already exists
+            if (newRoll !== oldRoll && students[newRoll]) {
+                showToast(`Roll number ${newRoll} already exists! Please use a different roll number.`, 'error');
+                return;
+            }
+            
+            try {
+                const updates = {};
                 
-                // Try to update Auth email (may fail, but we still update DB)
-                try {
-                    // Note: This requires Admin SDK, but we'll try anyway
-                    const user = auth.currentUser;
-                    if (user && user.uid === uid) {
-                        // Can't update other users from client
-                        console.log('Auth email update not possible from client');
+                // If roll number is changing
+                if (newRoll !== oldRoll) {
+                    // 1. Move student record to new roll, including regNo
+                    updates['/students/' + newRoll] = {
+                        ...students[oldRoll],
+                        name: newName,
+                        regNo: newRegNo, // NEW
+                        uid: uid
+                    };
+                    updates['/students/' + oldRoll] = null; // Delete old record
+                    
+                    // 2. Update student_courses to use new roll
+                    if (studentCourses[oldRoll]) {
+                        updates['/student_courses/' + newRoll] = studentCourses[oldRoll];
+                        updates['/student_courses/' + oldRoll] = null;
                     }
-                } catch (authError) {
-                    console.log('Auth update failed (expected):', authError);
+                    
+                    // 3. Update attendance records to use new roll
+                    Object.keys(attendance).forEach(date => {
+                        Object.keys(attendance[date] || {}).forEach(subject => {
+                            if (attendance[date][subject] && attendance[date][subject][oldRoll]) {
+                                if (!updates[`/attendance/${date}/${subject}/${newRoll}`]) {
+                                    updates[`/attendance/${date}/${subject}/${newRoll}`] = attendance[date][subject][oldRoll];
+                                }
+                                updates[`/attendance/${date}/${subject}/${oldRoll}`] = null;
+                            }
+                        });
+                    });
+                    
+                    // 4. Update users record with new roll and regNo (if we store regNo in users)
+                    if (uid) {
+                        updates['/users/' + uid + '/rollNo'] = newRoll;
+                        // Optionally store regNo in users too (not required but can be added)
+                    }
+                } else {
+                    // Just update fields if roll unchanged
+                    updates['/students/' + oldRoll + '/name'] = newName;
+                    updates['/students/' + oldRoll + '/regNo'] = newRegNo; // NEW
+                    if (uid) {
+                        updates['/users/' + uid + '/fullName'] = newName;
+                        updates['/users/' + uid + '/username'] = newUsername || users[uid].username;
+                        updates['/users/' + uid + '/email'] = newEmail;
+                    }
                 }
+                
+                // Update username/email even if roll didn't change
+                if (uid && newRoll === oldRoll) {
+                    if (newUsername) {
+                        updates['/users/' + uid + '/username'] = newUsername;
+                    }
+                    if (newEmail) {
+                        updates['/users/' + uid + '/email'] = newEmail;
+                        
+                        // Try to update Auth email (may fail, but we still update DB)
+                        try {
+                            const user = auth.currentUser;
+                            if (user && user.uid === uid) {
+                                console.log('Auth email update not possible from client');
+                            }
+                        } catch (authError) {
+                            console.log('Auth update failed (expected):', authError);
+                        }
+                    }
+                }
+                
+                // Apply all updates
+                if (Object.keys(updates).length > 0) {
+                    await db.ref().update(updates);
+                }
+                
+                // Reload data
+                await loadAllData();
+                
+                showToast('Student updated successfully!', 'success');
+                document.getElementById('studentEditForm').style.display = 'none';
+                renderStudentList();
+                renderUsersList();
+                
+                // Refresh attendance view if open
+                const currentSubject = document.getElementById('attendanceSubject')?.value;
+                if (currentSubject) {
+                    renderSubjectAttendance(currentSubject);
+                }
+                
+            } catch (error) {
+                showToast('Error updating student: ' + error.message, 'error');
+                console.error('Update error:', error);
             }
         }
-        
-        // Apply all updates
-        if (Object.keys(updates).length > 0) {
-            await db.ref().update(updates);
-        }
-        
-        // Reload data
-        await loadAllData();
-        
-        showToast('Student updated successfully!', 'success');
-        document.getElementById('studentEditForm').style.display = 'none';
-        renderStudentList();
-        renderUsersList();
-        
-        // Refresh attendance view if open
-        const currentSubject = document.getElementById('attendanceSubject')?.value;
-        if (currentSubject) {
-            renderSubjectAttendance(currentSubject);
-        }
-        
-    } catch (error) {
-        showToast('Error updating student: ' + error.message, 'error');
-        console.error('Update error:', error);
-    }
-}
+
         // Make total students card clickable
         if (totalStudentsCard) {
             totalStudentsCard.addEventListener('click', openStudentListModal);
@@ -1337,7 +1363,6 @@ window.saveStudentChanges = async function() {
             const rememberMe = document.getElementById('rememberMe').checked;
             
             try {
-                // Set persistence based on remember me choice
                 if (rememberMe) {
                     await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 } else {
@@ -1368,9 +1393,20 @@ window.saveStudentChanges = async function() {
                 } else {
                     studentDash.style.display = 'block';
                     studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    
+                    // Get student details from students object using rollNo
+                    const studentRec = students[currentUser.rollNo] || {};
                     studentName.textContent = currentUser.fullName;
                     studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                    studentRegNo.textContent = studentRec.regNo || 'N/A'; // NEW
                     studentEmail.textContent = currentUser.email || 'N/A';
+                    
+                    // Set student photo using registration number
+                    if (studentRec.regNo) {
+                        studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
+                    } else {
+                        studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
+                    }
                     
                     const studentCourseData = studentCourses[currentUser.rollNo];
                     if (studentCourseData) {
@@ -1409,7 +1445,7 @@ window.saveStudentChanges = async function() {
         logoutBtn.addEventListener('click', logout);
         studentLogoutBtn.addEventListener('click', logout);
 
-        // ==================== COURSE MANAGEMENT ====================
+        // ==================== COURSE MANAGEMENT (unchanged) ====================
         window.addCourse = async function() {
             const name = document.getElementById('courseName').value;
             const code = document.getElementById('courseCode').value;
@@ -1790,7 +1826,7 @@ window.saveStudentChanges = async function() {
             document.getElementById('assignmentsList').innerHTML = html || '<p class="text-muted">No assignments found</p>';
         }
 
-        // ==================== ATTENDANCE FUNCTIONS ====================
+        // ==================== ATTENDANCE FUNCTIONS (unchanged) ====================
         function initAttendanceDropdowns() {
             const courseSelect = document.getElementById('attendanceCourse');
             if (!courseSelect) return;
@@ -2026,7 +2062,7 @@ window.saveStudentChanges = async function() {
             });
         }
 
-        // ==================== BULK UPDATE WITH CALENDAR AND DATE STATUS ====================
+        // ==================== BULK UPDATE (unchanged) ====================
         if (quickBulkUpdateBtn) {
             quickBulkUpdateBtn.addEventListener('click', async () => {
                 const today = new Date().toISOString().split('T')[0];
@@ -2204,7 +2240,7 @@ window.saveStudentChanges = async function() {
             }
         });
 
-        // ==================== STUDENT DASHBOARD RENDER ====================
+        // ==================== STUDENT DASHBOARD RENDER (unchanged) ====================
         function renderStudentDashboard() {
             studentTableLoading.style.display = 'none';
             studentTableContainer.style.display = 'block';
@@ -2502,9 +2538,11 @@ window.saveStudentChanges = async function() {
             });
         }
 
-        // ==================== USER MANAGEMENT ====================
+        // ==================== USER MANAGEMENT (updated to handle registration number) ====================
         document.getElementById('newUserRole')?.addEventListener('change', function() {
-            document.getElementById('rollNoSection').style.display = this.value === 'student' ? 'block' : 'none';
+            const isStudent = this.value === 'student';
+            document.getElementById('rollNoSection').style.display = isStudent ? 'block' : 'none';
+            document.getElementById('regNoSection').style.display = isStudent ? 'block' : 'none'; // NEW
         });
 
         document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
@@ -2514,6 +2552,7 @@ window.saveStudentChanges = async function() {
             const password = document.getElementById('newPassword').value;
             const username = document.getElementById('newUsername').value;
             const roll = document.getElementById('newRollNo').value;
+            const regNo = document.getElementById('newRegNo').value; // NEW
             const fullName = document.getElementById('newFullName').value;
 
             try {
@@ -2528,14 +2567,18 @@ window.saveStudentChanges = async function() {
                 };
                 await db.ref('users/' + uid).set(userData);
                 if (role === 'student' && roll) {
-                    await db.ref('students/' + roll).set({ uid, name: fullName });
-                    students[roll] = { uid, name: fullName };
+                    await db.ref('students/' + roll).set({ 
+                        uid, 
+                        name: fullName,
+                        regNo: regNo // NEW
+                    });
+                    students[roll] = { uid, name: fullName, regNo: regNo }; // update local cache
                 }
                 showToast('User added', 'success');
                 e.target.reset();
                 renderUsersList();
                 loadCoursesForDropdowns();
-                updateStats(); // Update total students count immediately
+                updateStats();
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');
             }
@@ -2584,7 +2627,7 @@ window.saveStudentChanges = async function() {
                 await db.ref('users/' + uid).remove();
                 showToast('User removed', 'success');
                 renderUsersList();
-                updateStats(); // Update total students count
+                updateStats();
             } catch (error) {
                 showToast(error.message, 'error');
             }
@@ -2614,8 +2657,9 @@ window.saveStudentChanges = async function() {
                         rollNo: roll
                     };
                     await db.ref('users/' + uid).set(userData);
-                    await db.ref('students/' + roll).set({ uid, name: fullName });
-                    students[roll] = { uid, name: fullName };
+                    // For bulk add, registration number can be left empty or generated; we'll leave empty for now
+                    await db.ref('students/' + roll).set({ uid, name: fullName, regNo: '' });
+                    students[roll] = { uid, name: fullName, regNo: '' };
                     added++;
                 } catch (error) {
                     showToast(`Failed for ${roll}: ${error.message}`, 'error');
@@ -2626,7 +2670,7 @@ window.saveStudentChanges = async function() {
                 showToast(`${added} students added`, 'success');
                 renderUsersList();
                 loadCoursesForDropdowns();
-                updateStats(); // Update total students count
+                updateStats();
             }
         });
 
@@ -2668,9 +2712,19 @@ window.saveStudentChanges = async function() {
                         } else {
                             studentDash.style.display = 'block';
                             studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                            
+                            const studentRec = students[currentUser.rollNo] || {};
                             studentName.textContent = currentUser.fullName;
                             studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                            studentRegNo.textContent = studentRec.regNo || 'N/A'; // NEW
                             studentEmail.textContent = currentUser.email || 'N/A';
+                            
+                            // Set photo
+                            if (studentRec.regNo) {
+                                studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
+                            } else {
+                                studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
+                            }
                             
                             const studentCourseData = studentCourses[currentUser.rollNo];
                             if (studentCourseData) {
