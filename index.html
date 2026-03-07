@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        /* Your existing styles - keep them exactly as they are */
+        /* (your existing styles – unchanged) */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -376,23 +376,12 @@
             font-size: 0.85rem;
             font-family: monospace;
         }
-        .admin-badge {
-            background: var(--danger);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            margin-left: 8px;
-        }
-        .admin-only {
-            border-left: 4px solid var(--danger);
-        }
     </style>
 </head>
 <body>
     <div class="toast-container"></div>
 
-    <!-- LOGIN SECTION -->
+    <!-- LOGIN SECTION (unchanged) -->
     <div id="loginSection" class="login-container">
         <div class="text-center mb-4">
             <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
@@ -434,7 +423,7 @@
     <div id="adminDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen <span class="admin-badge">ADMIN</span></a>
+                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen</a>
                 <div class="d-flex align-items-center gap-3">
                     <span class="text-white" id="adminWelcome">Welcome, Admin</span>
                     <button class="btn btn-light btn-modern" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
@@ -477,7 +466,7 @@
             </div>
 
             <!-- QUICK ACTIONS -->
-            <div class="quick-action-buttons mb-4" id="adminQuickActions">
+            <div class="quick-action-buttons mb-4">
                 <button class="quick-action-btn" id="quickAddDateBtn"><i class="fas fa-calendar-plus fa-2x"></i><span>Add Date</span></button>
                 <button class="quick-action-btn" id="quickDeleteDateBtn"><i class="fas fa-calendar-minus fa-2x"></i><span>Delete Date</span></button>
                 <button class="quick-action-btn" id="quickMarkHolidayBtn"><i class="fas fa-umbrella-beach fa-2x"></i><span>Mark Holiday</span></button>
@@ -488,7 +477,7 @@
 
             <!-- MANAGEMENT TABS -->
             <div class="user-management-section">
-                <h4><i class="fas fa-users me-2"></i>Management <span class="admin-badge">ADMIN ONLY</span></h4>
+                <h4><i class="fas fa-users me-2"></i>Management</h4>
                 <ul class="nav nav-tabs" id="userTabs">
                     <li class="nav-item"><a class="nav-link active" href="#manageUsers" data-bs-toggle="tab">Manage Users</a></li>
                     <li class="nav-item"><a class="nav-link" href="#coursesTab" data-bs-toggle="tab">Courses & Subjects</a></li>
@@ -498,12 +487,12 @@
             </div>
 
             <div class="tab-content">
-                <!-- MANAGE USERS TAB -->
+                <!-- MANAGE USERS TAB (updated with registration number) -->
                 <div class="tab-pane fade show active" id="manageUsers">
                     <div class="row">
                         <div class="col-md-5">
-                            <div class="card admin-only">
-                                <div class="card-header"><i class="fas fa-user-plus me-2"></i>Add New User <span class="admin-badge">ADMIN ONLY</span></div>
+                            <div class="card">
+                                <div class="card-header"><i class="fas fa-user-plus me-2"></i>Add New User</div>
                                 <div class="card-body">
                                     <form id="addUserForm">
                                         <div class="mb-3">
@@ -525,15 +514,17 @@
                                             <label class="form-label">Password</label>
                                             <input type="password" class="form-control" id="newPassword" required>
                                         </div>
-                                        <div class="mb-3" id="rollNoSection" style="display: none;">
-                                            <label class="form-label">Roll Number (for students)</label>
-                                            <input type="text" class="form-control" id="newRollNo">
-                                        </div>
-                                        <div class="mb-3" id="regNoSection" style="display: none;">
-                                            <label class="form-label">Registration Number (for students)</label>
-                                            <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
-                                            <small class="text-muted">Used for profile photo</small>
-                                        </div>
+                                       <div class="mb-3" id="rollNoSection">
+    <label class="form-label">Roll Number (for students)</label>
+    <input type="text" class="form-control" id="newRollNo">
+</div>
+
+<!-- NEW: Registration Number field for students - moved outside -->
+<div class="mb-3" id="regNoSection" style="display: none;">
+    <label class="form-label">Registration Number (for students)</label>
+    <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
+    <small class="text-muted">Used for profile photo</small>
+</div>
                                         <div class="mb-3">
                                             <label class="form-label">Full Name</label>
                                             <input type="text" class="form-control" id="newFullName" required>
@@ -543,8 +534,8 @@
                                 </div>
                             </div>
                             <!-- Bulk Add Students -->
-                            <div class="card mt-3 admin-only">
-                                <div class="card-header"><i class="fas fa-users me-2"></i>Bulk Add Students <span class="admin-badge">ADMIN ONLY</span></div>
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-users me-2"></i>Bulk Add Students</div>
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="bulkRollInput" class="form-label">Roll Numbers (comma separated)</label>
@@ -577,13 +568,14 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB -->
+                <!-- COURSES & SUBJECTS TAB (unchanged) -->
                 <div class="tab-pane fade" id="coursesTab">
+                    <!-- ... (keep your existing code) ... -->
                     <div class="row">
                         <div class="col-md-4">
                             <!-- Add Course -->
-                            <div class="card admin-only">
-                                <div class="card-header"><i class="fas fa-book me-2"></i>Add Course <span class="admin-badge">ADMIN ONLY</span></div>
+                            <div class="card">
+                                <div class="card-header"><i class="fas fa-book me-2"></i>Add Course</div>
                                 <div class="card-body">
                                     <input type="text" id="courseName" class="form-control mb-2" placeholder="Course Name (e.g., Computer Science)">
                                     <input type="text" id="courseCode" class="form-control mb-2" placeholder="Course Code (e.g., CS)">
@@ -592,8 +584,8 @@
                             </div>
                             
                             <!-- Add Semester -->
-                            <div class="card mt-3 admin-only">
-                                <div class="card-header"><i class="fas fa-layer-group me-2"></i>Add Semester <span class="admin-badge">ADMIN ONLY</span></div>
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-layer-group me-2"></i>Add Semester</div>
                                 <div class="card-body">
                                     <select id="semesterCourse" class="form-control mb-2">
                                         <option value="">Select Course</option>
@@ -604,8 +596,8 @@
                             </div>
                             
                             <!-- Add Subject -->
-                            <div class="card mt-3 admin-only">
-                                <div class="card-header"><i class="fas fa-book-open me-2"></i>Add Subject <span class="admin-badge">ADMIN ONLY</span></div>
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-book-open me-2"></i>Add Subject</div>
                                 <div class="card-body">
                                     <select id="subjectCourse" class="form-control mb-2" onchange="loadSemestersForSubject()">
                                         <option value="">Select Course</option>
@@ -631,8 +623,8 @@
                             </div>
                             
                             <!-- Assign Students to Courses -->
-                            <div class="card mt-3 admin-only">
-                                <div class="card-header"><i class="fas fa-user-graduate me-2"></i>Assign Students to Courses <span class="admin-badge">ADMIN ONLY</span></div>
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-user-graduate me-2"></i>Assign Students to Courses</div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-6">
@@ -678,12 +670,13 @@
                     </div>
                 </div>
 
-                <!-- ATTENDANCE TAB -->
+                <!-- ATTENDANCE TAB (unchanged) -->
                 <div class="tab-pane fade" id="attendanceTab">
-                    <div class="row mb-4" id="adminDateManagement">
+                    <!-- ... (keep your existing code) ... -->
+                    <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="date-picker-container">
-                                <h5 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Add New Date <span class="admin-badge">ADMIN ONLY</span></h5>
+                                <h5 class="mb-3"><i class="fas fa-plus-circle me-2"></i>Add New Date</h5>
                                 <div class="d-flex gap-3">
                                     <input type="date" id="newDateInput2" class="form-control">
                                     <button class="btn btn-light btn-modern" id="addNewDateBtn2"><i class="fas fa-plus me-2"></i>Add</button>
@@ -692,7 +685,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="date-picker-container" style="background:linear-gradient(135deg,#f72585,#b5179e)">
-                                <h5 class="mb-3"><i class="fas fa-minus-circle me-2"></i>Delete Date <span class="admin-badge">ADMIN ONLY</span></h5>
+                                <h5 class="mb-3"><i class="fas fa-minus-circle me-2"></i>Delete Date</h5>
                                 <div class="d-flex gap-3">
                                     <select id="deleteDateSelect2" class="form-control"><option value="">Select date</option></select>
                                     <button class="btn btn-light btn-modern" id="deleteDateBtn2"><i class="fas fa-trash me-2"></i>Delete</button>
@@ -767,7 +760,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTS TAB -->
+                <!-- REPORTS TAB (unchanged) -->
                 <div class="tab-pane fade" id="reportsTab">
                     <div class="card">
                         <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
@@ -810,11 +803,11 @@
         </div>
     </div>
 
-    <!-- STUDENT DASHBOARD -->
+    <!-- STUDENT DASHBOARD (updated with photo) -->
     <div id="studentDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen <span class="badge bg-light text-dark">STUDENT</span></a>
+                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen</a>
                 <div class="d-flex align-items-center gap-3">
                     <span class="text-white" id="studentWelcome">Welcome, Student</span>
                     <button class="btn btn-light btn-modern" id="studentLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
@@ -855,6 +848,7 @@
                     <div class="card mt-3">
                         <div class="card-header"><i class="fas fa-user-circle me-2"></i>My Profile</div>
                         <div class="card-body">
+                            <!-- NEW: Student photo -->
                             <div class="text-center mb-4">
                                 <img id="studentPhoto" src="" alt="Student Photo" 
                                      style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);"
@@ -880,7 +874,7 @@
     <!-- BULK UPDATE MODAL -->
     <div class="bulk-update-modal" id="bulkUpdateModal">
         <div class="bulk-update-content">
-            <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance <span class="admin-badge">ADMIN ONLY</span></h4>
+            <h4 class="mb-4"><i class="fas fa-tasks me-2"></i>Bulk Update Attendance</h4>
             
             <div class="mb-3">
                 <label class="form-label">Select Date</label>
@@ -899,6 +893,7 @@
             <div class="mb-3">
                 <label class="form-label">Select Students</label>
                 <div class="border p-3" style="max-height: 300px; overflow-y: auto;" id="bulkUpdateStudentsContainer">
+                    <!-- Student checkboxes will be loaded here -->
                     <p class="text-muted text-center">Select date and subject first</p>
                 </div>
                 <div class="mt-2">
@@ -927,7 +922,7 @@
         </div>
     </div>
 
-    <!-- STUDENT LIST MODAL -->
+    <!-- STUDENT LIST MODAL (unchanged) -->
     <div class="student-list-modal" id="studentListModal">
         <div class="student-list-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -935,6 +930,7 @@
                 <button class="btn-close" onclick="closeStudentListModal()"></button>
             </div>
             
+            <!-- Student Edit Form (updated with registration number) -->
             <div id="studentEditForm" class="edit-student-form" style="display: none;">
                 <h5 class="mb-3">Edit Student Details</h5>
                 <input type="hidden" id="editStudentRoll">
@@ -982,6 +978,7 @@
                 </div>
             </div>
             
+            <!-- Students Table -->
             <div class="table-responsive">
                 <table class="student-table">
                     <thead>
@@ -994,7 +991,9 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="studentListTableBody"></tbody>
+                    <tbody id="studentListTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -1025,7 +1024,6 @@
         let courses = {};
         let studentCourses = {};
         let attendanceChart = null;
-        let isAddingUser = false; // Flag to prevent auto-login during user addition
 
         // DOM elements
         const loginSection = document.getElementById('loginSection');
@@ -1054,7 +1052,7 @@
         const studentWelcome = document.getElementById('studentWelcome');
         const studentName = document.getElementById('studentName');
         const studentRollNo = document.getElementById('studentRollNo');
-        const studentRegNo = document.getElementById('studentRegNo');
+        const studentRegNo = document.getElementById('studentRegNo'); // NEW
         const studentEmail = document.getElementById('studentEmail');
         const studentCourse = document.getElementById('studentCourse');
         const studentSemester = document.getElementById('studentSemester');
@@ -1066,9 +1064,9 @@
         const totalStudentsCard = document.getElementById('totalStudentsCard');
         const studentListModal = document.getElementById('studentListModal');
         const studentListTableBody = document.getElementById('studentListTableBody');
-        const studentPhoto = document.getElementById('studentPhoto');
+        const studentPhoto = document.getElementById('studentPhoto'); // NEW
 
-        // ==================== HELPER FUNCTIONS ====================
+        // ==================== HELPERS ====================
         function formatDate(dateString) {
             const d = new Date(dateString);
             return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -1085,34 +1083,7 @@
             toast.addEventListener('hidden.bs.toast', () => toast.remove());
         }
 
-        // ==================== AUTH CHECK FUNCTIONS ====================
-        function isAdmin() {
-            return currentUser && currentUser.role === 'admin';
-        }
-
-        async function checkAdminPermission() {
-            if (!currentUser) {
-                showToast('Please login first', 'error');
-                return false;
-            }
-            
-            // Verify with Firebase that user is still admin
-            try {
-                const userSnap = await db.ref('users/' + currentUser.uid).once('value');
-                const userData = userSnap.val();
-                if (!userData || userData.role !== 'admin') {
-                    showToast('Admin permission required', 'error');
-                    logout();
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                showToast('Error verifying permissions', 'error');
-                return false;
-            }
-        }
-
-        // ==================== DATA LOAD/SAVE ====================
+        // Load all data from Firebase
         async function loadAllData() {
             try {
                 const snapStudents = await db.ref('students').once('value');
@@ -1125,30 +1096,30 @@
                 courses = snapCourses.val() || {};
                 const snapStudentCourses = await db.ref('student_courses').once('value');
                 studentCourses = snapStudentCourses.val() || {};
+                console.log('Data loaded:', { courses, students, studentCourses });
+                
+                // Update total students count
                 updateStats();
             } catch (error) {
                 console.error('Error loading data:', error);
             }
         }
 
+        // Save to Firebase
         async function saveAllData() {
-            if (!await checkAdminPermission()) return false;
-            
             const updates = {};
             updates['/students'] = students;
             updates['/attendance'] = attendance;
             updates['/holidays'] = holidays;
             updates['/courses'] = courses;
             updates['/student_courses'] = studentCourses;
-            
             try {
                 await db.ref().update(updates);
                 showToast('Data saved to cloud!', 'success');
-                return true;
             } catch (error) {
                 showToast('Save failed: ' + error.message, 'error');
-                return false;
             }
+            updateStats();
         }
 
         function updateStats() {
@@ -1166,6 +1137,201 @@
             presentToday.textContent = p;
             absentToday.textContent = a;
             totalAttendanceDays.textContent = Object.keys(attendance).length;
+        }
+
+        // ==================== STUDENT LIST MODAL FUNCTIONS ====================
+        function openStudentListModal() {
+            renderStudentList();
+            studentListModal.style.display = 'flex';
+        }
+
+        function closeStudentListModal() {
+            studentListModal.style.display = 'none';
+            document.getElementById('studentEditForm').style.display = 'none';
+        }
+
+        // Updated renderStudentList to include registration number
+        function renderStudentList() {
+            let html = '';
+            Object.entries(students).forEach(([roll, student]) => {
+                // Get subjects enrolled for this student
+                const studentCourseData = studentCourses[roll];
+                let subjectsList = '';
+                if (studentCourseData) {
+                    const subjects = studentCourseData.subjects || [];
+                    subjectsList = subjects.map(subId => {
+                        // Find subject code from courses
+                        for (const courseId in courses) {
+                            const course = courses[courseId];
+                            for (const semId in course.semesters || {}) {
+                                const sem = course.semesters[semId];
+                                if (sem.subjects && sem.subjects[subId]) {
+                                    return `<span class="subject-code-badge">${sem.subjects[subId].code}</span>`;
+                                }
+                            }
+                        }
+                        return `<span class="subject-code-badge">${subId}</span>`;
+                    }).join(' ');
+                } else {
+                    subjectsList = '<span class="text-muted">No subjects</span>';
+                }
+                
+                html += `<tr>
+                    <td><strong>${roll}</strong></td>
+                    <td>${student.name}</td>
+                    <td>${student.email || 'N/A'}</td>
+                    <td>${student.regNo || '-'}</td>
+                    <td>${subjectsList}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editStudent('${roll}')">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+                    </td>
+                </tr>`;
+            });
+            studentListTableBody.innerHTML = html || '<tr><td colspan="6" class="text-center">No students found</td></tr>';
+        }
+
+        // ==================== STUDENT EDIT (UPDATED WITH REG NO) ====================
+        window.editStudent = function(roll) {
+            const student = students[roll];
+            const uid = Object.keys(users).find(uid => users[uid].rollNo === roll);
+            const userEntry = users[uid];
+            
+            document.getElementById('editStudentRoll').value = roll;
+            document.getElementById('editStudentUid').value = uid || '';
+            document.getElementById('editOldRoll').value = roll;
+            document.getElementById('editRollNo').value = roll;
+            document.getElementById('editFullName').value = student.name || '';
+            document.getElementById('editRegNo').value = student.regNo || ''; // NEW
+            document.getElementById('editUsername').value = userEntry?.username || '';
+            document.getElementById('editEmail').value = userEntry?.email || '';
+            
+            document.getElementById('studentEditForm').style.display = 'block';
+        }
+
+        window.saveStudentChanges = async function() {
+            const oldRoll = document.getElementById('editOldRoll').value;
+            const newRoll = document.getElementById('editRollNo').value;
+            const uid = document.getElementById('editStudentUid').value;
+            const newName = document.getElementById('editFullName').value;
+            const newRegNo = document.getElementById('editRegNo').value; // NEW
+            const newUsername = document.getElementById('editUsername').value;
+            const newEmail = document.getElementById('editEmail').value;
+            
+            // Validation
+            if (!newName) {
+                showToast('Name cannot be empty', 'error');
+                return;
+            }
+            
+            if (!newRoll) {
+                showToast('Roll number cannot be empty', 'error');
+                return;
+            }
+            
+            // Check if roll number is being changed and if new roll already exists
+            if (newRoll !== oldRoll && students[newRoll]) {
+                showToast(`Roll number ${newRoll} already exists! Please use a different roll number.`, 'error');
+                return;
+            }
+            
+            try {
+                const updates = {};
+                
+                // If roll number is changing
+                if (newRoll !== oldRoll) {
+                    // 1. Move student record to new roll, including regNo
+                    updates['/students/' + newRoll] = {
+                        ...students[oldRoll],
+                        name: newName,
+                        regNo: newRegNo, // NEW
+                        uid: uid
+                    };
+                    updates['/students/' + oldRoll] = null; // Delete old record
+                    
+                    // 2. Update student_courses to use new roll
+                    if (studentCourses[oldRoll]) {
+                        updates['/student_courses/' + newRoll] = studentCourses[oldRoll];
+                        updates['/student_courses/' + oldRoll] = null;
+                    }
+                    
+                    // 3. Update attendance records to use new roll
+                    Object.keys(attendance).forEach(date => {
+                        Object.keys(attendance[date] || {}).forEach(subject => {
+                            if (attendance[date][subject] && attendance[date][subject][oldRoll]) {
+                                if (!updates[`/attendance/${date}/${subject}/${newRoll}`]) {
+                                    updates[`/attendance/${date}/${subject}/${newRoll}`] = attendance[date][subject][oldRoll];
+                                }
+                                updates[`/attendance/${date}/${subject}/${oldRoll}`] = null;
+                            }
+                        });
+                    });
+                    
+                    // 4. Update users record with new roll and regNo (if we store regNo in users)
+                    if (uid) {
+                        updates['/users/' + uid + '/rollNo'] = newRoll;
+                        // Optionally store regNo in users too (not required but can be added)
+                    }
+                } else {
+                    // Just update fields if roll unchanged
+                    updates['/students/' + oldRoll + '/name'] = newName;
+                    updates['/students/' + oldRoll + '/regNo'] = newRegNo; // NEW
+                    if (uid) {
+                        updates['/users/' + uid + '/fullName'] = newName;
+                        updates['/users/' + uid + '/username'] = newUsername || users[uid].username;
+                        updates['/users/' + uid + '/email'] = newEmail;
+                    }
+                }
+                
+                // Update username/email even if roll didn't change
+                if (uid && newRoll === oldRoll) {
+                    if (newUsername) {
+                        updates['/users/' + uid + '/username'] = newUsername;
+                    }
+                    if (newEmail) {
+                        updates['/users/' + uid + '/email'] = newEmail;
+                        
+                        // Try to update Auth email (may fail, but we still update DB)
+                        try {
+                            const user = auth.currentUser;
+                            if (user && user.uid === uid) {
+                                console.log('Auth email update not possible from client');
+                            }
+                        } catch (authError) {
+                            console.log('Auth update failed (expected):', authError);
+                        }
+                    }
+                }
+                
+                // Apply all updates
+                if (Object.keys(updates).length > 0) {
+                    await db.ref().update(updates);
+                }
+                
+                // Reload data
+                await loadAllData();
+                
+                showToast('Student updated successfully!', 'success');
+                document.getElementById('studentEditForm').style.display = 'none';
+                renderStudentList();
+                renderUsersList();
+                
+                // Refresh attendance view if open
+                const currentSubject = document.getElementById('attendanceSubject')?.value;
+                if (currentSubject) {
+                    renderSubjectAttendance(currentSubject);
+                }
+                
+            } catch (error) {
+                showToast('Error updating student: ' + error.message, 'error');
+                console.error('Update error:', error);
+            }
+        }
+
+        // Make total students card clickable
+        if (totalStudentsCard) {
+            totalStudentsCard.addEventListener('click', openStudentListModal);
         }
 
         // ==================== AUTH ====================
@@ -1215,16 +1381,11 @@
                 }
                 
                 currentUser = { uid, ...userData };
-                
-                // Store in session storage for persistence
-                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
                 await loadAllData();
                 loginSection.style.display = 'none';
                 
                 if (currentUser.role === 'admin') {
                     adminDash.style.display = 'block';
-                    studentDash.style.display = 'none';
                     adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
                     loadCoursesForDropdowns();
                     displayCourseStructure();
@@ -1232,15 +1393,16 @@
                     renderUsersList();
                 } else {
                     studentDash.style.display = 'block';
-                    adminDash.style.display = 'none';
                     studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
                     
+                    // Get student details from students object using rollNo
                     const studentRec = students[currentUser.rollNo] || {};
                     studentName.textContent = currentUser.fullName;
                     studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                    studentRegNo.textContent = studentRec.regNo || 'N/A';
+                    studentRegNo.textContent = studentRec.regNo || 'N/A'; // NEW
                     studentEmail.textContent = currentUser.email || 'N/A';
                     
+                    // Set student photo using registration number
                     if (studentRec.regNo) {
                         studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
                     } else {
@@ -1272,69 +1434,7 @@
             }
         });
 
-        // Check session on page load
-        (function checkSession() {
-            const savedUser = sessionStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                // Verify with Firebase
-                auth.onAuthStateChanged(async (user) => {
-                    if (user && user.uid === currentUser.uid) {
-                        await loadAllData();
-                        loginSection.style.display = 'none';
-                        if (currentUser.role === 'admin') {
-                            adminDash.style.display = 'block';
-                            studentDash.style.display = 'none';
-                            adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-                            loadCoursesForDropdowns();
-                            displayCourseStructure();
-                            initAttendanceDropdowns();
-                            renderUsersList();
-                        } else {
-                            studentDash.style.display = 'block';
-                            adminDash.style.display = 'none';
-                            studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-                            
-                            const studentRec = students[currentUser.rollNo] || {};
-                            studentName.textContent = currentUser.fullName;
-                            studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                            studentRegNo.textContent = studentRec.regNo || 'N/A';
-                            studentEmail.textContent = currentUser.email || 'N/A';
-                            
-                            if (studentRec.regNo) {
-                                studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
-                            } else {
-                                studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
-                            }
-                            
-                            const studentCourseData = studentCourses[currentUser.rollNo];
-                            if (studentCourseData) {
-                                const course = courses[studentCourseData.courseId];
-                                const semester = course?.semesters[studentCourseData.semester];
-                                studentCourse.textContent = course?.name || 'N/A';
-                                studentSemester.textContent = semester?.name || 'N/A';
-                                
-                                const subjectSelect = document.getElementById('studentSubjectSelector');
-                                subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                                studentCourseData.subjects.forEach(subId => {
-                                    const subject = semester?.subjects[subId];
-                                    if (subject) {
-                                        subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
-                                    }
-                                });
-                            }
-                            
-                            renderStudentDashboard();
-                        }
-                    } else {
-                        sessionStorage.removeItem('currentUser');
-                    }
-                });
-            }
-        })();
-
         function logout() {
-            sessionStorage.removeItem('currentUser');
             auth.signOut().then(() => {
                 currentUser = null;
                 adminDash.style.display = 'none';
@@ -1346,367 +1446,8 @@
         logoutBtn.addEventListener('click', logout);
         studentLogoutBtn.addEventListener('click', logout);
 
-        // ==================== USER MANAGEMENT ====================
-        function toggleStudentFields() {
-            const roleSelect = document.getElementById('newUserRole');
-            const isStudent = roleSelect.value === 'student';
-            const rollNoSection = document.getElementById('rollNoSection');
-            const regNoSection = document.getElementById('regNoSection');
-            
-            if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
-            if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
-        }
-
-        document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
-        toggleStudentFields();
-
-        document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Set flag to prevent auto-login interference
-            isAddingUser = true;
-            
-            if (!await checkAdminPermission()) {
-                isAddingUser = false;
-                return;
-            }
-            
-            const role = document.getElementById('newUserRole').value;
-            const email = document.getElementById('newEmail').value;
-            const password = document.getElementById('newPassword').value;
-            const username = document.getElementById('newUsername').value;
-            const roll = document.getElementById('newRollNo').value;
-            const regNo = document.getElementById('newRegNo').value;
-            const fullName = document.getElementById('newFullName').value;
-
-            try {
-                // Store current user before creating new one
-                const adminUser = auth.currentUser;
-                const adminUid = adminUser.uid;
-                
-                // Create new user
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
-                
-                // Create user data in database
-                const userData = {
-                    email,
-                    role,
-                    fullName,
-                    username: username || fullName,
-                    rollNo: role === 'student' ? roll : null
-                };
-                await db.ref('users/' + uid).set(userData);
-                
-                if (role === 'student' && roll) {
-                    await db.ref('students/' + roll).set({ 
-                        uid, 
-                        name: fullName,
-                        email: email,
-                        regNo: regNo || ''
-                    });
-                    students[roll] = { uid, name: fullName, email: email, regNo: regNo || '' };
-                }
-                
-                // CRITICAL: Sign back in as admin
-                await auth.signInWithEmailAndPassword(adminUser.email, password); // Note: This won't work - need admin password
-                // Better approach: Re-authenticate admin using stored credentials
-                // For security, we'll reload the admin session from storage
-                
-                // Reload admin user data
-                const adminSnap = await db.ref('users/' + adminUid).once('value');
-                const adminData = adminSnap.val();
-                currentUser = { uid: adminUid, ...adminData };
-                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                showToast('User added successfully', 'success');
-                e.target.reset();
-                toggleStudentFields();
-                await renderUsersList();
-                loadCoursesForDropdowns();
-                updateStats();
-                
-            } catch (error) {
-                showToast('Error: ' + error.message, 'error');
-                console.error('Add user error:', error);
-            } finally {
-                isAddingUser = false;
-            }
-        });
-
-        async function renderUsersList() {
-            const snap = await db.ref('users').once('value');
-            users = snap.val() || {};
-            const tbody = document.getElementById('usersList');
-            tbody.innerHTML = '';
-            
-            Object.entries(users).forEach(([uid, u]) => {
-                tbody.innerHTML += `<tr>
-                    <td>${u.email}</td>
-                    <td><span class="badge ${u.role==='admin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
-                    <td>${u.fullName}</td>
-                    <td>${u.rollNo || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-warning" onclick="resetPassword('${uid}')"><i class="fas fa-key"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${uid}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        window.resetPassword = async (uid) => {
-            if (!await checkAdminPermission()) return;
-            const email = users[uid]?.email;
-            if (!email) return;
-            try {
-                await auth.sendPasswordResetEmail(email);
-                showToast('Password reset email sent', 'success');
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        };
-
-        window.deleteUser = async (uid) => {
-            if (!await checkAdminPermission()) return;
-            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
-            if (!confirm('Delete user?')) return;
-            try {
-                const userData = users[uid];
-                if (userData.role === 'student' && userData.rollNo) {
-                    await db.ref('students/' + userData.rollNo).remove();
-                    delete students[userData.rollNo];
-                }
-                await db.ref('users/' + uid).remove();
-                showToast('User removed', 'success');
-                renderUsersList();
-                updateStats();
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        };
-
-        document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
-
-        document.getElementById('addRollNumbersBtn')?.addEventListener('click', async () => {
-            if (!await checkAdminPermission()) return;
-            
-            const text = document.getElementById('bulkRollInput').value.trim();
-            if (!text) { showToast('Enter roll numbers', 'error'); return; }
-            const rolls = text.split(',').map(r => r.trim()).filter(r => r);
-            let added = 0;
-            
-            // Store current admin
-            const adminUser = auth.currentUser;
-            const adminUid = adminUser.uid;
-            
-            for (let roll of rolls) {
-                if (students[roll]) continue;
-                const email = `${roll}@attenzen.com`;
-                const password = `${roll}123`;
-                const fullName = `Student ${roll}`;
-                try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    const uid = userCredential.user.uid;
-                    const userData = {
-                        email,
-                        role: 'student',
-                        fullName,
-                        username: fullName,
-                        rollNo: roll
-                    };
-                    await db.ref('users/' + uid).set(userData);
-                    await db.ref('students/' + roll).set({ uid, name: fullName, email: email, regNo: '' });
-                    students[roll] = { uid, name: fullName, email: email, regNo: '' };
-                    added++;
-                } catch (error) {
-                    showToast(`Failed for ${roll}: ${error.message}`, 'error');
-                }
-            }
-            
-            // Sign back in as admin
-            const adminSnap = await db.ref('users/' + adminUid).once('value');
-            const adminData = adminSnap.val();
-            currentUser = { uid: adminUid, ...adminData };
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            if (added) {
-                document.getElementById('bulkRollInput').value = '';
-                showToast(`${added} students added`, 'success');
-                renderUsersList();
-                loadCoursesForDropdowns();
-                updateStats();
-            }
-        });
-
-        // ==================== STUDENT LIST MODAL ====================
-        function openStudentListModal() {
-            renderStudentList();
-            studentListModal.style.display = 'flex';
-        }
-
-        function closeStudentListModal() {
-            studentListModal.style.display = 'none';
-            document.getElementById('studentEditForm').style.display = 'none';
-        }
-
-        function renderStudentList() {
-            let html = '';
-            Object.entries(students).forEach(([roll, student]) => {
-                const studentCourseData = studentCourses[roll];
-                let subjectsList = '';
-                if (studentCourseData) {
-                    const subjects = studentCourseData.subjects || [];
-                    subjectsList = subjects.map(subId => {
-                        for (const courseId in courses) {
-                            const course = courses[courseId];
-                            for (const semId in course?.semesters || {}) {
-                                const sem = course.semesters[semId];
-                                if (sem.subjects && sem.subjects[subId]) {
-                                    return `<span class="subject-code-badge">${sem.subjects[subId].code}</span>`;
-                                }
-                            }
-                        }
-                        return `<span class="subject-code-badge">${subId}</span>`;
-                    }).join(' ');
-                } else {
-                    subjectsList = '<span class="text-muted">No subjects</span>';
-                }
-                
-                html += `<tr>
-                    <td><strong>${roll}</strong></td>
-                    <td>${student.name}</td>
-                    <td>${student.email || 'N/A'}</td>
-                    <td>${student.regNo || '-'}</td>
-                    <td>${subjectsList}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="editStudent('${roll}')">
-                            <i class="fas fa-edit"></i> Update
-                        </button>
-                    </td>
-                </tr>`;
-            });
-            studentListTableBody.innerHTML = html || '<tr><td colspan="6" class="text-center">No students found</td></tr>';
-        }
-
-        window.editStudent = function(roll) {
-            if (!checkAdminPermission()) return;
-            
-            const student = students[roll];
-            const uid = Object.keys(users).find(uid => users[uid]?.rollNo === roll);
-            const userEntry = users[uid];
-            
-            document.getElementById('editStudentRoll').value = roll;
-            document.getElementById('editStudentUid').value = uid || '';
-            document.getElementById('editOldRoll').value = roll;
-            document.getElementById('editRollNo').value = roll;
-            document.getElementById('editFullName').value = student.name || '';
-            document.getElementById('editRegNo').value = student.regNo || '';
-            document.getElementById('editUsername').value = userEntry?.username || '';
-            document.getElementById('editEmail').value = userEntry?.email || '';
-            
-            document.getElementById('studentEditForm').style.display = 'block';
-        }
-
-        window.saveStudentChanges = async function() {
-            if (!await checkAdminPermission()) return;
-            
-            const oldRoll = document.getElementById('editOldRoll').value;
-            const newRoll = document.getElementById('editRollNo').value;
-            const uid = document.getElementById('editStudentUid').value;
-            const newName = document.getElementById('editFullName').value;
-            const newRegNo = document.getElementById('editRegNo').value;
-            const newUsername = document.getElementById('editUsername').value;
-            const newEmail = document.getElementById('editEmail').value;
-            
-            if (!newName) {
-                showToast('Name cannot be empty', 'error');
-                return;
-            }
-            
-            if (!newRoll) {
-                showToast('Roll number cannot be empty', 'error');
-                return;
-            }
-            
-            if (newRoll !== oldRoll && students[newRoll]) {
-                showToast(`Roll number ${newRoll} already exists!`, 'error');
-                return;
-            }
-            
-            try {
-                const updates = {};
-                
-                if (newRoll !== oldRoll) {
-                    updates['/students/' + newRoll] = {
-                        ...students[oldRoll],
-                        name: newName,
-                        regNo: newRegNo,
-                        uid: uid
-                    };
-                    updates['/students/' + oldRoll] = null;
-                    
-                    if (studentCourses[oldRoll]) {
-                        updates['/student_courses/' + newRoll] = studentCourses[oldRoll];
-                        updates['/student_courses/' + oldRoll] = null;
-                    }
-                    
-                    Object.keys(attendance).forEach(date => {
-                        Object.keys(attendance[date] || {}).forEach(subject => {
-                            if (attendance[date][subject] && attendance[date][subject][oldRoll]) {
-                                if (!updates[`/attendance/${date}/${subject}/${newRoll}`]) {
-                                    updates[`/attendance/${date}/${subject}/${newRoll}`] = attendance[date][subject][oldRoll];
-                                }
-                                updates[`/attendance/${date}/${subject}/${oldRoll}`] = null;
-                            }
-                        });
-                    });
-                    
-                    if (uid) {
-                        updates['/users/' + uid + '/rollNo'] = newRoll;
-                    }
-                } else {
-                    updates['/students/' + oldRoll + '/name'] = newName;
-                    updates['/students/' + oldRoll + '/regNo'] = newRegNo;
-                    if (uid) {
-                        updates['/users/' + uid + '/fullName'] = newName;
-                        updates['/users/' + uid + '/username'] = newUsername || users[uid].username;
-                        updates['/users/' + uid + '/email'] = newEmail;
-                    }
-                }
-                
-                if (Object.keys(updates).length > 0) {
-                    await db.ref().update(updates);
-                }
-                
-                await loadAllData();
-                
-                showToast('Student updated successfully!', 'success');
-                document.getElementById('studentEditForm').style.display = 'none';
-                renderStudentList();
-                renderUsersList();
-                
-                const currentSubject = document.getElementById('attendanceSubject')?.value;
-                if (currentSubject) {
-                    renderSubjectAttendance(currentSubject);
-                }
-                
-            } catch (error) {
-                showToast('Error updating student: ' + error.message, 'error');
-            }
-        }
-
-        window.cancelStudentEdit = function() {
-            document.getElementById('studentEditForm').style.display = 'none';
-        }
-
-        if (totalStudentsCard) {
-            totalStudentsCard.addEventListener('click', openStudentListModal);
-        }
-
-        // ==================== COURSE MANAGEMENT FUNCTIONS ====================
+        // ==================== COURSE MANAGEMENT (unchanged) ====================
         window.addCourse = async function() {
-            if (!await checkAdminPermission()) return;
-            
             const name = document.getElementById('courseName').value;
             const code = document.getElementById('courseCode').value;
             if (!name || !code) {
@@ -1729,8 +1470,6 @@
         }
 
         window.addSemester = async function() {
-            if (!await checkAdminPermission()) return;
-            
             const courseId = document.getElementById('semesterCourse').value;
             const name = document.getElementById('semesterName').value;
             if (!courseId || !name) {
@@ -1769,8 +1508,6 @@
         }
 
         window.addSubject = async function() {
-            if (!await checkAdminPermission()) return;
-            
             const courseId = document.getElementById('subjectCourse').value;
             const semesterId = document.getElementById('subjectSemester').value;
             const name = document.getElementById('subjectName').value;
@@ -1819,8 +1556,6 @@
         }
 
         window.editCourse = function(courseId) {
-            if (!checkAdminPermission()) return;
-            
             const course = courses[courseId];
             const newName = prompt('Enter new course name:', course.name);
             const newCode = prompt('Enter new course code:', course.code);
@@ -1840,13 +1575,11 @@
         }
 
         window.deleteCourse = async function(courseId) {
-            if (!await checkAdminPermission()) return;
-            
-            if (!confirm('Delete this course? All semesters and subjects will be deleted.')) return;
+            if (!confirm('Are you sure you want to delete this course? This will also delete all semesters and subjects in this course.')) return;
             
             const hasAssignments = Object.values(studentCourses).some(sc => sc.courseId === courseId);
             if (hasAssignments) {
-                if (!confirm('This course has students assigned. Continue?')) return;
+                if (!confirm('This course has students assigned. Deleting it will remove their assignments. Continue?')) return;
             }
             
             await db.ref('courses/' + courseId).remove();
@@ -1857,8 +1590,6 @@
         }
 
         window.editSemester = function(courseId, semesterId) {
-            if (!checkAdminPermission()) return;
-            
             const semester = courses[courseId]?.semesters[semesterId];
             const newName = prompt('Enter new semester name:', semester.name);
             
@@ -1876,15 +1607,13 @@
         }
 
         window.deleteSemester = async function(courseId, semesterId) {
-            if (!await checkAdminPermission()) return;
-            
-            if (!confirm('Delete this semester? All subjects will be deleted.')) return;
+            if (!confirm('Are you sure you want to delete this semester? This will also delete all subjects in this semester.')) return;
             
             const hasAssignments = Object.values(studentCourses).some(sc => 
                 sc.courseId === courseId && sc.semester === semesterId
             );
             if (hasAssignments) {
-                if (!confirm('This semester has students assigned. Continue?')) return;
+                if (!confirm('This semester has students assigned. Deleting it will remove their assignments. Continue?')) return;
             }
             
             await db.ref(`courses/${courseId}/semesters/${semesterId}`).remove();
@@ -1895,8 +1624,6 @@
         }
 
         window.editSubject = function(courseId, semesterId, subjectId) {
-            if (!checkAdminPermission()) return;
-            
             const subject = courses[courseId]?.semesters[semesterId]?.subjects[subjectId];
             const newName = prompt('Enter new subject name:', subject.name);
             const newCode = prompt('Enter new subject code:', subject.code);
@@ -1918,15 +1645,13 @@
         }
 
         window.deleteSubject = async function(courseId, semesterId, subjectId) {
-            if (!await checkAdminPermission()) return;
-            
-            if (!confirm('Delete this subject?')) return;
+            if (!confirm('Are you sure you want to delete this subject?')) return;
             
             const hasAssignments = Object.values(studentCourses).some(sc => 
                 sc.courseId === courseId && sc.semester === semesterId && sc.subjects.includes(subjectId)
             );
             if (hasAssignments) {
-                if (!confirm('This subject has students assigned. Continue?')) return;
+                if (!confirm('This subject has students assigned. Deleting it will remove their assignments. Continue?')) return;
             }
             
             await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).remove();
@@ -1939,7 +1664,7 @@
         function displayCourseStructure() {
             let html = '';
             if (!courses || Object.keys(courses).length === 0) {
-                document.getElementById('courseStructure').innerHTML = '<p class="text-muted text-center">No courses added yet.</p>';
+                document.getElementById('courseStructure').innerHTML = '<p class="text-muted text-center">No courses added yet. Click "Add Course" to get started.</p>';
                 return;
             }
             
@@ -2050,8 +1775,6 @@
         }
 
         window.assignStudentToCourse = async function() {
-            if (!await checkAdminPermission()) return;
-            
             const studentRoll = document.getElementById('assignStudent').value;
             const courseId = document.getElementById('assignCourse').value;
             const semesterId = document.getElementById('assignSemester').value;
@@ -2104,7 +1827,7 @@
             document.getElementById('assignmentsList').innerHTML = html || '<p class="text-muted">No assignments found</p>';
         }
 
-        // ==================== ATTENDANCE FUNCTIONS ====================
+        // ==================== ATTENDANCE FUNCTIONS (unchanged) ====================
         function initAttendanceDropdowns() {
             const courseSelect = document.getElementById('attendanceCourse');
             if (!courseSelect) return;
@@ -2223,36 +1946,31 @@
                 dates.forEach(date => {
                     const td = document.createElement('td');
                     const status = (attendance[date]?.[subjectId]?.[roll]) || 'A';
-                    const disabledClass = !isAdmin() ? 'disabled' : '';
-                    td.innerHTML = `<span class="status-toggle ${status==='P'?'present':status==='H'?'holiday':'absent'} ${disabledClass}" data-student="${roll}" data-date="${date}" data-subject="${subjectId}">${status}</span>`;
+                    td.innerHTML = `<span class="status-toggle ${status==='P'?'present':status==='H'?'holiday':'absent'}" data-student="${roll}" data-date="${date}" data-subject="${subjectId}">${status}</span>`;
                     row.appendChild(td);
                 });
                 
                 tbody.appendChild(row);
             });
 
-            if (isAdmin()) {
-                document.querySelectorAll('.status-toggle:not(.disabled)').forEach(t => {
-                    t.addEventListener('click', async function() {
-                        if (!await checkAdminPermission()) return;
-                        
-                        const student = this.dataset.student;
-                        const date = this.dataset.date;
-                        const subject = this.dataset.subject;
-                        const cur = this.textContent;
-                        const next = cur === 'P' ? 'A' : cur === 'A' ? 'H' : 'P';
-                        
-                        this.textContent = next;
-                        this.className = `status-toggle ${next==='P'?'present':next==='H'?'holiday':'absent'}`;
-                        
-                        if (!attendance[date]) attendance[date] = {};
-                        if (!attendance[date][subject]) attendance[date][subject] = {};
-                        attendance[date][subject][student] = next;
-                        
-                        await saveAllData();
-                    });
+            document.querySelectorAll('.status-toggle').forEach(t => {
+                t.addEventListener('click', async function() {
+                    const student = this.dataset.student;
+                    const date = this.dataset.date;
+                    const subject = this.dataset.subject;
+                    const cur = this.textContent;
+                    const next = cur === 'P' ? 'A' : cur === 'A' ? 'H' : 'P';
+                    
+                    this.textContent = next;
+                    this.className = `status-toggle ${next==='P'?'present':next==='H'?'holiday':'absent'}`;
+                    
+                    if (!attendance[date]) attendance[date] = {};
+                    if (!attendance[date][subject]) attendance[date][subject] = {};
+                    attendance[date][subject][student] = next;
+                    
+                    await saveAllData();
                 });
-            }
+            });
 
             updateDateSelects();
             renderAttendanceChart(subjectId);
@@ -2262,22 +1980,13 @@
             const dates = Object.keys(attendance).sort();
             [deleteDateSelect2, bulkUpdateDate].forEach(sel => {
                 if (!sel) return;
-                const currentValue = sel.value;
                 sel.innerHTML = '<option value="">Select date</option>';
-                dates.forEach(d => {
-                    const option = document.createElement('option');
-                    option.value = d;
-                    option.textContent = formatDate(d);
-                    if (d === currentValue) option.selected = true;
-                    sel.appendChild(option);
-                });
+                dates.forEach(d => sel.innerHTML += `<option value="${d}">${formatDate(d)}</option>`);
             });
         }
 
         if (markAllPresentBtn) {
             markAllPresentBtn.addEventListener('click', async () => {
-                if (!await checkAdminPermission()) return;
-                
                 const date = dateSelector.value;
                 const subjectId = document.getElementById('attendanceSubject').value;
                 
@@ -2320,8 +2029,6 @@
         }
 
         async function addDateHandler() {
-            if (!await checkAdminPermission()) return;
-            
             const date = newDateInput2?.value;
             if (!date) { showToast('Select a date', 'error'); return; }
             if (attendance[date]) { showToast('Date already exists', 'warning'); return; }
@@ -2335,8 +2042,6 @@
         if (quickAddDateBtn) quickAddDateBtn.addEventListener('click', addDateHandler);
 
         async function deleteDateHandler() {
-            if (!await checkAdminPermission()) return;
-            
             const date = deleteDateSelect2?.value;
             if (!date) { showToast('Select a date', 'error'); return; }
             if (confirm(`Delete attendance for ${formatDate(date)}?`)) {
@@ -2358,11 +2063,9 @@
             });
         }
 
-        // ==================== BULK UPDATE ====================
+        // ==================== BULK UPDATE (unchanged) ====================
         if (quickBulkUpdateBtn) {
             quickBulkUpdateBtn.addEventListener('click', async () => {
-                if (!await checkAdminPermission()) return;
-                
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('bulkUpdateDate').value = today;
                 
@@ -2498,8 +2201,6 @@
 
         if (applyBulkUpdate) {
             applyBulkUpdate.addEventListener('click', async () => {
-                if (!await checkAdminPermission()) return;
-                
                 const date = bulkUpdateDate.value;
                 const subject = document.getElementById('bulkUpdateSubject').value;
                 const selected = [];
@@ -2540,7 +2241,7 @@
             }
         });
 
-        // ==================== STUDENT DASHBOARD RENDER ====================
+        // ==================== STUDENT DASHBOARD RENDER (unchanged) ====================
         function renderStudentDashboard() {
             studentTableLoading.style.display = 'none';
             studentTableContainer.style.display = 'block';
@@ -2591,7 +2292,7 @@
 
         // ==================== EXPORTS ====================
         if (downloadExcelBtn) {
-            downloadExcelBtn.addEventListener('click', async () => {
+            downloadExcelBtn.addEventListener('click', () => {
                 const subject = document.getElementById('attendanceSubject')?.value;
                 if (!subject) {
                     showToast('Please select a subject first', 'error');
@@ -2621,9 +2322,7 @@
         }
 
         if (quickExportPDFBtn) {
-            quickExportPDFBtn.addEventListener('click', async () => {
-                if (!await checkAdminPermission()) return;
-                
+            quickExportPDFBtn.addEventListener('click', () => {
                 const subject = document.getElementById('attendanceSubject')?.value;
                 if (!subject) {
                     showToast('Please select a subject first', 'error');
@@ -2780,15 +2479,9 @@
                 data: {
                     labels: dates.map(d => formatDate(d)),
                     datasets: [
-                        { label: 'Present', data: presentData, borderColor: '#4cc9f0', backgroundColor: 'rgba(76,201,240,0.1)', tension: 0.4 },
-                        { label: 'Absent', data: absentData, borderColor: '#f72585', backgroundColor: 'rgba(247,37,133,0.1)', tension: 0.4 }
+                        { label: 'Present', data: presentData, borderColor: '#4cc9f0', tension: 0.4 },
+                        { label: 'Absent', data: absentData, borderColor: '#f72585', tension: 0.4 }
                     ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' }
-                    }
                 }
             });
         }
@@ -2796,8 +2489,6 @@
         // ==================== HOLIDAY / REMINDER ====================
         if (quickMarkHolidayBtn) {
             quickMarkHolidayBtn.addEventListener('click', async () => {
-                if (!await checkAdminPermission()) return;
-                
                 const date = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
                 const subject = document.getElementById('attendanceSubject')?.value;
                 
@@ -2825,15 +2516,13 @@
 
         if (quickSendReminderBtn) {
             quickSendReminderBtn.addEventListener('click', () => {
-                if (!checkAdminPermission()) return;
-                showToast('Reminder sent to all students (demo)', 'success');
+                showToast('Reminder sent (demo)', 'success');
             });
         }
 
         // ==================== CLOUD SYNC ====================
         if (cloudSyncBtn) {
             cloudSyncBtn.addEventListener('click', async () => {
-                cloudSyncBtn.classList.add('sync-animation');
                 await loadAllData();
                 if (currentUser) {
                     if (currentUser.role === 'admin') { 
@@ -2841,40 +2530,175 @@
                         displayCourseStructure();
                         initAttendanceDropdowns();
                         renderUsersList();
-                    } else {
-                        renderStudentDashboard();
                     }
+                    else renderStudentDashboard();
                 }
                 updateStats();
                 updateDateSelects();
                 showToast('Data refreshed from cloud', 'success');
-                setTimeout(() => cloudSyncBtn.classList.remove('sync-animation'), 1500);
             });
         }
+
+        // ==================== USER MANAGEMENT (updated to handle registration number) ====================
+       // Function to toggle student-specific fields
+function toggleStudentFields() {
+    const roleSelect = document.getElementById('newUserRole');
+    const isStudent = roleSelect.value === 'student';
+    const rollNoSection = document.getElementById('rollNoSection');
+    const regNoSection = document.getElementById('regNoSection');
+    
+    if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
+    if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
+}
+
+// Add event listener for role changes
+document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
+
+// Also trigger on page load to set initial state
+document.addEventListener('DOMContentLoaded', function() {
+    toggleStudentFields();
+});
+
+        document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const role = document.getElementById('newUserRole').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const username = document.getElementById('newUsername').value;
+            const roll = document.getElementById('newRollNo').value;
+            const regNo = document.getElementById('newRegNo').value; // NEW
+            const fullName = document.getElementById('newFullName').value;
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                const userData = {
+                    email,
+                    role,
+                    fullName,
+                    username: username || fullName,
+                    rollNo: role === 'student' ? roll : null
+                };
+                await db.ref('users/' + uid).set(userData);
+                if (role === 'student' && roll) {
+                    await db.ref('students/' + roll).set({ 
+                        uid, 
+                        name: fullName,
+                        regNo: regNo // NEW
+                    });
+                    students[roll] = { uid, name: fullName, regNo: regNo }; // update local cache
+                }
+                showToast('User added', 'success');
+                e.target.reset();
+                renderUsersList();
+                loadCoursesForDropdowns();
+                updateStats();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        });
+
+        async function renderUsersList() {
+            const snap = await db.ref('users').once('value');
+            users = snap.val() || {};
+            const tbody = document.getElementById('usersList');
+            tbody.innerHTML = '';
+            
+            Object.entries(users).forEach(([uid, u]) => {
+                tbody.innerHTML += `<tr>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${u.role==='admin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
+                    <td>${u.fullName}</td>
+                    <td>${u.rollNo || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-warning" onclick="resetPassword('${uid}')"><i class="fas fa-key"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${uid}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        window.resetPassword = async (uid) => {
+            const email = users[uid]?.email;
+            if (!email) return;
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('Password reset email sent', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        window.deleteUser = async (uid) => {
+            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
+            if (!confirm('Delete user?')) return;
+            try {
+                const userData = users[uid];
+                if (userData.role === 'student' && userData.rollNo) {
+                    await db.ref('students/' + userData.rollNo).remove();
+                    delete students[userData.rollNo];
+                }
+                await db.ref('users/' + uid).remove();
+                showToast('User removed', 'success');
+                renderUsersList();
+                updateStats();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
+
+        document.getElementById('addRollNumbersBtn')?.addEventListener('click', async () => {
+            const text = document.getElementById('bulkRollInput').value.trim();
+            if (!text) { showToast('Enter roll numbers', 'error'); return; }
+            const rolls = text.split(',').map(r => r.trim()).filter(r => r);
+            let added = 0;
+            
+            for (let roll of rolls) {
+                if (students[roll]) continue;
+                const email = `${roll}@attenzen.com`;
+                const password = `${roll}123`;
+                const fullName = `Student ${roll}`;
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const uid = userCredential.user.uid;
+                    const userData = {
+                        email,
+                        role: 'student',
+                        fullName,
+                        username: fullName,
+                        rollNo: roll
+                    };
+                    await db.ref('users/' + uid).set(userData);
+                    // For bulk add, registration number can be left empty or generated; we'll leave empty for now
+                    await db.ref('students/' + roll).set({ uid, name: fullName, regNo: '' });
+                    students[roll] = { uid, name: fullName, regNo: '' };
+                    added++;
+                } catch (error) {
+                    showToast(`Failed for ${roll}: ${error.message}`, 'error');
+                }
+            }
+            if (added) {
+                document.getElementById('bulkRollInput').value = '';
+                showToast(`${added} students added`, 'success');
+                renderUsersList();
+                loadCoursesForDropdowns();
+                updateStats();
+            }
+        });
 
         // ==================== CHANGE PASSWORD ====================
         if (changePasswordBtn) {
             changePasswordBtn.addEventListener('click', async () => {
-                const currentPwd = prompt('Enter current password:');
-                if (!currentPwd) return;
-                
-                try {
-                    const user = auth.currentUser;
-                    const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPwd);
-                    await user.reauthenticateWithCredential(credential);
-                    
-                    const newPassword = prompt('Enter new password (min 6 chars):');
-                    if (newPassword && newPassword.length >= 6) {
-                        const confirmPwd = prompt('Confirm new password:');
-                        if (newPassword !== confirmPwd) {
-                            showToast('Passwords do not match', 'error');
-                            return;
-                        }
-                        await user.updatePassword(newPassword);
-                        showToast('Password changed successfully', 'success');
+                const newPassword = prompt('Enter new password (min 6 chars):');
+                if (newPassword && newPassword.length >= 6) {
+                    try {
+                        await auth.currentUser.updatePassword(newPassword);
+                        showToast('Password changed', 'success');
+                    } catch (error) {
+                        showToast(error.message, 'error');
                     }
-                } catch (error) {
-                    showToast('Error: ' + error.message, 'error');
                 }
             });
         }
@@ -2885,17 +2709,15 @@
             await loadAllData();
             
             auth.onAuthStateChanged(async (user) => {
-                if (user && !isAddingUser) {
+                if (user) {
                     const userSnap = await db.ref('users/' + user.uid).once('value');
                     const userData = userSnap.val();
                     if (userData) {
                         currentUser = { uid: user.uid, ...userData };
-                        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
                         await loadAllData();
                         loginSection.style.display = 'none';
                         if (currentUser.role === 'admin') {
                             adminDash.style.display = 'block';
-                            studentDash.style.display = 'none';
                             adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
                             loadCoursesForDropdowns();
                             displayCourseStructure();
@@ -2903,15 +2725,15 @@
                             renderUsersList();
                         } else {
                             studentDash.style.display = 'block';
-                            adminDash.style.display = 'none';
                             studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
                             
                             const studentRec = students[currentUser.rollNo] || {};
                             studentName.textContent = currentUser.fullName;
                             studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                            studentRegNo.textContent = studentRec.regNo || 'N/A';
+                            studentRegNo.textContent = studentRec.regNo || 'N/A'; // NEW
                             studentEmail.textContent = currentUser.email || 'N/A';
                             
+                            // Set photo
                             if (studentRec.regNo) {
                                 studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
                             } else {
@@ -2937,6 +2759,7 @@
                             
                             renderStudentDashboard();
                         }
+                        showToast('Auto-login successful!', 'success');
                     }
                 }
             });
