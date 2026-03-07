@@ -381,7 +381,7 @@
 <body>
     <div class="toast-container"></div>
 
-    <!-- LOGIN SECTION -->
+    <!-- LOGIN SECTION (unchanged) -->
     <div id="loginSection" class="login-container">
         <div class="text-center mb-4">
             <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
@@ -821,7 +821,7 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span><i class="fas fa-history me-2"></i>My Attendance Record</span>
                             <select id="studentSubjectSelector" class="form-control w-auto" onchange="renderStudentDashboard()">
-                                <!-- Populated with enrolled subjects, no "All Subjects" -->
+                                <!-- Options will be populated without "All Subjects" -->
                             </select>
                         </div>
                         <div class="card-body">
@@ -1025,10 +1025,6 @@
         let studentCourses = {};
         let attendanceChart = null;
 
-        // Store admin credentials temporarily for re-login after adding a user
-        let adminEmail = null;
-        let adminPassword = null;
-
         // DOM elements
         const loginSection = document.getElementById('loginSection');
         const adminDash = document.getElementById('adminDashboard');
@@ -1069,6 +1065,41 @@
         const studentListModal = document.getElementById('studentListModal');
         const studentListTableBody = document.getElementById('studentListTableBody');
         const studentPhoto = document.getElementById('studentPhoto'); // NEW
+        const bulkUpdateDate = document.getElementById('bulkUpdateDate');
+        const bulkUpdateSubject = document.getElementById('bulkUpdateSubject');
+        const bulkUpdateStatus = document.getElementById('bulkUpdateStatus');
+        const applyBulkUpdate = document.getElementById('applyBulkUpdate');
+        const closeBulkUpdate = document.getElementById('closeBulkUpdate');
+        const bulkUpdateModal = document.getElementById('bulkUpdateModal');
+        const newDateInput2 = document.getElementById('newDateInput2');
+        const addNewDateBtn2 = document.getElementById('addNewDateBtn2');
+        const deleteDateSelect2 = document.getElementById('deleteDateSelect2');
+        const deleteDateBtn2 = document.getElementById('deleteDateBtn2');
+        const quickAddDateBtn = document.getElementById('quickAddDateBtn');
+        const quickDeleteDateBtn = document.getElementById('quickDeleteDateBtn');
+        const quickMarkHolidayBtn = document.getElementById('quickMarkHolidayBtn');
+        const quickBulkUpdateBtn = document.getElementById('quickBulkUpdateBtn');
+        const quickExportPDFBtn = document.getElementById('quickExportPDFBtn');
+        const quickSendReminderBtn = document.getElementById('quickSendReminderBtn');
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const reportFromDate = document.getElementById('reportFromDate');
+        const reportToDate = document.getElementById('reportToDate');
+
+        // ==================== HELPER TO CREATE USER WITHOUT SIGN-IN ====================
+        async function createUserViaAPI(email, password) {
+            const apiKey = firebaseConfig.apiKey;
+            const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, returnSecureToken: true })
+            });
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+            return data.localId; // returns the new user's UID
+        }
 
         // ==================== HELPERS ====================
         function formatDate(dateString) {
@@ -1385,13 +1416,6 @@
                 }
                 
                 currentUser = { uid, ...userData };
-                
-                // Store admin credentials for re-login after adding users
-                if (currentUser.role === 'admin') {
-                    adminEmail = email;
-                    adminPassword = password;
-                }
-                
                 await loadAllData();
                 loginSection.style.display = 'none';
                 
@@ -1427,19 +1451,30 @@
                         studentCourse.textContent = course?.name || 'N/A';
                         studentSemester.textContent = semester?.name || 'N/A';
                         
-                        // Populate subject selector with only enrolled subjects, no "All Subjects"
+                        // Populate subject dropdown WITHOUT "All Subjects" option, default to first subject
                         const subjectSelect = document.getElementById('studentSubjectSelector');
-                        subjectSelect.innerHTML = ''; // clear
-                        if (studentCourseData.subjects && studentCourseData.subjects.length > 0) {
-                            studentCourseData.subjects.forEach(subId => {
-                                const subject = semester?.subjects[subId];
-                                if (subject) {
-                                    subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                        subjectSelect.innerHTML = ''; // Clear
+                        studentCourseData.subjects.forEach((subId, index) => {
+                            const subject = semester?.subjects[subId];
+                            if (subject) {
+                                const option = document.createElement('option');
+                                option.value = subId;
+                                option.textContent = subject.name;
+                                subjectSelect.appendChild(option);
+                                // Set first subject as selected by default
+                                if (index === 0) {
+                                    option.selected = true;
                                 }
-                            });
-                            // Set default to first subject
-                            subjectSelect.value = studentCourseData.subjects[0];
+                            }
+                        });
+                        // If for some reason no subjects, add a placeholder (but shouldn't happen)
+                        if (subjectSelect.options.length === 0) {
+                            subjectSelect.innerHTML = '<option value="">No subjects</option>';
                         }
+                    } else {
+                        studentCourse.textContent = 'N/A';
+                        studentSemester.textContent = 'N/A';
+                        document.getElementById('studentSubjectSelector').innerHTML = '<option value="">No subjects</option>';
                     }
                     
                     renderStudentDashboard();
@@ -1843,7 +1878,7 @@
             document.getElementById('assignmentsList').innerHTML = html || '<p class="text-muted">No assignments found</p>';
         }
 
-        // ==================== ATTENDANCE FUNCTIONS ====================
+        // ==================== ATTENDANCE FUNCTIONS (unchanged) ====================
         function initAttendanceDropdowns() {
             const courseSelect = document.getElementById('attendanceCourse');
             if (!courseSelect) return;
@@ -2079,7 +2114,7 @@
             });
         }
 
-        // ==================== BULK UPDATE (fixed) ====================
+        // ==================== BULK UPDATE (MODIFIED) ====================
         if (quickBulkUpdateBtn) {
             quickBulkUpdateBtn.addEventListener('click', async () => {
                 const today = new Date().toISOString().split('T')[0];
@@ -2230,25 +2265,25 @@
                     return; 
                 }
                 
+                // Get all students for this subject
+                const allStudentsForSubject = [];
+                Object.entries(studentCourses).forEach(([roll, data]) => {
+                    if (data.subjects && data.subjects.includes(subject)) {
+                        allStudentsForSubject.push(roll);
+                    }
+                });
+                
                 if (!attendance[date]) attendance[date] = {};
                 if (!attendance[date][subject]) attendance[date][subject] = {};
                 
-                // If marking Present, first set all students to Absent (unless holiday? but we'll set absent)
-                if (status === 'P') {
-                    // Get all students for this subject
-                    const allStudents = [];
-                    Object.entries(studentCourses).forEach(([roll, data]) => {
-                        if (data.subjects && data.subjects.includes(subject)) {
-                            allStudents.push(roll);
-                        }
-                    });
-                    allStudents.forEach(roll => {
+                // Mark selected students with chosen status, others with "A" (absent)
+                allStudentsForSubject.forEach(roll => {
+                    if (selected.includes(roll)) {
+                        attendance[date][subject][roll] = status;
+                    } else {
                         attendance[date][subject][roll] = 'A';
-                    });
-                }
-                
-                // Now apply the selected status to the chosen students
-                selected.forEach(roll => attendance[date][subject][roll] = status);
+                    }
+                });
                 
                 await saveAllData();
                 
@@ -2257,9 +2292,10 @@
                     renderSubjectAttendance(subject);
                 }
                 
+                // Refresh the bulk update view to show new statuses
                 loadStudentsForBulkUpdate(subject, date);
                 
-                showToast(`Bulk update applied for ${selected.length} students`, 'success');
+                showToast(`Bulk update applied: ${selected.length} marked as ${status==='P'?'Present':status==='A'?'Absent':'Holiday'}, others set to Absent`, 'success');
             });
         }
 
@@ -2273,7 +2309,7 @@
             }
         });
 
-        // ==================== STUDENT DASHBOARD RENDER (updated) ====================
+        // ==================== STUDENT DASHBOARD RENDER (modified to use selected subject only) ====================
         function renderStudentDashboard() {
             studentTableLoading.style.display = 'none';
             studentTableContainer.style.display = 'block';
@@ -2285,8 +2321,18 @@
                 return; 
             }
             
-            // Ensure a subject is selected (should be, because we removed "All Subjects")
-            if (!selectedSubject) return;
+            // If no subject selected (shouldn't happen), default to first available
+            if (!selectedSubject) {
+                const select = document.getElementById('studentSubjectSelector');
+                if (select.options.length > 0) {
+                    select.options[0].selected = true;
+                    renderStudentDashboard(); // re-run with selected subject
+                    return;
+                } else {
+                    studentTableContainer.innerHTML = '<p class="text-center">No subjects assigned</p>';
+                    return;
+                }
+            }
             
             const tbody = studentAttendanceTable.querySelector('tbody');
             tbody.innerHTML = '';
@@ -2294,7 +2340,7 @@
             let present = 0;
             
             dates.forEach(date => {
-                // Get status for selected subject only
+                // Only show status for the selected subject
                 const status = (attendance[date]?.[selectedSubject]?.[roll]) || 'A';
                 
                 if (status === 'P') present++;
@@ -2595,8 +2641,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const fullName = document.getElementById('newFullName').value;
 
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
+                // Use API to create user without signing in
+                const uid = await createUserViaAPI(email, password);
                 const userData = {
                     email,
                     role,
@@ -2615,12 +2661,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 showToast('User added', 'success');
                 e.target.reset();
-                
-                // Re-login as admin to stay in admin session
-                if (adminEmail && adminPassword) {
-                    await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
-                }
-                
                 renderUsersList();
                 loadCoursesForDropdowns();
                 updateStats();
@@ -2692,8 +2732,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const password = `${roll}123`;
                 const fullName = `Student ${roll}`;
                 try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    const uid = userCredential.user.uid;
+                    // Use API to create user without signing in
+                    const uid = await createUserViaAPI(email, password);
                     const userData = {
                         email,
                         role: 'student',
@@ -2745,8 +2785,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const userData = userSnap.val();
                     if (userData) {
                         currentUser = { uid: user.uid, ...userData };
-                        // Store admin credentials if admin logs in via persistence (but we don't have password)
-                        // We'll only store on explicit login, so adminPassword may be null here.
                         await loadAllData();
                         loginSection.style.display = 'none';
                         if (currentUser.role === 'admin') {
@@ -2780,17 +2818,30 @@ document.addEventListener('DOMContentLoaded', function() {
                                 studentCourse.textContent = course?.name || 'N/A';
                                 studentSemester.textContent = semester?.name || 'N/A';
                                 
+                                // Populate subject dropdown WITHOUT "All Subjects" option, default to first subject
                                 const subjectSelect = document.getElementById('studentSubjectSelector');
-                                subjectSelect.innerHTML = ''; // clear
-                                if (studentCourseData.subjects && studentCourseData.subjects.length > 0) {
-                                    studentCourseData.subjects.forEach(subId => {
-                                        const subject = semester?.subjects[subId];
-                                        if (subject) {
-                                            subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                                subjectSelect.innerHTML = ''; // Clear
+                                studentCourseData.subjects.forEach((subId, index) => {
+                                    const subject = semester?.subjects[subId];
+                                    if (subject) {
+                                        const option = document.createElement('option');
+                                        option.value = subId;
+                                        option.textContent = subject.name;
+                                        subjectSelect.appendChild(option);
+                                        // Set first subject as selected by default
+                                        if (index === 0) {
+                                            option.selected = true;
                                         }
-                                    });
-                                    subjectSelect.value = studentCourseData.subjects[0];
+                                    }
+                                });
+                                // If for some reason no subjects, add a placeholder (but shouldn't happen)
+                                if (subjectSelect.options.length === 0) {
+                                    subjectSelect.innerHTML = '<option value="">No subjects</option>';
                                 }
+                            } else {
+                                studentCourse.textContent = 'N/A';
+                                studentSemester.textContent = 'N/A';
+                                document.getElementById('studentSubjectSelector').innerHTML = '<option value="">No subjects</option>';
                             }
                             
                             renderStudentDashboard();
