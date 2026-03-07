@@ -1052,7 +1052,7 @@
         const studentWelcome = document.getElementById('studentWelcome');
         const studentName = document.getElementById('studentName');
         const studentRollNo = document.getElementById('studentRollNo');
-        const studentRegNo = document.getElementById('studentRegNo'); // NEW
+        const studentRegNo = document.getElementById('studentRegNo');
         const studentEmail = document.getElementById('studentEmail');
         const studentCourse = document.getElementById('studentCourse');
         const studentSemester = document.getElementById('studentSemester');
@@ -1064,7 +1064,7 @@
         const totalStudentsCard = document.getElementById('totalStudentsCard');
         const studentListModal = document.getElementById('studentListModal');
         const studentListTableBody = document.getElementById('studentListTableBody');
-        const studentPhoto = document.getElementById('studentPhoto'); // NEW
+        const studentPhoto = document.getElementById('studentPhoto');
         const bulkUpdateDate = document.getElementById('bulkUpdateDate');
         const bulkUpdateSubject = document.getElementById('bulkUpdateSubject');
         const bulkUpdateStatus = document.getElementById('bulkUpdateStatus');
@@ -1098,7 +1098,7 @@
             if (data.error) {
                 throw new Error(data.error.message);
             }
-            return data.localId; // returns the new user's UID
+            return data.localId;
         }
 
         // ==================== HELPERS ====================
@@ -1133,7 +1133,6 @@
                 studentCourses = snapStudentCourses.val() || {};
                 console.log('Data loaded:', { courses, students, studentCourses });
                 
-                // Update total students count
                 updateStats();
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -1157,17 +1156,30 @@
             updateStats();
         }
 
-        function updateStats() {
+        // Update stats cards – if subjectId provided, count only for that subject
+        function updateStats(subjectId = null) {
             totalStudents.textContent = Object.keys(students).length;
             const today = new Date().toISOString().split('T')[0];
             let p = 0, a = 0;
-            if (attendance[today]) {
-                Object.values(attendance[today]).forEach(subjectAttendance => {
-                    Object.values(subjectAttendance || {}).forEach(s => { 
-                        if (s === 'P') p++; 
-                        else if (s === 'A') a++; 
+            
+            if (subjectId) {
+                // Count for specific subject
+                if (attendance[today] && attendance[today][subjectId]) {
+                    Object.values(attendance[today][subjectId]).forEach(s => {
+                        if (s === 'P') p++;
+                        else if (s === 'A') a++;
                     });
-                });
+                }
+            } else {
+                // Count across all subjects
+                if (attendance[today]) {
+                    Object.values(attendance[today]).forEach(subjectAttendance => {
+                        Object.values(subjectAttendance || {}).forEach(s => {
+                            if (s === 'P') p++;
+                            else if (s === 'A') a++;
+                        });
+                    });
+                }
             }
             presentToday.textContent = p;
             absentToday.textContent = a;
@@ -1185,17 +1197,14 @@
             document.getElementById('studentEditForm').style.display = 'none';
         }
 
-        // Updated renderStudentList to include registration number
         function renderStudentList() {
             let html = '';
             Object.entries(students).forEach(([roll, student]) => {
-                // Get subjects enrolled for this student
                 const studentCourseData = studentCourses[roll];
                 let subjectsList = '';
                 if (studentCourseData) {
                     const subjects = studentCourseData.subjects || [];
                     subjectsList = subjects.map(subId => {
-                        // Find subject code from courses
                         for (const courseId in courses) {
                             const course = courses[courseId];
                             for (const semId in course.semesters || {}) {
@@ -1238,7 +1247,7 @@
             document.getElementById('editOldRoll').value = roll;
             document.getElementById('editRollNo').value = roll;
             document.getElementById('editFullName').value = student.name || '';
-            document.getElementById('editRegNo').value = student.regNo || ''; // NEW
+            document.getElementById('editRegNo').value = student.regNo || '';
             document.getElementById('editUsername').value = userEntry?.username || '';
             document.getElementById('editEmail').value = userEntry?.email || '';
             
@@ -1250,22 +1259,18 @@
             const newRoll = document.getElementById('editRollNo').value;
             const uid = document.getElementById('editStudentUid').value;
             const newName = document.getElementById('editFullName').value;
-            const newRegNo = document.getElementById('editRegNo').value; // NEW
+            const newRegNo = document.getElementById('editRegNo').value;
             const newUsername = document.getElementById('editUsername').value;
             const newEmail = document.getElementById('editEmail').value;
             
-            // Validation
             if (!newName) {
                 showToast('Name cannot be empty', 'error');
                 return;
             }
-            
             if (!newRoll) {
                 showToast('Roll number cannot be empty', 'error');
                 return;
             }
-            
-            // Check if roll number is being changed and if new roll already exists
             if (newRoll !== oldRoll && students[newRoll]) {
                 showToast(`Roll number ${newRoll} already exists! Please use a different roll number.`, 'error');
                 return;
@@ -1274,24 +1279,20 @@
             try {
                 const updates = {};
                 
-                // If roll number is changing
                 if (newRoll !== oldRoll) {
-                    // 1. Move student record to new roll, including regNo
                     updates['/students/' + newRoll] = {
                         ...students[oldRoll],
                         name: newName,
-                        regNo: newRegNo, // NEW
+                        regNo: newRegNo,
                         uid: uid
                     };
-                    updates['/students/' + oldRoll] = null; // Delete old record
+                    updates['/students/' + oldRoll] = null;
                     
-                    // 2. Update student_courses to use new roll
                     if (studentCourses[oldRoll]) {
                         updates['/student_courses/' + newRoll] = studentCourses[oldRoll];
                         updates['/student_courses/' + oldRoll] = null;
                     }
                     
-                    // 3. Update attendance records to use new roll
                     Object.keys(attendance).forEach(date => {
                         Object.keys(attendance[date] || {}).forEach(subject => {
                             if (attendance[date][subject] && attendance[date][subject][oldRoll]) {
@@ -1303,15 +1304,12 @@
                         });
                     });
                     
-                    // 4. Update users record with new roll and regNo (if we store regNo in users)
                     if (uid) {
                         updates['/users/' + uid + '/rollNo'] = newRoll;
-                        // Optionally store regNo in users too (not required but can be added)
                     }
                 } else {
-                    // Just update fields if roll unchanged
                     updates['/students/' + oldRoll + '/name'] = newName;
-                    updates['/students/' + oldRoll + '/regNo'] = newRegNo; // NEW
+                    updates['/students/' + oldRoll + '/regNo'] = newRegNo;
                     if (uid) {
                         updates['/users/' + uid + '/fullName'] = newName;
                         updates['/users/' + uid + '/username'] = newUsername || users[uid].username;
@@ -1319,15 +1317,12 @@
                     }
                 }
                 
-                // Update username/email even if roll didn't change
                 if (uid && newRoll === oldRoll) {
                     if (newUsername) {
                         updates['/users/' + uid + '/username'] = newUsername;
                     }
                     if (newEmail) {
                         updates['/users/' + uid + '/email'] = newEmail;
-                        
-                        // Try to update Auth email (may fail, but we still update DB)
                         try {
                             const user = auth.currentUser;
                             if (user && user.uid === uid) {
@@ -1339,12 +1334,10 @@
                     }
                 }
                 
-                // Apply all updates
                 if (Object.keys(updates).length > 0) {
                     await db.ref().update(updates);
                 }
                 
-                // Reload data
                 await loadAllData();
                 
                 showToast('Student updated successfully!', 'success');
@@ -1352,7 +1345,6 @@
                 renderStudentList();
                 renderUsersList();
                 
-                // Refresh attendance view if open
                 const currentSubject = document.getElementById('attendanceSubject')?.value;
                 if (currentSubject) {
                     renderSubjectAttendance(currentSubject);
@@ -1364,7 +1356,6 @@
             }
         }
 
-        // Make total students card clickable
         if (totalStudentsCard) {
             totalStudentsCard.addEventListener('click', openStudentListModal);
         }
@@ -1426,18 +1417,19 @@
                     displayCourseStructure();
                     initAttendanceDropdowns();
                     renderUsersList();
+                    // Update stats with current subject if any
+                    const currentSubject = document.getElementById('attendanceSubject')?.value;
+                    updateStats(currentSubject || null);
                 } else {
                     studentDash.style.display = 'block';
                     studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
                     
-                    // Get student details from students object using rollNo
                     const studentRec = students[currentUser.rollNo] || {};
                     studentName.textContent = currentUser.fullName;
                     studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                    studentRegNo.textContent = studentRec.regNo || 'N/A'; // NEW
+                    studentRegNo.textContent = studentRec.regNo || 'N/A';
                     studentEmail.textContent = currentUser.email || 'N/A';
                     
-                    // Set student photo using registration number
                     if (studentRec.regNo) {
                         studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
                     } else {
@@ -1451,9 +1443,8 @@
                         studentCourse.textContent = course?.name || 'N/A';
                         studentSemester.textContent = semester?.name || 'N/A';
                         
-                        // Populate subject dropdown WITHOUT "All Subjects" option, default to first subject
                         const subjectSelect = document.getElementById('studentSubjectSelector');
-                        subjectSelect.innerHTML = ''; // Clear
+                        subjectSelect.innerHTML = '';
                         studentCourseData.subjects.forEach((subId, index) => {
                             const subject = semester?.subjects[subId];
                             if (subject) {
@@ -1461,13 +1452,11 @@
                                 option.value = subId;
                                 option.textContent = subject.name;
                                 subjectSelect.appendChild(option);
-                                // Set first subject as selected by default
                                 if (index === 0) {
                                     option.selected = true;
                                 }
                             }
                         });
-                        // If for some reason no subjects, add a placeholder (but shouldn't happen)
                         if (subjectSelect.options.length === 0) {
                             subjectSelect.innerHTML = '<option value="">No subjects</option>';
                         }
@@ -1569,12 +1558,10 @@
                 showToast('Please select a course', 'error');
                 return;
             }
-            
             if (!semesterId) {
                 showToast('Please select a semester', 'error');
                 return;
             }
-            
             if (!name || !code) {
                 showToast('Please enter subject name and code', 'error');
                 return;
@@ -1878,7 +1865,7 @@
             document.getElementById('assignmentsList').innerHTML = html || '<p class="text-muted">No assignments found</p>';
         }
 
-        // ==================== ATTENDANCE FUNCTIONS (unchanged) ====================
+        // ==================== ATTENDANCE FUNCTIONS ====================
         function initAttendanceDropdowns() {
             const courseSelect = document.getElementById('attendanceCourse');
             if (!courseSelect) return;
@@ -1929,6 +1916,17 @@
                     Object.entries(subjects).forEach(([id, sub]) => {
                         subSelect.innerHTML += `<option value="${id}">${sub.name} (${sub.code})</option>`;
                     });
+                    
+                    // Update stats when subject changes
+                    updateStats(subSelect.value || null);
+                });
+            }
+            
+            // Also listen to subject select changes
+            const subSelect = document.getElementById('attendanceSubject');
+            if (subSelect) {
+                subSelect.addEventListener('change', function() {
+                    updateStats(this.value || null);
                 });
             }
             
@@ -2020,11 +2018,13 @@
                     attendance[date][subject][student] = next;
                     
                     await saveAllData();
+                    updateStats(subject); // Update stats after change
                 });
             });
 
             updateDateSelects();
             renderAttendanceChart(subjectId);
+            updateStats(subjectId); // Update stats with current subject
         }
 
         function updateDateSelects() {
@@ -2045,7 +2045,6 @@
                     showToast('Select a date', 'error'); 
                     return; 
                 }
-                
                 if (!subjectId) { 
                     showToast('Select a subject first', 'error'); 
                     return; 
@@ -2265,7 +2264,6 @@
                     return; 
                 }
                 
-                // Get all students for this subject
                 const allStudentsForSubject = [];
                 Object.entries(studentCourses).forEach(([roll, data]) => {
                     if (data.subjects && data.subjects.includes(subject)) {
@@ -2276,7 +2274,6 @@
                 if (!attendance[date]) attendance[date] = {};
                 if (!attendance[date][subject]) attendance[date][subject] = {};
                 
-                // Mark selected students with chosen status, others with "A" (absent)
                 allStudentsForSubject.forEach(roll => {
                     if (selected.includes(roll)) {
                         attendance[date][subject][roll] = status;
@@ -2292,8 +2289,8 @@
                     renderSubjectAttendance(subject);
                 }
                 
-                // Refresh the bulk update view to show new statuses
                 loadStudentsForBulkUpdate(subject, date);
+                updateStats(subject); // Update stats after bulk update
                 
                 showToast(`Bulk update applied: ${selected.length} marked as ${status==='P'?'Present':status==='A'?'Absent':'Holiday'}, others set to Absent`, 'success');
             });
@@ -2321,12 +2318,11 @@
                 return; 
             }
             
-            // If no subject selected (shouldn't happen), default to first available
             if (!selectedSubject) {
                 const select = document.getElementById('studentSubjectSelector');
                 if (select.options.length > 0) {
                     select.options[0].selected = true;
-                    renderStudentDashboard(); // re-run with selected subject
+                    renderStudentDashboard();
                     return;
                 } else {
                     studentTableContainer.innerHTML = '<p class="text-center">No subjects assigned</p>';
@@ -2334,7 +2330,6 @@
                 }
             }
             
-            // Get all dates where this subject has attendance records
             const datesWithSubject = Object.keys(attendance).filter(date => 
                 attendance[date] && attendance[date][selectedSubject] !== undefined
             ).sort().reverse();
@@ -2613,34 +2608,32 @@
                         displayCourseStructure();
                         initAttendanceDropdowns();
                         renderUsersList();
+                        const currentSubject = document.getElementById('attendanceSubject')?.value;
+                        updateStats(currentSubject || null);
                     }
                     else renderStudentDashboard();
                 }
-                updateStats();
                 updateDateSelects();
                 showToast('Data refreshed from cloud', 'success');
             });
         }
 
-        // ==================== USER MANAGEMENT (updated to handle registration number) ====================
-       // Function to toggle student-specific fields
-function toggleStudentFields() {
-    const roleSelect = document.getElementById('newUserRole');
-    const isStudent = roleSelect.value === 'student';
-    const rollNoSection = document.getElementById('rollNoSection');
-    const regNoSection = document.getElementById('regNoSection');
-    
-    if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
-    if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
-}
+        // ==================== USER MANAGEMENT ====================
+        function toggleStudentFields() {
+            const roleSelect = document.getElementById('newUserRole');
+            const isStudent = roleSelect.value === 'student';
+            const rollNoSection = document.getElementById('rollNoSection');
+            const regNoSection = document.getElementById('regNoSection');
+            
+            if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
+            if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
+        }
 
-// Add event listener for role changes
-document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
+        document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
 
-// Also trigger on page load to set initial state
-document.addEventListener('DOMContentLoaded', function() {
-    toggleStudentFields();
-});
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleStudentFields();
+        });
 
         document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -2649,11 +2642,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = document.getElementById('newPassword').value;
             const username = document.getElementById('newUsername').value;
             const roll = document.getElementById('newRollNo').value;
-            const regNo = document.getElementById('newRegNo').value; // NEW
+            const regNo = document.getElementById('newRegNo').value;
             const fullName = document.getElementById('newFullName').value;
 
             try {
-                // Use API to create user without signing in
                 const uid = await createUserViaAPI(email, password);
                 const userData = {
                     email,
@@ -2667,9 +2659,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     await db.ref('students/' + roll).set({ 
                         uid, 
                         name: fullName,
-                        regNo: regNo // NEW
+                        regNo: regNo
                     });
-                    students[roll] = { uid, name: fullName, regNo: regNo }; // update local cache
+                    students[roll] = { uid, name: fullName, regNo: regNo };
                 }
                 showToast('User added', 'success');
                 e.target.reset();
@@ -2744,7 +2736,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const password = `${roll}123`;
                 const fullName = `Student ${roll}`;
                 try {
-                    // Use API to create user without signing in
                     const uid = await createUserViaAPI(email, password);
                     const userData = {
                         email,
@@ -2754,7 +2745,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         rollNo: roll
                     };
                     await db.ref('users/' + uid).set(userData);
-                    // For bulk add, registration number can be left empty or generated; we'll leave empty for now
                     await db.ref('students/' + roll).set({ uid, name: fullName, regNo: '' });
                     students[roll] = { uid, name: fullName, regNo: '' };
                     added++;
@@ -2806,6 +2796,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             displayCourseStructure();
                             initAttendanceDropdowns();
                             renderUsersList();
+                            const currentSubject = document.getElementById('attendanceSubject')?.value;
+                            updateStats(currentSubject || null);
                         } else {
                             studentDash.style.display = 'block';
                             studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
@@ -2813,10 +2805,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             const studentRec = students[currentUser.rollNo] || {};
                             studentName.textContent = currentUser.fullName;
                             studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                            studentRegNo.textContent = studentRec.regNo || 'N/A'; // NEW
+                            studentRegNo.textContent = studentRec.regNo || 'N/A';
                             studentEmail.textContent = currentUser.email || 'N/A';
                             
-                            // Set photo
                             if (studentRec.regNo) {
                                 studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
                             } else {
@@ -2830,9 +2821,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 studentCourse.textContent = course?.name || 'N/A';
                                 studentSemester.textContent = semester?.name || 'N/A';
                                 
-                                // Populate subject dropdown WITHOUT "All Subjects" option, default to first subject
                                 const subjectSelect = document.getElementById('studentSubjectSelector');
-                                subjectSelect.innerHTML = ''; // Clear
+                                subjectSelect.innerHTML = '';
                                 studentCourseData.subjects.forEach((subId, index) => {
                                     const subject = semester?.subjects[subId];
                                     if (subject) {
@@ -2840,13 +2830,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                         option.value = subId;
                                         option.textContent = subject.name;
                                         subjectSelect.appendChild(option);
-                                        // Set first subject as selected by default
                                         if (index === 0) {
                                             option.selected = true;
                                         }
                                     }
                                 });
-                                // If for some reason no subjects, add a placeholder (but shouldn't happen)
                                 if (subjectSelect.options.length === 0) {
                                     subjectSelect.innerHTML = '<option value="">No subjects</option>';
                                 }
