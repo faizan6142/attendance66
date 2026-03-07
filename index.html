@@ -1148,34 +1148,43 @@
         }
 
         // Update stats cards – if subjectId provided, count only for that subject
-        function updateStats(subjectId = null) {
-            totalStudents.textContent = Object.keys(students).length;
-            const today = new Date().toISOString().split('T')[0];
-            let p = 0, a = 0;
-            
-            if (subjectId) {
-                // Count for specific subject
-                if (attendance[today] && attendance[today][subjectId]) {
-                    Object.values(attendance[today][subjectId]).forEach(s => {
-                        if (s === 'P') p++;
-                        else if (s === 'A') a++;
-                    });
-                }
-            } else {
-                // Count across all subjects
-                if (attendance[today]) {
-                    Object.values(attendance[today]).forEach(subjectAttendance => {
-                        Object.values(subjectAttendance || {}).forEach(s => {
-                            if (s === 'P') p++;
-                            else if (s === 'A') a++;
-                        });
-                    });
-                }
-            }
-            presentToday.textContent = p;
-            absentToday.textContent = a;
-            totalAttendanceDays.textContent = Object.keys(attendance).length;
+      function updateStats(subjectId = null) {
+    totalStudents.textContent = Object.keys(students).length;
+    const today = new Date().toISOString().split('T')[0];
+    let p = 0, a = 0;
+    
+    console.log("Updating stats for subject:", subjectId);
+    console.log("Today's date:", today);
+    console.log("Today's attendance data:", attendance[today]);
+    
+    if (subjectId) {
+        // Count for specific subject
+        if (attendance[today] && attendance[today][subjectId]) {
+            console.log(`Found data for subject ${subjectId}:`, attendance[today][subjectId]);
+            Object.values(attendance[today][subjectId]).forEach(s => {
+                if (s === 'P') p++;
+                else if (s === 'A') a++;
+            });
+        } else {
+            console.log(`No data for subject ${subjectId} today`);
         }
+    } else {
+        // Count across all subjects
+        if (attendance[today]) {
+            Object.values(attendance[today]).forEach(subjectAttendance => {
+                Object.values(subjectAttendance || {}).forEach(s => {
+                    if (s === 'P') p++;
+                    else if (s === 'A') a++;
+                });
+            });
+        }
+    }
+    presentToday.textContent = p;
+    absentToday.textContent = a;
+    totalAttendanceDays.textContent = Object.keys(attendance).length;
+    
+    console.log(`Present: ${p}, Absent: ${a}`);
+}
 
         // ==================== STUDENT LIST MODAL FUNCTIONS ====================
         function openStudentListModal() {
