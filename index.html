@@ -1066,6 +1066,22 @@
         const studentListTableBody = document.getElementById('studentListTableBody');
         const studentPhoto = document.getElementById('studentPhoto'); // NEW
 
+        // ==================== HELPER TO CREATE USER WITHOUT SIGN-IN ====================
+        async function createUserViaAPI(email, password) {
+            const apiKey = firebaseConfig.apiKey;
+            const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, returnSecureToken: true })
+            });
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+            return data.localId; // returns the new user's UID
+        }
+
         // ==================== HELPERS ====================
         function formatDate(dateString) {
             const d = new Date(dateString);
@@ -2570,8 +2586,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const fullName = document.getElementById('newFullName').value;
 
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
+                // Use API to create user without signing in
+                const uid = await createUserViaAPI(email, password);
                 const userData = {
                     email,
                     role,
@@ -2661,8 +2677,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const password = `${roll}123`;
                 const fullName = `Student ${roll}`;
                 try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    const uid = userCredential.user.uid;
+                    // Use API to create user without signing in
+                    const uid = await createUserViaAPI(email, password);
                     const userData = {
                         email,
                         role: 'student',
