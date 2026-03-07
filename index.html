@@ -2309,7 +2309,7 @@
             }
         });
 
-        // ==================== STUDENT DASHBOARD RENDER (modified to use selected subject only) ====================
+        // ==================== STUDENT DASHBOARD RENDER (MODIFIED: only dates with subject attendance) ====================
         function renderStudentDashboard() {
             studentTableLoading.style.display = 'none';
             studentTableContainer.style.display = 'block';
@@ -2334,15 +2334,27 @@
                 }
             }
             
+            // Get all dates where this subject has attendance records
+            const datesWithSubject = Object.keys(attendance).filter(date => 
+                attendance[date] && attendance[date][selectedSubject] !== undefined
+            ).sort().reverse();
+            
+            if (datesWithSubject.length === 0) {
+                studentTableContainer.innerHTML = '<p class="text-center">No attendance records for this subject</p>';
+                presentCount.textContent = '0';
+                absentCount.textContent = '0';
+                attendancePercentage.style.width = '0%';
+                attendancePercentage.textContent = '0%';
+                attendanceMessage.textContent = 'No data';
+                return;
+            }
+            
             const tbody = studentAttendanceTable.querySelector('tbody');
             tbody.innerHTML = '';
-            const dates = Object.keys(attendance).sort().reverse();
             let present = 0;
             
-            dates.forEach(date => {
-                // Only show status for the selected subject
-                const status = (attendance[date]?.[selectedSubject]?.[roll]) || 'A';
-                
+            datesWithSubject.forEach(date => {
+                const status = attendance[date][selectedSubject][roll] || 'A';
                 if (status === 'P') present++;
                 tbody.innerHTML += `<tr>
                     <td>${formatDate(date)}</td>
@@ -2354,8 +2366,8 @@
             });
             
             presentCount.textContent = present;
-            absentCount.textContent = dates.length - present;
-            const percent = dates.length ? Math.round((present/dates.length)*100) : 0;
+            absentCount.textContent = datesWithSubject.length - present;
+            const percent = datesWithSubject.length ? Math.round((present/datesWithSubject.length)*100) : 0;
             attendancePercentage.style.width = percent+'%';
             attendancePercentage.textContent = percent+'%';
             attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
