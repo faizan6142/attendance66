@@ -1965,7 +1965,10 @@
                 return;
             }
 
-            const dates = Object.keys(attendance).sort();
+            // Get all dates that have this subject marked
+            const dates = Object.keys(attendance)
+                .filter(date => attendance[date] && attendance[date][subjectId])
+                .sort();
             const today = new Date().toISOString().split('T')[0];
             
             dates.forEach(date => {
@@ -1976,13 +1979,10 @@
                 thead.appendChild(th);
             });
             
-            if (!dates.includes(today)) {
-                const th = document.createElement('th');
-                th.textContent = formatDate(today);
-                th.setAttribute('data-date', today);
-                th.classList.add('today-column');
-                thead.appendChild(th);
-                dates.push(today);
+            // If no dates for this subject, show message
+            if (dates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="100%" class="text-center">No attendance records for this subject</td></tr>';
+                return;
             }
 
             studentsForSubject.forEach(roll => {
@@ -1994,7 +1994,7 @@
                 
                 dates.forEach(date => {
                     const td = document.createElement('td');
-                    const status = (attendance[date]?.[subjectId]?.[roll]) || 'A';
+                    const status = (attendance[date][subjectId][roll]) || 'A';
                     td.innerHTML = `<span class="status-toggle ${status==='P'?'present':status==='H'?'holiday':'absent'}" data-student="${roll}" data-date="${date}" data-subject="${subjectId}">${status}</span>`;
                     row.appendChild(td);
                 });
@@ -2306,7 +2306,7 @@
             }
         });
 
-        // ==================== STUDENT DASHBOARD RENDER (MODIFIED: only dates with subject attendance) ====================
+        // ==================== STUDENT DASHBOARD RENDER (only dates with subject attendance) ====================
         function renderStudentDashboard() {
             studentTableLoading.style.display = 'none';
             studentTableContainer.style.display = 'block';
@@ -2377,7 +2377,9 @@
                     return;
                 }
                 
-                const dates = Object.keys(attendance).sort();
+                const dates = Object.keys(attendance)
+                    .filter(date => attendance[date] && attendance[date][subject])
+                    .sort();
                 const headers = ['Roll No', 'Student Name', ...dates.map(d => formatDate(d))];
                 
                 const studentsForSubject = [];
@@ -2389,7 +2391,7 @@
                 
                 const data = studentsForSubject.map(roll => {
                     const student = students[roll];
-                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
+                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d][subject][roll]) || 'A')];
                 });
                 
                 const wb = XLSX.utils.book_new();
@@ -2411,7 +2413,9 @@
                 const doc = new jsPDF();
                 doc.text('Attendance Report', 14, 16);
                 
-                const dates = Object.keys(attendance).sort();
+                const dates = Object.keys(attendance)
+                    .filter(date => attendance[date] && attendance[date][subject])
+                    .sort();
                 const headers = [['Roll No', 'Student Name', ...dates.map(d => formatDate(d).slice(0,5))]];
                 
                 const studentsForSubject = [];
@@ -2423,7 +2427,7 @@
                 
                 const body = studentsForSubject.map(roll => {
                     const student = students[roll];
-                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d]?.[subject]?.[roll]) || 'A')];
+                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d][subject][roll]) || 'A')];
                 });
                 
                 doc.autoTable({ head: headers, body, startY: 20 });
@@ -2531,7 +2535,9 @@
             const ctx = document.getElementById('attendanceChart').getContext('2d');
             if (attendanceChart) attendanceChart.destroy();
             
-            const dates = Object.keys(attendance).sort().slice(-10);
+            const dates = Object.keys(attendance)
+                .filter(date => attendance[date] && attendance[date][subjectId])
+                .sort().slice(-10);
             
             const studentsForSubject = [];
             Object.entries(studentCourses).forEach(([roll, data]) => {
@@ -2542,13 +2548,13 @@
             
             const presentData = dates.map(d => {
                 return studentsForSubject.filter(roll => 
-                    attendance[d]?.[subjectId]?.[roll] === 'P'
+                    attendance[d][subjectId][roll] === 'P'
                 ).length;
             });
             
             const absentData = dates.map(d => {
                 return studentsForSubject.filter(roll => 
-                    attendance[d]?.[subjectId]?.[roll] === 'A'
+                    attendance[d][subjectId][roll] === 'A'
                 ).length;
             });
             
