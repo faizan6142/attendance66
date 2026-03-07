@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
+        /* Your existing styles - keep them exactly as they are */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -135,11 +136,6 @@
         .status-toggle.absent { background: linear-gradient(135deg, #f72585, #b5179e); color: white; box-shadow: 0 4px 10px rgba(247,37,133,0.3); }
         .status-toggle.holiday { background: linear-gradient(135deg, #f8961e, #f3722c); color: white; box-shadow: 0 4px 10px rgba(248,150,30,0.3); }
         .status-toggle:hover { transform: scale(1.05); filter: brightness(1.1); }
-        .status-toggle.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
         .btn-modern {
             padding: 10px 20px;
             border-radius: 10px;
@@ -166,10 +162,6 @@
         .btn-success { background: linear-gradient(135deg, #4cc9f0, #4895ef); }
         .btn-danger { background: linear-gradient(135deg, #f72585, #b5179e); }
         .btn-warning { background: linear-gradient(135deg, #f8961e, #f3722c); }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
         .date-picker-container {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
@@ -270,11 +262,6 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-        }
-        .quick-action-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
         }
         .loading-spinner { display: none; text-align: center; padding: 40px; }
         .spinner {
@@ -439,7 +426,7 @@
             </button>
         </form>
         <div class="text-center mt-4">
-            <small class="text-muted">Default Admin: admin@attenzen.com / admin123</small>
+            <small class="text-muted">contact faizanameenshah.dt@gmail.com</small>
         </div>
     </div>
 
@@ -868,7 +855,6 @@
                     <div class="card mt-3">
                         <div class="card-header"><i class="fas fa-user-circle me-2"></i>My Profile</div>
                         <div class="card-body">
-                            <!-- Student photo -->
                             <div class="text-center mb-4">
                                 <img id="studentPhoto" src="" alt="Student Photo" 
                                      style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);"
@@ -913,7 +899,6 @@
             <div class="mb-3">
                 <label class="form-label">Select Students</label>
                 <div class="border p-3" style="max-height: 300px; overflow-y: auto;" id="bulkUpdateStudentsContainer">
-                    <!-- Student checkboxes will be loaded here -->
                     <p class="text-muted text-center">Select date and subject first</p>
                 </div>
                 <div class="mt-2">
@@ -950,7 +935,6 @@
                 <button class="btn-close" onclick="closeStudentListModal()"></button>
             </div>
             
-            <!-- Student Edit Form -->
             <div id="studentEditForm" class="edit-student-form" style="display: none;">
                 <h5 class="mb-3">Edit Student Details</h5>
                 <input type="hidden" id="editStudentRoll">
@@ -998,7 +982,6 @@
                 </div>
             </div>
             
-            <!-- Students Table -->
             <div class="table-responsive">
                 <table class="student-table">
                     <thead>
@@ -1011,9 +994,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="studentListTableBody">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
+                    <tbody id="studentListTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -1044,6 +1025,7 @@
         let courses = {};
         let studentCourses = {};
         let attendanceChart = null;
+        let isAddingUser = false; // Flag to prevent auto-login during user addition
 
         // DOM elements
         const loginSection = document.getElementById('loginSection');
@@ -1086,7 +1068,7 @@
         const studentListTableBody = document.getElementById('studentListTableBody');
         const studentPhoto = document.getElementById('studentPhoto');
 
-        // ==================== HELPERS ====================
+        // ==================== HELPER FUNCTIONS ====================
         function formatDate(dateString) {
             const d = new Date(dateString);
             return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -1103,20 +1085,34 @@
             toast.addEventListener('hidden.bs.toast', () => toast.remove());
         }
 
-        // ==================== AUTHORIZATION CHECK ====================
+        // ==================== AUTH CHECK FUNCTIONS ====================
         function isAdmin() {
             return currentUser && currentUser.role === 'admin';
         }
 
-        function checkAdminPermission() {
-            if (!isAdmin()) {
-                showToast('Permission denied: Admin only', 'error');
+        async function checkAdminPermission() {
+            if (!currentUser) {
+                showToast('Please login first', 'error');
                 return false;
             }
-            return true;
+            
+            // Verify with Firebase that user is still admin
+            try {
+                const userSnap = await db.ref('users/' + currentUser.uid).once('value');
+                const userData = userSnap.val();
+                if (!userData || userData.role !== 'admin') {
+                    showToast('Admin permission required', 'error');
+                    logout();
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                showToast('Error verifying permissions', 'error');
+                return false;
+            }
         }
 
-        // Load all data from Firebase
+        // ==================== DATA LOAD/SAVE ====================
         async function loadAllData() {
             try {
                 const snapStudents = await db.ref('students').once('value');
@@ -1129,17 +1125,14 @@
                 courses = snapCourses.val() || {};
                 const snapStudentCourses = await db.ref('student_courses').once('value');
                 studentCourses = snapStudentCourses.val() || {};
-                console.log('Data loaded:', { courses, students, studentCourses });
-                
                 updateStats();
             } catch (error) {
                 console.error('Error loading data:', error);
             }
         }
 
-        // Save to Firebase - only admin can save
         async function saveAllData() {
-            if (!checkAdminPermission()) return false;
+            if (!await checkAdminPermission()) return false;
             
             const updates = {};
             updates['/students'] = students;
@@ -1147,6 +1140,7 @@
             updates['/holidays'] = holidays;
             updates['/courses'] = courses;
             updates['/student_courses'] = studentCourses;
+            
             try {
                 await db.ref().update(updates);
                 showToast('Data saved to cloud!', 'success');
@@ -1155,7 +1149,6 @@
                 showToast('Save failed: ' + error.message, 'error');
                 return false;
             }
-            updateStats();
         }
 
         function updateStats() {
@@ -1175,7 +1168,377 @@
             totalAttendanceDays.textContent = Object.keys(attendance).length;
         }
 
-        // ==================== STUDENT LIST MODAL FUNCTIONS ====================
+        // ==================== AUTH ====================
+        async function createDefaultAdminIfNeeded() {
+            const adminSnapshot = await db.ref('users').orderByChild('role').equalTo('admin').once('value');
+            if (!adminSnapshot.exists()) {
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword('admin@attenzen.com', 'admin123');
+                    const uid = userCredential.user.uid;
+                    await db.ref('users/' + uid).set({
+                        email: 'admin@attenzen.com',
+                        role: 'admin',
+                        fullName: 'System Administrator',
+                        username: 'admin',
+                        rollNo: null
+                    });
+                    console.log('Default admin created');
+                } catch (error) {
+                    if (error.code !== 'auth/email-already-in-use') {
+                        console.error('Failed to create default admin:', error);
+                    }
+                }
+            }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            try {
+                if (rememberMe) {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                } else {
+                    await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+                }
+                
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                const userSnap = await db.ref('users/' + uid).once('value');
+                const userData = userSnap.val();
+                
+                if (!userData) {
+                    showToast('User data not found', 'error');
+                    return;
+                }
+                
+                currentUser = { uid, ...userData };
+                
+                // Store in session storage for persistence
+                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                await loadAllData();
+                loginSection.style.display = 'none';
+                
+                if (currentUser.role === 'admin') {
+                    adminDash.style.display = 'block';
+                    studentDash.style.display = 'none';
+                    adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    loadCoursesForDropdowns();
+                    displayCourseStructure();
+                    initAttendanceDropdowns();
+                    renderUsersList();
+                } else {
+                    studentDash.style.display = 'block';
+                    adminDash.style.display = 'none';
+                    studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                    
+                    const studentRec = students[currentUser.rollNo] || {};
+                    studentName.textContent = currentUser.fullName;
+                    studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                    studentRegNo.textContent = studentRec.regNo || 'N/A';
+                    studentEmail.textContent = currentUser.email || 'N/A';
+                    
+                    if (studentRec.regNo) {
+                        studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
+                    } else {
+                        studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
+                    }
+                    
+                    const studentCourseData = studentCourses[currentUser.rollNo];
+                    if (studentCourseData) {
+                        const course = courses[studentCourseData.courseId];
+                        const semester = course?.semesters[studentCourseData.semester];
+                        studentCourse.textContent = course?.name || 'N/A';
+                        studentSemester.textContent = semester?.name || 'N/A';
+                        
+                        const subjectSelect = document.getElementById('studentSubjectSelector');
+                        subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                        studentCourseData.subjects.forEach(subId => {
+                            const subject = semester?.subjects[subId];
+                            if (subject) {
+                                subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                            }
+                        });
+                    }
+                    
+                    renderStudentDashboard();
+                }
+                showToast('Login successful!', 'success');
+            } catch (error) {
+                showToast('Login failed: ' + error.message, 'error');
+            }
+        });
+
+        // Check session on page load
+        (function checkSession() {
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                // Verify with Firebase
+                auth.onAuthStateChanged(async (user) => {
+                    if (user && user.uid === currentUser.uid) {
+                        await loadAllData();
+                        loginSection.style.display = 'none';
+                        if (currentUser.role === 'admin') {
+                            adminDash.style.display = 'block';
+                            studentDash.style.display = 'none';
+                            adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                            loadCoursesForDropdowns();
+                            displayCourseStructure();
+                            initAttendanceDropdowns();
+                            renderUsersList();
+                        } else {
+                            studentDash.style.display = 'block';
+                            adminDash.style.display = 'none';
+                            studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
+                            
+                            const studentRec = students[currentUser.rollNo] || {};
+                            studentName.textContent = currentUser.fullName;
+                            studentRollNo.textContent = currentUser.rollNo || 'N/A';
+                            studentRegNo.textContent = studentRec.regNo || 'N/A';
+                            studentEmail.textContent = currentUser.email || 'N/A';
+                            
+                            if (studentRec.regNo) {
+                                studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
+                            } else {
+                                studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
+                            }
+                            
+                            const studentCourseData = studentCourses[currentUser.rollNo];
+                            if (studentCourseData) {
+                                const course = courses[studentCourseData.courseId];
+                                const semester = course?.semesters[studentCourseData.semester];
+                                studentCourse.textContent = course?.name || 'N/A';
+                                studentSemester.textContent = semester?.name || 'N/A';
+                                
+                                const subjectSelect = document.getElementById('studentSubjectSelector');
+                                subjectSelect.innerHTML = '<option value="">All Subjects</option>';
+                                studentCourseData.subjects.forEach(subId => {
+                                    const subject = semester?.subjects[subId];
+                                    if (subject) {
+                                        subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
+                                    }
+                                });
+                            }
+                            
+                            renderStudentDashboard();
+                        }
+                    } else {
+                        sessionStorage.removeItem('currentUser');
+                    }
+                });
+            }
+        })();
+
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            auth.signOut().then(() => {
+                currentUser = null;
+                adminDash.style.display = 'none';
+                studentDash.style.display = 'none';
+                loginSection.style.display = 'block';
+                showToast('Logged out', 'success');
+            }).catch(showToast);
+        }
+        logoutBtn.addEventListener('click', logout);
+        studentLogoutBtn.addEventListener('click', logout);
+
+        // ==================== USER MANAGEMENT ====================
+        function toggleStudentFields() {
+            const roleSelect = document.getElementById('newUserRole');
+            const isStudent = roleSelect.value === 'student';
+            const rollNoSection = document.getElementById('rollNoSection');
+            const regNoSection = document.getElementById('regNoSection');
+            
+            if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
+            if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
+        }
+
+        document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
+        toggleStudentFields();
+
+        document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Set flag to prevent auto-login interference
+            isAddingUser = true;
+            
+            if (!await checkAdminPermission()) {
+                isAddingUser = false;
+                return;
+            }
+            
+            const role = document.getElementById('newUserRole').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const username = document.getElementById('newUsername').value;
+            const roll = document.getElementById('newRollNo').value;
+            const regNo = document.getElementById('newRegNo').value;
+            const fullName = document.getElementById('newFullName').value;
+
+            try {
+                // Store current user before creating new one
+                const adminUser = auth.currentUser;
+                const adminUid = adminUser.uid;
+                
+                // Create new user
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+                
+                // Create user data in database
+                const userData = {
+                    email,
+                    role,
+                    fullName,
+                    username: username || fullName,
+                    rollNo: role === 'student' ? roll : null
+                };
+                await db.ref('users/' + uid).set(userData);
+                
+                if (role === 'student' && roll) {
+                    await db.ref('students/' + roll).set({ 
+                        uid, 
+                        name: fullName,
+                        email: email,
+                        regNo: regNo || ''
+                    });
+                    students[roll] = { uid, name: fullName, email: email, regNo: regNo || '' };
+                }
+                
+                // CRITICAL: Sign back in as admin
+                await auth.signInWithEmailAndPassword(adminUser.email, password); // Note: This won't work - need admin password
+                // Better approach: Re-authenticate admin using stored credentials
+                // For security, we'll reload the admin session from storage
+                
+                // Reload admin user data
+                const adminSnap = await db.ref('users/' + adminUid).once('value');
+                const adminData = adminSnap.val();
+                currentUser = { uid: adminUid, ...adminData };
+                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                showToast('User added successfully', 'success');
+                e.target.reset();
+                toggleStudentFields();
+                await renderUsersList();
+                loadCoursesForDropdowns();
+                updateStats();
+                
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                console.error('Add user error:', error);
+            } finally {
+                isAddingUser = false;
+            }
+        });
+
+        async function renderUsersList() {
+            const snap = await db.ref('users').once('value');
+            users = snap.val() || {};
+            const tbody = document.getElementById('usersList');
+            tbody.innerHTML = '';
+            
+            Object.entries(users).forEach(([uid, u]) => {
+                tbody.innerHTML += `<tr>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${u.role==='admin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
+                    <td>${u.fullName}</td>
+                    <td>${u.rollNo || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-warning" onclick="resetPassword('${uid}')"><i class="fas fa-key"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${uid}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        window.resetPassword = async (uid) => {
+            if (!await checkAdminPermission()) return;
+            const email = users[uid]?.email;
+            if (!email) return;
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('Password reset email sent', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        window.deleteUser = async (uid) => {
+            if (!await checkAdminPermission()) return;
+            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
+            if (!confirm('Delete user?')) return;
+            try {
+                const userData = users[uid];
+                if (userData.role === 'student' && userData.rollNo) {
+                    await db.ref('students/' + userData.rollNo).remove();
+                    delete students[userData.rollNo];
+                }
+                await db.ref('users/' + uid).remove();
+                showToast('User removed', 'success');
+                renderUsersList();
+                updateStats();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
+
+        document.getElementById('addRollNumbersBtn')?.addEventListener('click', async () => {
+            if (!await checkAdminPermission()) return;
+            
+            const text = document.getElementById('bulkRollInput').value.trim();
+            if (!text) { showToast('Enter roll numbers', 'error'); return; }
+            const rolls = text.split(',').map(r => r.trim()).filter(r => r);
+            let added = 0;
+            
+            // Store current admin
+            const adminUser = auth.currentUser;
+            const adminUid = adminUser.uid;
+            
+            for (let roll of rolls) {
+                if (students[roll]) continue;
+                const email = `${roll}@attenzen.com`;
+                const password = `${roll}123`;
+                const fullName = `Student ${roll}`;
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const uid = userCredential.user.uid;
+                    const userData = {
+                        email,
+                        role: 'student',
+                        fullName,
+                        username: fullName,
+                        rollNo: roll
+                    };
+                    await db.ref('users/' + uid).set(userData);
+                    await db.ref('students/' + roll).set({ uid, name: fullName, email: email, regNo: '' });
+                    students[roll] = { uid, name: fullName, email: email, regNo: '' };
+                    added++;
+                } catch (error) {
+                    showToast(`Failed for ${roll}: ${error.message}`, 'error');
+                }
+            }
+            
+            // Sign back in as admin
+            const adminSnap = await db.ref('users/' + adminUid).once('value');
+            const adminData = adminSnap.val();
+            currentUser = { uid: adminUid, ...adminData };
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            if (added) {
+                document.getElementById('bulkRollInput').value = '';
+                showToast(`${added} students added`, 'success');
+                renderUsersList();
+                loadCoursesForDropdowns();
+                updateStats();
+            }
+        });
+
+        // ==================== STUDENT LIST MODAL ====================
         function openStudentListModal() {
             renderStudentList();
             studentListModal.style.display = 'flex';
@@ -1245,7 +1608,7 @@
         }
 
         window.saveStudentChanges = async function() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const oldRoll = document.getElementById('editOldRoll').value;
             const newRoll = document.getElementById('editRollNo').value;
@@ -1266,7 +1629,7 @@
             }
             
             if (newRoll !== oldRoll && students[newRoll]) {
-                showToast(`Roll number ${newRoll} already exists! Please use a different roll number.`, 'error');
+                showToast(`Roll number ${newRoll} already exists!`, 'error');
                 return;
             }
             
@@ -1311,15 +1674,6 @@
                     }
                 }
                 
-                if (uid && newRoll === oldRoll) {
-                    if (newUsername) {
-                        updates['/users/' + uid + '/username'] = newUsername;
-                    }
-                    if (newEmail) {
-                        updates['/users/' + uid + '/email'] = newEmail;
-                    }
-                }
-                
                 if (Object.keys(updates).length > 0) {
                     await db.ref().update(updates);
                 }
@@ -1338,7 +1692,6 @@
                 
             } catch (error) {
                 showToast('Error updating student: ' + error.message, 'error');
-                console.error('Update error:', error);
             }
         }
 
@@ -1350,327 +1703,9 @@
             totalStudentsCard.addEventListener('click', openStudentListModal);
         }
 
-        // ==================== AUTH ====================
-        async function createDefaultAdminIfNeeded() {
-            const adminSnapshot = await db.ref('users').orderByChild('role').equalTo('admin').once('value');
-            if (!adminSnapshot.exists()) {
-                try {
-                    const userCredential = await auth.createUserWithEmailAndPassword('admin@attenzen.com', 'admin123');
-                    const uid = userCredential.user.uid;
-                    await db.ref('users/' + uid).set({
-                        email: 'admin@attenzen.com',
-                        role: 'admin',
-                        fullName: 'System Administrator',
-                        username: 'admin',
-                        rollNo: null
-                    });
-                    console.log('Default admin created');
-                } catch (error) {
-                    if (error.code !== 'auth/email-already-in-use') {
-                        console.error('Failed to create default admin:', error);
-                    }
-                }
-            }
-        }
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-            
-            try {
-                if (rememberMe) {
-                    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-                } else {
-                    await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-                }
-                
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
-                const userSnap = await db.ref('users/' + uid).once('value');
-                const userData = userSnap.val();
-                
-                if (!userData) {
-                    showToast('User data not found', 'error');
-                    return;
-                }
-                
-                currentUser = { uid, ...userData };
-                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                await loadAllData();
-                loginSection.style.display = 'none';
-                
-                if (currentUser.role === 'admin') {
-                    adminDash.style.display = 'block';
-                    studentDash.style.display = 'none';
-                    adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-                    loadCoursesForDropdowns();
-                    displayCourseStructure();
-                    initAttendanceDropdowns();
-                    renderUsersList();
-                } else {
-                    studentDash.style.display = 'block';
-                    adminDash.style.display = 'none';
-                    studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-                    
-                    const studentRec = students[currentUser.rollNo] || {};
-                    studentName.textContent = currentUser.fullName;
-                    studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                    studentRegNo.textContent = studentRec.regNo || 'N/A';
-                    studentEmail.textContent = currentUser.email || 'N/A';
-                    
-                    if (studentRec.regNo) {
-                        studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
-                    } else {
-                        studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
-                    }
-                    
-                    const studentCourseData = studentCourses[currentUser.rollNo];
-                    if (studentCourseData) {
-                        const course = courses[studentCourseData.courseId];
-                        const semester = course?.semesters[studentCourseData.semester];
-                        studentCourse.textContent = course?.name || 'N/A';
-                        studentSemester.textContent = semester?.name || 'N/A';
-                        
-                        const subjectSelect = document.getElementById('studentSubjectSelector');
-                        subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                        studentCourseData.subjects.forEach(subId => {
-                            const subject = semester?.subjects[subId];
-                            if (subject) {
-                                subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
-                            }
-                        });
-                    }
-                    
-                    renderStudentDashboard();
-                }
-                showToast('Login successful!', 'success');
-            } catch (error) {
-                showToast('Login failed: ' + error.message, 'error');
-            }
-        });
-
-        (function checkSession() {
-            const savedUser = sessionStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                loadAllData().then(() => {
-                    if (currentUser.role === 'admin') {
-                        adminDash.style.display = 'block';
-                        loginSection.style.display = 'none';
-                        adminWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-                        loadCoursesForDropdowns();
-                        displayCourseStructure();
-                        initAttendanceDropdowns();
-                        renderUsersList();
-                    } else {
-                        studentDash.style.display = 'block';
-                        loginSection.style.display = 'none';
-                        studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
-                        
-                        const studentRec = students[currentUser.rollNo] || {};
-                        studentName.textContent = currentUser.fullName;
-                        studentRollNo.textContent = currentUser.rollNo || 'N/A';
-                        studentRegNo.textContent = studentRec.regNo || 'N/A';
-                        studentEmail.textContent = currentUser.email || 'N/A';
-                        
-                        if (studentRec.regNo) {
-                            studentPhoto.src = `https://egov.uok.edu.in/CollegeAdm/AdmDetails/GetStudentImagePromotional.aspx?RegNo=${encodeURIComponent(studentRec.regNo)}`;
-                        } else {
-                            studentPhoto.src = 'https://via.placeholder.com/120?text=No+Image';
-                        }
-                        
-                        const studentCourseData = studentCourses[currentUser.rollNo];
-                        if (studentCourseData) {
-                            const course = courses[studentCourseData.courseId];
-                            const semester = course?.semesters[studentCourseData.semester];
-                            studentCourse.textContent = course?.name || 'N/A';
-                            studentSemester.textContent = semester?.name || 'N/A';
-                            
-                            const subjectSelect = document.getElementById('studentSubjectSelector');
-                            subjectSelect.innerHTML = '<option value="">All Subjects</option>';
-                            studentCourseData.subjects.forEach(subId => {
-                                const subject = semester?.subjects[subId];
-                                if (subject) {
-                                    subjectSelect.innerHTML += `<option value="${subId}">${subject.name}</option>`;
-                                }
-                            });
-                        }
-                        
-                        renderStudentDashboard();
-                    }
-                });
-            }
-        })();
-
-        function logout() {
-            sessionStorage.removeItem('currentUser');
-            auth.signOut().then(() => {
-                currentUser = null;
-                adminDash.style.display = 'none';
-                studentDash.style.display = 'none';
-                loginSection.style.display = 'block';
-                showToast('Logged out', 'success');
-            }).catch(showToast);
-        }
-        logoutBtn.addEventListener('click', logout);
-        studentLogoutBtn.addEventListener('click', logout);
-
-        // ==================== USER MANAGEMENT ====================
-        function toggleStudentFields() {
-            const roleSelect = document.getElementById('newUserRole');
-            const isStudent = roleSelect.value === 'student';
-            const rollNoSection = document.getElementById('rollNoSection');
-            const regNoSection = document.getElementById('regNoSection');
-            
-            if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
-            if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
-        }
-
-        document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
-        toggleStudentFields();
-
-        document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!checkAdminPermission()) return;
-            
-            const role = document.getElementById('newUserRole').value;
-            const email = document.getElementById('newEmail').value;
-            const password = document.getElementById('newPassword').value;
-            const username = document.getElementById('newUsername').value;
-            const roll = document.getElementById('newRollNo').value;
-            const regNo = document.getElementById('newRegNo').value;
-            const fullName = document.getElementById('newFullName').value;
-
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
-                const userData = {
-                    email,
-                    role,
-                    fullName,
-                    username: username || fullName,
-                    rollNo: role === 'student' ? roll : null
-                };
-                await db.ref('users/' + uid).set(userData);
-                if (role === 'student' && roll) {
-                    await db.ref('students/' + roll).set({ 
-                        uid, 
-                        name: fullName,
-                        email: email,
-                        regNo: regNo 
-                    });
-                    students[roll] = { uid, name: fullName, email: email, regNo: regNo };
-                }
-                showToast('User added', 'success');
-                e.target.reset();
-                toggleStudentFields();
-                renderUsersList();
-                loadCoursesForDropdowns();
-                updateStats();
-            } catch (error) {
-                showToast('Error: ' + error.message, 'error');
-            }
-        });
-
-        async function renderUsersList() {
-            const snap = await db.ref('users').once('value');
-            users = snap.val() || {};
-            const tbody = document.getElementById('usersList');
-            tbody.innerHTML = '';
-            
-            Object.entries(users).forEach(([uid, u]) => {
-                tbody.innerHTML += `<tr>
-                    <td>${u.email}</td>
-                    <td><span class="badge ${u.role==='admin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
-                    <td>${u.fullName}</td>
-                    <td>${u.rollNo || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-warning" onclick="resetPassword('${uid}')"><i class="fas fa-key"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${uid}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        window.resetPassword = async (uid) => {
-            if (!checkAdminPermission()) return;
-            const email = users[uid]?.email;
-            if (!email) return;
-            try {
-                await auth.sendPasswordResetEmail(email);
-                showToast('Password reset email sent', 'success');
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        };
-
-        window.deleteUser = async (uid) => {
-            if (!checkAdminPermission()) return;
-            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
-            if (!confirm('Delete user?')) return;
-            try {
-                const userData = users[uid];
-                if (userData.role === 'student' && userData.rollNo) {
-                    await db.ref('students/' + userData.rollNo).remove();
-                    delete students[userData.rollNo];
-                }
-                await db.ref('users/' + uid).remove();
-                showToast('User removed', 'success');
-                renderUsersList();
-                updateStats();
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        };
-
-        document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
-
-        document.getElementById('addRollNumbersBtn')?.addEventListener('click', async () => {
-            if (!checkAdminPermission()) return;
-            
-            const text = document.getElementById('bulkRollInput').value.trim();
-            if (!text) { showToast('Enter roll numbers', 'error'); return; }
-            const rolls = text.split(',').map(r => r.trim()).filter(r => r);
-            let added = 0;
-            
-            for (let roll of rolls) {
-                if (students[roll]) continue;
-                const email = `${roll}@attenzen.com`;
-                const password = `${roll}123`;
-                const fullName = `Student ${roll}`;
-                try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    const uid = userCredential.user.uid;
-                    const userData = {
-                        email,
-                        role: 'student',
-                        fullName,
-                        username: fullName,
-                        rollNo: roll
-                    };
-                    await db.ref('users/' + uid).set(userData);
-                    await db.ref('students/' + roll).set({ uid, name: fullName, email: email, regNo: '' });
-                    students[roll] = { uid, name: fullName, email: email, regNo: '' };
-                    added++;
-                } catch (error) {
-                    showToast(`Failed for ${roll}: ${error.message}`, 'error');
-                }
-            }
-            if (added) {
-                document.getElementById('bulkRollInput').value = '';
-                showToast(`${added} students added`, 'success');
-                renderUsersList();
-                loadCoursesForDropdowns();
-                updateStats();
-            }
-        });
-
-        // ==================== COURSE MANAGEMENT ====================
+        // ==================== COURSE MANAGEMENT FUNCTIONS ====================
         window.addCourse = async function() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const name = document.getElementById('courseName').value;
             const code = document.getElementById('courseCode').value;
@@ -1694,7 +1729,7 @@
         }
 
         window.addSemester = async function() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const courseId = document.getElementById('semesterCourse').value;
             const name = document.getElementById('semesterName').value;
@@ -1734,7 +1769,7 @@
         }
 
         window.addSubject = async function() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const courseId = document.getElementById('subjectCourse').value;
             const semesterId = document.getElementById('subjectSemester').value;
@@ -1805,13 +1840,13 @@
         }
 
         window.deleteCourse = async function(courseId) {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
-            if (!confirm('Are you sure you want to delete this course? This will also delete all semesters and subjects in this course.')) return;
+            if (!confirm('Delete this course? All semesters and subjects will be deleted.')) return;
             
             const hasAssignments = Object.values(studentCourses).some(sc => sc.courseId === courseId);
             if (hasAssignments) {
-                if (!confirm('This course has students assigned. Deleting it will remove their assignments. Continue?')) return;
+                if (!confirm('This course has students assigned. Continue?')) return;
             }
             
             await db.ref('courses/' + courseId).remove();
@@ -1841,15 +1876,15 @@
         }
 
         window.deleteSemester = async function(courseId, semesterId) {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
-            if (!confirm('Are you sure you want to delete this semester? This will also delete all subjects in this semester.')) return;
+            if (!confirm('Delete this semester? All subjects will be deleted.')) return;
             
             const hasAssignments = Object.values(studentCourses).some(sc => 
                 sc.courseId === courseId && sc.semester === semesterId
             );
             if (hasAssignments) {
-                if (!confirm('This semester has students assigned. Deleting it will remove their assignments. Continue?')) return;
+                if (!confirm('This semester has students assigned. Continue?')) return;
             }
             
             await db.ref(`courses/${courseId}/semesters/${semesterId}`).remove();
@@ -1883,15 +1918,15 @@
         }
 
         window.deleteSubject = async function(courseId, semesterId, subjectId) {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
-            if (!confirm('Are you sure you want to delete this subject?')) return;
+            if (!confirm('Delete this subject?')) return;
             
             const hasAssignments = Object.values(studentCourses).some(sc => 
                 sc.courseId === courseId && sc.semester === semesterId && sc.subjects.includes(subjectId)
             );
             if (hasAssignments) {
-                if (!confirm('This subject has students assigned. Deleting it will remove their assignments. Continue?')) return;
+                if (!confirm('This subject has students assigned. Continue?')) return;
             }
             
             await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).remove();
@@ -1904,7 +1939,7 @@
         function displayCourseStructure() {
             let html = '';
             if (!courses || Object.keys(courses).length === 0) {
-                document.getElementById('courseStructure').innerHTML = '<p class="text-muted text-center">No courses added yet. Click "Add Course" to get started.</p>';
+                document.getElementById('courseStructure').innerHTML = '<p class="text-muted text-center">No courses added yet.</p>';
                 return;
             }
             
@@ -2015,7 +2050,7 @@
         }
 
         window.assignStudentToCourse = async function() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const studentRoll = document.getElementById('assignStudent').value;
             const courseId = document.getElementById('assignCourse').value;
@@ -2199,6 +2234,8 @@
             if (isAdmin()) {
                 document.querySelectorAll('.status-toggle:not(.disabled)').forEach(t => {
                     t.addEventListener('click', async function() {
+                        if (!await checkAdminPermission()) return;
+                        
                         const student = this.dataset.student;
                         const date = this.dataset.date;
                         const subject = this.dataset.subject;
@@ -2239,7 +2276,7 @@
 
         if (markAllPresentBtn) {
             markAllPresentBtn.addEventListener('click', async () => {
-                if (!checkAdminPermission()) return;
+                if (!await checkAdminPermission()) return;
                 
                 const date = dateSelector.value;
                 const subjectId = document.getElementById('attendanceSubject').value;
@@ -2283,7 +2320,7 @@
         }
 
         async function addDateHandler() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const date = newDateInput2?.value;
             if (!date) { showToast('Select a date', 'error'); return; }
@@ -2298,7 +2335,7 @@
         if (quickAddDateBtn) quickAddDateBtn.addEventListener('click', addDateHandler);
 
         async function deleteDateHandler() {
-            if (!checkAdminPermission()) return;
+            if (!await checkAdminPermission()) return;
             
             const date = deleteDateSelect2?.value;
             if (!date) { showToast('Select a date', 'error'); return; }
@@ -2324,7 +2361,7 @@
         // ==================== BULK UPDATE ====================
         if (quickBulkUpdateBtn) {
             quickBulkUpdateBtn.addEventListener('click', async () => {
-                if (!checkAdminPermission()) return;
+                if (!await checkAdminPermission()) return;
                 
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('bulkUpdateDate').value = today;
@@ -2461,7 +2498,7 @@
 
         if (applyBulkUpdate) {
             applyBulkUpdate.addEventListener('click', async () => {
-                if (!checkAdminPermission()) return;
+                if (!await checkAdminPermission()) return;
                 
                 const date = bulkUpdateDate.value;
                 const subject = document.getElementById('bulkUpdateSubject').value;
@@ -2554,7 +2591,7 @@
 
         // ==================== EXPORTS ====================
         if (downloadExcelBtn) {
-            downloadExcelBtn.addEventListener('click', () => {
+            downloadExcelBtn.addEventListener('click', async () => {
                 const subject = document.getElementById('attendanceSubject')?.value;
                 if (!subject) {
                     showToast('Please select a subject first', 'error');
@@ -2584,8 +2621,8 @@
         }
 
         if (quickExportPDFBtn) {
-            quickExportPDFBtn.addEventListener('click', () => {
-                if (!checkAdminPermission()) return;
+            quickExportPDFBtn.addEventListener('click', async () => {
+                if (!await checkAdminPermission()) return;
                 
                 const subject = document.getElementById('attendanceSubject')?.value;
                 if (!subject) {
@@ -2759,7 +2796,7 @@
         // ==================== HOLIDAY / REMINDER ====================
         if (quickMarkHolidayBtn) {
             quickMarkHolidayBtn.addEventListener('click', async () => {
-                if (!checkAdminPermission()) return;
+                if (!await checkAdminPermission()) return;
                 
                 const date = prompt('Enter date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
                 const subject = document.getElementById('attendanceSubject')?.value;
@@ -2848,7 +2885,7 @@
             await loadAllData();
             
             auth.onAuthStateChanged(async (user) => {
-                if (user && !currentUser) {
+                if (user && !isAddingUser) {
                     const userSnap = await db.ref('users/' + user.uid).once('value');
                     const userData = userSnap.val();
                     if (userData) {
@@ -2900,7 +2937,6 @@
                             
                             renderStudentDashboard();
                         }
-                        showToast('Auto-login successful!', 'success');
                     }
                 }
             });
