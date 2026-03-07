@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        /* (your existing styles – unchanged) */
+        /* Your existing styles */
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
@@ -381,7 +381,7 @@
 <body>
     <div class="toast-container"></div>
 
-    <!-- LOGIN SECTION (unchanged) -->
+    <!-- LOGIN SECTION -->
     <div id="loginSection" class="login-container">
         <div class="text-center mb-4">
             <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
@@ -404,7 +404,6 @@
                 </div>
             </div>
             
-            <!-- Remember Me Checkbox -->
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="rememberMe" checked>
                 <label class="form-check-label" for="rememberMe">Remember me (stay logged in)</label>
@@ -487,7 +486,7 @@
             </div>
 
             <div class="tab-content">
-                <!-- MANAGE USERS TAB (updated with registration number) -->
+                <!-- MANAGE USERS TAB -->
                 <div class="tab-pane fade show active" id="manageUsers">
                     <div class="row">
                         <div class="col-md-5">
@@ -515,16 +514,14 @@
                                             <input type="password" class="form-control" id="newPassword" required>
                                         </div>
                                        <div class="mb-3" id="rollNoSection">
-    <label class="form-label">Roll Number (for students)</label>
-    <input type="text" class="form-control" id="newRollNo">
-</div>
-
-<!-- NEW: Registration Number field for students - moved outside -->
-<div class="mb-3" id="regNoSection" style="display: none;">
-    <label class="form-label">Registration Number (for students)</label>
-    <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
-    <small class="text-muted">Used for profile photo</small>
-</div>
+                                            <label class="form-label">Roll Number (for students)</label>
+                                            <input type="text" class="form-control" id="newRollNo">
+                                        </div>
+                                        <div class="mb-3" id="regNoSection" style="display: none;">
+                                            <label class="form-label">Registration Number (for students)</label>
+                                            <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
+                                            <small class="text-muted">Used for profile photo</small>
+                                        </div>
                                         <div class="mb-3">
                                             <label class="form-label">Full Name</label>
                                             <input type="text" class="form-control" id="newFullName" required>
@@ -568,9 +565,8 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB (unchanged) -->
+                <!-- COURSES & SUBJECTS TAB -->
                 <div class="tab-pane fade" id="coursesTab">
-                    <!-- ... (keep your existing code) ... -->
                     <div class="row">
                         <div class="col-md-4">
                             <!-- Add Course -->
@@ -670,9 +666,8 @@
                     </div>
                 </div>
 
-                <!-- ATTENDANCE TAB (unchanged) -->
+                <!-- ATTENDANCE TAB -->
                 <div class="tab-pane fade" id="attendanceTab">
-                    <!-- ... (keep your existing code) ... -->
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="date-picker-container">
@@ -760,7 +755,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTS TAB (unchanged) -->
+                <!-- REPORTS TAB -->
                 <div class="tab-pane fade" id="reportsTab">
                     <div class="card">
                         <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
@@ -803,7 +798,7 @@
         </div>
     </div>
 
-    <!-- STUDENT DASHBOARD (updated with photo) -->
+    <!-- STUDENT DASHBOARD (FIXED) -->
     <div id="studentDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
@@ -820,8 +815,8 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span><i class="fas fa-history me-2"></i>My Attendance Record</span>
-                            <select id="studentSubjectSelector" class="form-control w-auto" onchange="()">
-                                <!-- Options will be populated without "All Subjects" -->
+                            <select id="studentSubjectSelector" class="form-control w-auto" onchange="renderStudentDashboard()">
+                                <!-- Options will be populated -->
                             </select>
                         </div>
                         <div class="card-body">
@@ -848,7 +843,6 @@
                     <div class="card mt-3">
                         <div class="card-header"><i class="fas fa-user-circle me-2"></i>My Profile</div>
                         <div class="card-body">
-                            <!-- NEW: Student photo -->
                             <div class="text-center mb-4">
                                 <img id="studentPhoto" src="" alt="Student Photo" 
                                      style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary);"
@@ -893,7 +887,6 @@
             <div class="mb-3">
                 <label class="form-label">Select Students</label>
                 <div class="border p-3" style="max-height: 300px; overflow-y: auto;" id="bulkUpdateStudentsContainer">
-                    <!-- Student checkboxes will be loaded here -->
                     <p class="text-muted text-center">Select date and subject first</p>
                 </div>
                 <div class="mt-2">
@@ -922,7 +915,7 @@
         </div>
     </div>
 
-    <!-- STUDENT LIST MODAL (unchanged) -->
+    <!-- STUDENT LIST MODAL -->
     <div class="student-list-modal" id="studentListModal">
         <div class="student-list-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -930,7 +923,7 @@
                 <button class="btn-close" onclick="closeStudentListModal()"></button>
             </div>
             
-            <!-- Student Edit Form (updated with registration number) -->
+            <!-- Student Edit Form -->
             <div id="studentEditForm" class="edit-student-form" style="display: none;">
                 <h5 class="mb-3">Edit Student Details</h5>
                 <input type="hidden" id="editStudentRoll">
@@ -991,9 +984,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="studentListTableBody">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
+                    <tbody id="studentListTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -1236,7 +1227,7 @@
             studentListTableBody.innerHTML = html || '<tr><td colspan="6" class="text-center">No students found</td></tr>';
         }
 
-        // ==================== STUDENT EDIT (UPDATED WITH REG NO) ====================
+        // ==================== STUDENT EDIT ====================
         window.editStudent = function(roll) {
             const student = students[roll];
             const uid = Object.keys(users).find(uid => users[uid].rollNo === roll);
@@ -1417,7 +1408,6 @@
                     displayCourseStructure();
                     initAttendanceDropdowns();
                     renderUsersList();
-                    // Update stats with current subject if any
                     const currentSubject = document.getElementById('attendanceSubject')?.value;
                     updateStats(currentSubject || null);
                 } else {
@@ -1443,8 +1433,10 @@
                         studentCourse.textContent = course?.name || 'N/A';
                         studentSemester.textContent = semester?.name || 'N/A';
                         
+                        // FIXED: Populate subject dropdown with FORCE RERENDER
                         const subjectSelect = document.getElementById('studentSubjectSelector');
-                        subjectSelect.innerHTML = '';
+                        subjectSelect.innerHTML = ''; // Clear
+                        
                         studentCourseData.subjects.forEach((subId, index) => {
                             const subject = semester?.subjects[subId];
                             if (subject) {
@@ -1452,18 +1444,17 @@
                                 option.value = subId;
                                 option.textContent = subject.name;
                                 subjectSelect.appendChild(option);
+                                // Set first subject as selected
                                 if (index === 0) {
                                     option.selected = true;
                                 }
                             }
                         });
-                        if (subjectSelect.options.length === 0) {
-                            subjectSelect.innerHTML = '<option value="">No subjects</option>';
-                        }
-                    } else {
-                        studentCourse.textContent = 'N/A';
-                        studentSemester.textContent = 'N/A';
-                        document.getElementById('studentSubjectSelector').innerHTML = '<option value="">No subjects</option>';
+                        
+                        // Force a change event to trigger render
+                        setTimeout(() => {
+                            renderStudentDashboard();
+                        }, 100);
                     }
                     
                     renderStudentDashboard();
@@ -1486,7 +1477,7 @@
         logoutBtn.addEventListener('click', logout);
         studentLogoutBtn.addEventListener('click', logout);
 
-        // ==================== COURSE MANAGEMENT (unchanged) ====================
+        // ==================== COURSE MANAGEMENT ====================
         window.addCourse = async function() {
             const name = document.getElementById('courseName').value;
             const code = document.getElementById('courseCode').value;
@@ -1917,12 +1908,10 @@
                         subSelect.innerHTML += `<option value="${id}">${sub.name} (${sub.code})</option>`;
                     });
                     
-                    // Update stats when subject changes
                     updateStats(subSelect.value || null);
                 });
             }
             
-            // Also listen to subject select changes
             const subSelect = document.getElementById('attendanceSubject');
             if (subSelect) {
                 subSelect.addEventListener('change', function() {
@@ -1965,7 +1954,6 @@
                 return;
             }
 
-            // Get all dates that have this subject marked
             const dates = Object.keys(attendance)
                 .filter(date => attendance[date] && attendance[date][subjectId])
                 .sort();
@@ -1979,7 +1967,6 @@
                 thead.appendChild(th);
             });
             
-            // If no dates for this subject, show message
             if (dates.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="100%" class="text-center">No attendance records for this subject</td></tr>';
                 return;
@@ -2018,13 +2005,13 @@
                     attendance[date][subject][student] = next;
                     
                     await saveAllData();
-                    updateStats(subject); // Update stats after change
+                    updateStats(subject);
                 });
             });
 
             updateDateSelects();
             renderAttendanceChart(subjectId);
-            updateStats(subjectId); // Update stats with current subject
+            updateStats(subjectId);
         }
 
         function updateDateSelects() {
@@ -2113,7 +2100,7 @@
             });
         }
 
-        // ==================== BULK UPDATE (MODIFIED) ====================
+        // ==================== BULK UPDATE ====================
         if (quickBulkUpdateBtn) {
             quickBulkUpdateBtn.addEventListener('click', async () => {
                 const today = new Date().toISOString().split('T')[0];
@@ -2290,7 +2277,7 @@
                 }
                 
                 loadStudentsForBulkUpdate(subject, date);
-                updateStats(subject); // Update stats after bulk update
+                updateStats(subject);
                 
                 showToast(`Bulk update applied: ${selected.length} marked as ${status==='P'?'Present':status==='A'?'Absent':'Holiday'}, others set to Absent`, 'success');
             });
@@ -2306,110 +2293,94 @@
             }
         });
 
-        // ==================== STUDENT DASHBOARD RENDER (only dates with subject attendance) ====================
+        // ==================== FIXED STUDENT DASHBOARD RENDER ====================
         function renderStudentDashboard() {
-    studentTableLoading.style.display = 'none';
-    studentTableContainer.style.display = 'block';
-    
-    const roll = currentUser.rollNo;
-    const selectedSubject = document.getElementById('studentSubjectSelector')?.value;
-    
-    console.log("===== STUDENT DASHBOARD DEBUG =====");
-    console.log("Current user roll:", roll);
-    console.log("Selected subject:", selectedSubject);
-    
-    if (!roll) { 
-        studentTableContainer.innerHTML = '<p class="text-center">No roll number assigned</p>'; 
-        return; 
-    }
-    
-    if (!selectedSubject) {
-        const select = document.getElementById('studentSubjectSelector');
-        if (select.options.length > 0) {
-            select.options[0].selected = true;
-            renderStudentDashboard();
-            return;
-        } else {
-            studentTableContainer.innerHTML = '<p class="text-center">No subjects assigned</p>';
-            return;
-        }
-    }
-    
-    // Get all dates
-    const allDates = Object.keys(attendance);
-    console.log("All dates in system:", allDates);
-    
-    // CRITICAL: Only include dates where the selected subject has a NON-EMPTY attendance record
-    const datesWithSubject = [];
-    
-    allDates.forEach(date => {
-        // Check if this date has the selected subject AND that subject has actual student data
-        if (attendance[date] && 
-            attendance[date][selectedSubject] && 
-            Object.keys(attendance[date][selectedSubject]).length > 0) {
+            studentTableLoading.style.display = 'none';
+            studentTableContainer.style.display = 'block';
             
-            console.log(`Date ${date} HAS valid attendance for subject ${selectedSubject} with ${Object.keys(attendance[date][selectedSubject]).length} students`);
-            datesWithSubject.push(date);
-        } else {
-            console.log(`Date ${date} does NOT have valid attendance for subject ${selectedSubject}`);
-            if (attendance[date]) {
-                console.log("Available subjects on this date:", Object.keys(attendance[date]));
+            const roll = currentUser.rollNo;
+            const selectedSubject = document.getElementById('studentSubjectSelector')?.value;
+            
+            console.log("===== RENDERING STUDENT DASHBOARD =====");
+            console.log("Selected subject:", selectedSubject);
+            console.log("Current attendance data:", attendance);
+            
+            if (!roll) { 
+                studentTableContainer.innerHTML = '<p class="text-center">No roll number assigned</p>'; 
+                return; 
             }
+            
+            if (!selectedSubject) {
+                const select = document.getElementById('studentSubjectSelector');
+                if (select.options.length > 0) {
+                    select.options[0].selected = true;
+                    renderStudentDashboard();
+                    return;
+                } else {
+                    studentTableContainer.innerHTML = '<p class="text-center">No subjects assigned</p>';
+                    return;
+                }
+            }
+            
+            // Get all dates
+            const allDates = Object.keys(attendance);
+            
+            // CRITICAL: Filter dates where the selected subject has data for ANY student
+            const datesWithSubject = allDates.filter(date => {
+                return attendance[date] && 
+                       attendance[date][selectedSubject] && 
+                       Object.keys(attendance[date][selectedSubject]).length > 0;
+            }).sort().reverse();
+            
+            console.log("Filtered dates:", datesWithSubject);
+            
+            if (datesWithSubject.length === 0) {
+                studentTableContainer.innerHTML = '<p class="text-center">No attendance records for this subject</p>';
+                presentCount.textContent = '0';
+                absentCount.textContent = '0';
+                attendancePercentage.style.width = '0%';
+                attendancePercentage.textContent = '0%';
+                attendanceMessage.textContent = 'No data';
+                return;
+            }
+            
+            const tbody = studentAttendanceTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            let present = 0;
+            
+            datesWithSubject.forEach(date => {
+                // Get the student's status for this subject on this date
+                let status = 'A';
+                
+                if (attendance[date] && 
+                    attendance[date][selectedSubject] && 
+                    attendance[date][selectedSubject][roll] !== undefined) {
+                    status = attendance[date][selectedSubject][roll];
+                }
+                
+                console.log(`Date ${date}: status = ${status}`);
+                
+                if (status === 'P') present++;
+                
+                tbody.innerHTML += `<tr>
+                    <td>${formatDate(date)}</td>
+                    <td>${getDayName(date)}</td>
+                    <td class="${status==='P'?'present':status==='H'?'holiday':'absent'}">
+                        ${status==='P'?'Present':status==='H'?'Holiday':'Absent'}
+                    </td>
+                </tr>`;
+            });
+            
+            presentCount.textContent = present;
+            absentCount.textContent = datesWithSubject.length - present;
+            const percent = datesWithSubject.length ? Math.round((present/datesWithSubject.length)*100) : 0;
+            attendancePercentage.style.width = percent+'%';
+            attendancePercentage.textContent = percent+'%';
+            attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
+            
+            console.log("===== DONE RENDERING =====");
         }
-    });
-    
-    // Sort and reverse (newest first)
-    datesWithSubject.sort().reverse();
-    
-    console.log("Final filtered dates with subject:", datesWithSubject);
-    
-    if (datesWithSubject.length === 0) {
-        studentTableContainer.innerHTML = '<p class="text-center">No attendance records for this subject</p>';
-        presentCount.textContent = '0';
-        absentCount.textContent = '0';
-        attendancePercentage.style.width = '0%';
-        attendancePercentage.textContent = '0%';
-        attendanceMessage.textContent = 'No data';
-        return;
-    }
-    
-    const tbody = studentAttendanceTable.querySelector('tbody');
-    tbody.innerHTML = '';
-    let present = 0;
-    
-    datesWithSubject.forEach(date => {
-        // Get the student's status for this subject on this date
-        let status = 'A';
-        
-        // Triple-check that the path exists
-        if (attendance[date] && 
-            attendance[date][selectedSubject] && 
-            attendance[date][selectedSubject][roll] !== undefined) {
-            status = attendance[date][selectedSubject][roll];
-        }
-        
-        console.log(`Date ${date}, status for student ${roll}:`, status);
-        
-        if (status === 'P') present++;
-        
-        tbody.innerHTML += `<tr>
-            <td>${formatDate(date)}</td>
-            <td>${getDayName(date)}</td>
-            <td class="${status==='P'?'present':status==='H'?'holiday':'absent'}">
-                ${status==='P'?'Present':status==='H'?'Holiday':'Absent'}
-            </td>
-        </tr>`;
-    });
-    
-    presentCount.textContent = present;
-    absentCount.textContent = datesWithSubject.length - present;
-    const percent = datesWithSubject.length ? Math.round((present/datesWithSubject.length)*100) : 0;
-    attendancePercentage.style.width = percent+'%';
-    attendancePercentage.textContent = percent+'%';
-    attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
-    
-    console.log("===== DEBUG END =====");
-}
+
         // ==================== EXPORTS ====================
         if (downloadExcelBtn) {
             downloadExcelBtn.addEventListener('click', () => {
