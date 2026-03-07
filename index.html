@@ -2560,44 +2560,90 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
         document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const role = document.getElementById('newUserRole').value;
-            const email = document.getElementById('newEmail').value;
-            const password = document.getElementById('newPassword').value;
-            const username = document.getElementById('newUsername').value;
-            const roll = document.getElementById('newRollNo').value;
-            const regNo = document.getElementById('newRegNo').value; // NEW
-            const fullName = document.getElementById('newFullName').value;
+    e.preventDefault();
+    
+    // Save current admin email before creating user
+    const adminEmail = auth.currentUser.email;
+    
+    const role = document.getElementById('newUserRole').value;
+    const email = document.getElementById('newEmail').value;
+    const password = document.getElementById('newPassword').value;
+    const username = document.getElementById('newUsername').value;
+    const roll = document.getElementById('newRollNo').value;
+    const regNo = document.getElementById('newRegNo').value;
+    const fullName = document.getElementById('newFullName').value;
 
+    try {
+        // 1. Create the new user (this will auto-login as the new user)
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const uid = userCredential.user.uid;
+        
+        // 2. Prepare user data
+        const userData = {
+            email,
+            role,
+            fullName,
+            username: username || fullName,
+            rollNo: role === 'student' ? roll : null
+        };
+        
+        // 3. Write to database (as the new user - this will fail if student)
+        try {
+            await db.ref('users/' + uid).set(userData);
+        } catch (writeError) {
+            console.log('Write as new user failed (expected for students), will retry as admin');
+        }
+        
+        if (role === 'student' && roll) {
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = userCredential.user.uid;
-                const userData = {
-                    email,
-                    role,
-                    fullName,
-                    username: username || fullName,
-                    rollNo: role === 'student' ? roll : null
-                };
-                await db.ref('users/' + uid).set(userData);
-                if (role === 'student' && roll) {
-                    await db.ref('students/' + roll).set({ 
-                        uid, 
-                        name: fullName,
-                        regNo: regNo // NEW
-                    });
-                    students[roll] = { uid, name: fullName, regNo: regNo }; // update local cache
-                }
-                showToast('User added', 'success');
+                await db.ref('students/' + roll).set({ 
+                    uid, 
+                    name: fullName,
+                    regNo: regNo 
+                });
+                students[roll] = { uid, name: fullName, regNo: regNo };
+            } catch (studentError) {
+                console.log('Student write failed, will retry as admin');
+            }
+        }
+        
+        // 4. CRITICAL: Sign out the new user
+        await auth.signOut();
+        
+        // 5. Ask for admin password to sign back in
+        const adminPassword = prompt("User created! Enter admin password to continue:", "");
+        
+        if (adminPassword) {
+            try {
+                await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
+                showToast('User added successfully!', 'success');
+                
+                // Refresh data
+                await loadAllData();
                 e.target.reset();
                 renderUsersList();
                 loadCoursesForDropdowns();
                 updateStats();
-            } catch (error) {
-                showToast('Error: ' + error.message, 'error');
+            } catch (loginError) {
+                showToast('User created but failed to re-login as admin. Please login manually.', 'warning');
+                // Force redirect to login
+                adminDash.style.display = 'none';
+                studentDash.style.display = 'none';
+                loginSection.style.display = 'block';
             }
-        });
-
+        } else {
+            showToast('User created but you need to login as admin manually', 'warning');
+            // Force redirect to login
+            adminDash.style.display = 'none';
+            studentDash.style.display = 'none';
+            loginSection.style.display = 'block';
+        }
+        
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+        console.error(error);
+    }
+});
         async function renderUsersList() {
             const snap = await db.ref('users').once('value');
             users = snap.val() || {};
