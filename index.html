@@ -2317,7 +2317,6 @@
     console.log("===== STUDENT DASHBOARD DEBUG =====");
     console.log("Current user roll:", roll);
     console.log("Selected subject:", selectedSubject);
-    console.log("Full attendance object:", JSON.stringify(attendance, null, 2));
     
     if (!roll) { 
         studentTableContainer.innerHTML = '<p class="text-center">No roll number assigned</p>'; 
@@ -2340,23 +2339,29 @@
     const allDates = Object.keys(attendance);
     console.log("All dates in system:", allDates);
     
-    // Filter dates where the selected subject exists
+    // CRITICAL: Only include dates where the selected subject has a NON-EMPTY attendance record
     const datesWithSubject = [];
     
     allDates.forEach(date => {
-        // Check if this date has the selected subject
-        if (attendance[date] && attendance[date][selectedSubject]) {
-            console.log(`Date ${date} HAS subject ${selectedSubject}`);
+        // Check if this date has the selected subject AND that subject has actual student data
+        if (attendance[date] && 
+            attendance[date][selectedSubject] && 
+            Object.keys(attendance[date][selectedSubject]).length > 0) {
+            
+            console.log(`Date ${date} HAS valid attendance for subject ${selectedSubject} with ${Object.keys(attendance[date][selectedSubject]).length} students`);
             datesWithSubject.push(date);
         } else {
-            console.log(`Date ${date} does NOT have subject ${selectedSubject}`);
+            console.log(`Date ${date} does NOT have valid attendance for subject ${selectedSubject}`);
+            if (attendance[date]) {
+                console.log("Available subjects on this date:", Object.keys(attendance[date]));
+            }
         }
     });
     
     // Sort and reverse (newest first)
     datesWithSubject.sort().reverse();
     
-    console.log("Final dates with subject:", datesWithSubject);
+    console.log("Final filtered dates with subject:", datesWithSubject);
     
     if (datesWithSubject.length === 0) {
         studentTableContainer.innerHTML = '<p class="text-center">No attendance records for this subject</p>';
@@ -2376,9 +2381,10 @@
         // Get the student's status for this subject on this date
         let status = 'A';
         
+        // Triple-check that the path exists
         if (attendance[date] && 
             attendance[date][selectedSubject] && 
-            attendance[date][selectedSubject][roll]) {
+            attendance[date][selectedSubject][roll] !== undefined) {
             status = attendance[date][selectedSubject][roll];
         }
         
