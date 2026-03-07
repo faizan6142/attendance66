@@ -514,16 +514,17 @@
                                             <label class="form-label">Password</label>
                                             <input type="password" class="form-control" id="newPassword" required>
                                         </div>
-                                        <div class="mb-3" id="rollNoSection">
-                                            <label class="form-label">Roll Number (for students)</label>
-                                            <input type="text" class="form-control" id="newRollNo">
-                                        </div>
-                                        <!-- NEW: Registration Number field for students -->
-                                        <div class="mb-3" id="regNoSection" style="display: none;">
-                                            <label class="form-label">Registration Number (for students)</label>
-                                            <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
-                                            <small class="text-muted">Used for profile photo</small>
-                                        </div>
+                                       <div class="mb-3" id="rollNoSection">
+    <label class="form-label">Roll Number (for students)</label>
+    <input type="text" class="form-control" id="newRollNo">
+</div>
+
+<!-- NEW: Registration Number field for students - moved outside -->
+<div class="mb-3" id="regNoSection" style="display: none;">
+    <label class="form-label">Registration Number (for students)</label>
+    <input type="text" class="form-control" id="newRegNo" placeholder="e.g., 64100-ang-2022">
+    <small class="text-muted">Used for profile photo</small>
+</div>
                                         <div class="mb-3">
                                             <label class="form-label">Full Name</label>
                                             <input type="text" class="form-control" id="newFullName" required>
@@ -2539,11 +2540,24 @@
         }
 
         // ==================== USER MANAGEMENT (updated to handle registration number) ====================
-        document.getElementById('newUserRole')?.addEventListener('change', function() {
-            const isStudent = this.value === 'student';
-            document.getElementById('rollNoSection').style.display = isStudent ? 'block' : 'none';
-            document.getElementById('regNoSection').style.display = isStudent ? 'block' : 'none'; // NEW
-        });
+       // Function to toggle student-specific fields
+function toggleStudentFields() {
+    const roleSelect = document.getElementById('newUserRole');
+    const isStudent = roleSelect.value === 'student';
+    const rollNoSection = document.getElementById('rollNoSection');
+    const regNoSection = document.getElementById('regNoSection');
+    
+    if (rollNoSection) rollNoSection.style.display = isStudent ? 'block' : 'none';
+    if (regNoSection) regNoSection.style.display = isStudent ? 'block' : 'none';
+}
+
+// Add event listener for role changes
+document.getElementById('newUserRole')?.addEventListener('change', toggleStudentFields);
+
+// Also trigger on page load to set initial state
+document.addEventListener('DOMContentLoaded', function() {
+    toggleStudentFields();
+});
 
         document.getElementById('addUserForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
