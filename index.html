@@ -2308,66 +2308,71 @@
 
         // ==================== STUDENT DASHBOARD RENDER (only dates with subject attendance) ====================
         function renderStudentDashboard() {
-            studentTableLoading.style.display = 'none';
-            studentTableContainer.style.display = 'block';
-            const roll = currentUser.rollNo;
-            const selectedSubject = document.getElementById('studentSubjectSelector')?.value;
-            
-            if (!roll) { 
-                studentTableContainer.innerHTML = '<p class="text-center">No roll number assigned</p>'; 
-                return; 
-            }
-            
-            if (!selectedSubject) {
-                const select = document.getElementById('studentSubjectSelector');
-                if (select.options.length > 0) {
-                    select.options[0].selected = true;
-                    renderStudentDashboard();
-                    return;
-                } else {
-                    studentTableContainer.innerHTML = '<p class="text-center">No subjects assigned</p>';
-                    return;
-                }
-            }
-            
-            const datesWithSubject = Object.keys(attendance).filter(date => 
-                attendance[date] && attendance[date][selectedSubject] !== undefined
-            ).sort().reverse();
-            
-            if (datesWithSubject.length === 0) {
-                studentTableContainer.innerHTML = '<p class="text-center">No attendance records for this subject</p>';
-                presentCount.textContent = '0';
-                absentCount.textContent = '0';
-                attendancePercentage.style.width = '0%';
-                attendancePercentage.textContent = '0%';
-                attendanceMessage.textContent = 'No data';
-                return;
-            }
-            
-            const tbody = studentAttendanceTable.querySelector('tbody');
-            tbody.innerHTML = '';
-            let present = 0;
-            
-            datesWithSubject.forEach(date => {
-                const status = attendance[date][selectedSubject][roll] || 'A';
-                if (status === 'P') present++;
-                tbody.innerHTML += `<tr>
-                    <td>${formatDate(date)}</td>
-                    <td>${getDayName(date)}</td>
-                    <td class="${status==='P'?'present':status==='H'?'holiday':'absent'}">
-                        ${status==='P'?'Present':status==='H'?'Holiday':'Absent'}
-                    </td>
-                </tr>`;
-            });
-            
-            presentCount.textContent = present;
-            absentCount.textContent = datesWithSubject.length - present;
-            const percent = datesWithSubject.length ? Math.round((present/datesWithSubject.length)*100) : 0;
-            attendancePercentage.style.width = percent+'%';
-            attendancePercentage.textContent = percent+'%';
-            attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
+    studentTableLoading.style.display = 'none';
+    studentTableContainer.style.display = 'block';
+    const roll = currentUser.rollNo;
+    const selectedSubject = document.getElementById('studentSubjectSelector')?.value;
+    
+    console.log("Selected subject:", selectedSubject); // Debug line
+    console.log("All attendance data:", attendance); // Debug line
+    
+    if (!roll) { 
+        studentTableContainer.innerHTML = '<p class="text-center">No roll number assigned</p>'; 
+        return; 
+    }
+    
+    if (!selectedSubject) {
+        const select = document.getElementById('studentSubjectSelector');
+        if (select.options.length > 0) {
+            select.options[0].selected = true;
+            renderStudentDashboard();
+            return;
+        } else {
+            studentTableContainer.innerHTML = '<p class="text-center">No subjects assigned</p>';
+            return;
         }
-
+    }
+    
+    const datesWithSubject = Object.keys(attendance).filter(date => 
+        attendance[date] && attendance[date][selectedSubject] !== undefined
+    ).sort().reverse();
+    
+    console.log("Dates with this subject:", datesWithSubject); // Debug line
+    
+    if (datesWithSubject.length === 0) {
+        studentTableContainer.innerHTML = '<p class="text-center">No attendance records for this subject</p>';
+        presentCount.textContent = '0';
+        absentCount.textContent = '0';
+        attendancePercentage.style.width = '0%';
+        attendancePercentage.textContent = '0%';
+        attendanceMessage.textContent = 'No data';
+        return;
+    }
+    
+    const tbody = studentAttendanceTable.querySelector('tbody');
+    tbody.innerHTML = '';
+    let present = 0;
+    
+    datesWithSubject.forEach(date => {
+        const status = attendance[date][selectedSubject][roll] || 'A';
+        console.log(`Date ${date}, status:`, status); // Debug line
+        if (status === 'P') present++;
+        tbody.innerHTML += `<tr>
+            <td>${formatDate(date)}</td>
+            <td>${getDayName(date)}</td>
+            <td class="${status==='P'?'present':status==='H'?'holiday':'absent'}">
+                ${status==='P'?'Present':status==='H'?'Holiday':'Absent'}
+            </td>
+        </tr>`;
+    });
+    
+    presentCount.textContent = present;
+    absentCount.textContent = datesWithSubject.length - present;
+    const percent = datesWithSubject.length ? Math.round((present/datesWithSubject.length)*100) : 0;
+    attendancePercentage.style.width = percent+'%';
+    attendancePercentage.textContent = percent+'%';
+    attendanceMessage.textContent = percent >= 75 ? 'Good attendance!' : percent >= 50 ? 'Needs improvement.' : 'Low attendance!';
+}
         // ==================== EXPORTS ====================
         if (downloadExcelBtn) {
             downloadExcelBtn.addEventListener('click', () => {
