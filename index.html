@@ -542,6 +542,16 @@
                                     <button class="btn btn-outline-primary w-100" type="button" id="addRollNumbersBtn"><i class="fas fa-user-plus me-2"></i>Add Students</button>
                                 </div>
                             </div>
+                            <!-- NEW: Database Cleanup Card -->
+                            <div class="card mt-3">
+                                <div class="card-header bg-warning"><i class="fas fa-broom me-2"></i>Database Cleanup</div>
+                                <div class="card-body">
+                                    <p class="text-muted">Remove orphaned student records from courses and attendance (e.g., "Unknown" entries).</p>
+                                    <button class="btn btn-warning w-100" type="button" onclick="cleanupOrphanedStudents()">
+                                        <i class="fas fa-broom me-2"></i>Clean Up Database
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-7">
                             <div class="card">
@@ -565,7 +575,7 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB -->
+                <!-- COURSES & SUBJECTS TAB (unchanged) -->
                 <div class="tab-pane fade" id="coursesTab">
                     <div class="row">
                         <div class="col-md-4">
@@ -666,7 +676,7 @@
                     </div>
                 </div>
 
-                <!-- ATTENDANCE TAB -->
+                <!-- ATTENDANCE TAB (unchanged) -->
                 <div class="tab-pane fade" id="attendanceTab">
                     <div class="row mb-4">
                         <div class="col-md-6">
@@ -755,7 +765,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTS TAB -->
+                <!-- REPORTS TAB (unchanged) -->
                 <div class="tab-pane fade" id="reportsTab">
                     <div class="card">
                         <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
@@ -798,7 +808,7 @@
         </div>
     </div>
 
-    <!-- STUDENT DASHBOARD (FIXED) -->
+    <!-- STUDENT DASHBOARD (unchanged) -->
     <div id="studentDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
@@ -1148,43 +1158,43 @@
         }
 
         // Update stats cards – if subjectId provided, count only for that subject
-      function updateStats(subjectId = null) {
-    totalStudents.textContent = Object.keys(students).length;
-    const today = new Date().toISOString().split('T')[0];
-    let p = 0, a = 0;
-    
-    console.log("Updating stats for subject:", subjectId);
-    console.log("Today's date:", today);
-    console.log("Today's attendance data:", attendance[today]);
-    
-    if (subjectId) {
-        // Count for specific subject
-        if (attendance[today] && attendance[today][subjectId]) {
-            console.log(`Found data for subject ${subjectId}:`, attendance[today][subjectId]);
-            Object.values(attendance[today][subjectId]).forEach(s => {
-                if (s === 'P') p++;
-                else if (s === 'A') a++;
-            });
-        } else {
-            console.log(`No data for subject ${subjectId} today`);
+        function updateStats(subjectId = null) {
+            totalStudents.textContent = Object.keys(students).length;
+            const today = new Date().toISOString().split('T')[0];
+            let p = 0, a = 0;
+            
+            console.log("Updating stats for subject:", subjectId);
+            console.log("Today's date:", today);
+            console.log("Today's attendance data:", attendance[today]);
+            
+            if (subjectId) {
+                // Count for specific subject
+                if (attendance[today] && attendance[today][subjectId]) {
+                    console.log(`Found data for subject ${subjectId}:`, attendance[today][subjectId]);
+                    Object.values(attendance[today][subjectId]).forEach(s => {
+                        if (s === 'P') p++;
+                        else if (s === 'A') a++;
+                    });
+                } else {
+                    console.log(`No data for subject ${subjectId} today`);
+                }
+            } else {
+                // Count across all subjects
+                if (attendance[today]) {
+                    Object.values(attendance[today]).forEach(subjectAttendance => {
+                        Object.values(subjectAttendance || {}).forEach(s => {
+                            if (s === 'P') p++;
+                            else if (s === 'A') a++;
+                        });
+                    });
+                }
+            }
+            presentToday.textContent = p;
+            absentToday.textContent = a;
+            totalAttendanceDays.textContent = Object.keys(attendance).length;
+            
+            console.log(`Present: ${p}, Absent: ${a}`);
         }
-    } else {
-        // Count across all subjects
-        if (attendance[today]) {
-            Object.values(attendance[today]).forEach(subjectAttendance => {
-                Object.values(subjectAttendance || {}).forEach(s => {
-                    if (s === 'P') p++;
-                    else if (s === 'A') a++;
-                });
-            });
-        }
-    }
-    presentToday.textContent = p;
-    absentToday.textContent = a;
-    totalAttendanceDays.textContent = Object.keys(attendance).length;
-    
-    console.log(`Present: ${p}, Absent: ${a}`);
-}
 
         // ==================== STUDENT LIST MODAL FUNCTIONS ====================
         function openStudentListModal() {
@@ -1442,10 +1452,8 @@
                         studentCourse.textContent = course?.name || 'N/A';
                         studentSemester.textContent = semester?.name || 'N/A';
                         
-                        // FIXED: Populate subject dropdown with FORCE RERENDER
                         const subjectSelect = document.getElementById('studentSubjectSelector');
-                        subjectSelect.innerHTML = ''; // Clear
-                        
+                        subjectSelect.innerHTML = '';
                         studentCourseData.subjects.forEach((subId, index) => {
                             const subject = semester?.subjects[subId];
                             if (subject) {
@@ -1453,17 +1461,18 @@
                                 option.value = subId;
                                 option.textContent = subject.name;
                                 subjectSelect.appendChild(option);
-                                // Set first subject as selected
                                 if (index === 0) {
                                     option.selected = true;
                                 }
                             }
                         });
-                        
-                        // Force a change event to trigger render
-                        setTimeout(() => {
-                            renderStudentDashboard();
-                        }, 100);
+                        if (subjectSelect.options.length === 0) {
+                            subjectSelect.innerHTML = '<option value="">No subjects</option>';
+                        }
+                    } else {
+                        studentCourse.textContent = 'N/A';
+                        studentSemester.textContent = 'N/A';
+                        document.getElementById('studentSubjectSelector').innerHTML = '<option value="">No subjects</option>';
                     }
                     
                     renderStudentDashboard();
@@ -2732,44 +2741,148 @@
             }
         };
 
+        // ==================== UPDATED DELETE USER ====================
         window.deleteUser = async (uid) => {
-    if (uid === currentUser?.uid) { 
-        showToast('Cannot delete yourself', 'error'); 
-        return; 
-    }
-    if (!confirm('Delete user?')) return;
-    
-    try {
-        const userData = users[uid];
-        
-        if (userData.role === 'student' && userData.rollNo) {
-            // Remove from students
-            await db.ref('students/' + userData.rollNo).remove();
-            delete students[userData.rollNo];
+            if (uid === currentUser?.uid) { 
+                showToast('Cannot delete yourself', 'error'); 
+                return; 
+            }
+            if (!confirm('Delete user?')) return;
             
-            // IMPORTANT: Also remove from student_courses
-            await db.ref('student_courses/' + userData.rollNo).remove();
-            delete studentCourses[userData.rollNo];
+            try {
+                const userData = users[uid];
+                
+                if (userData.role === 'student' && userData.rollNo) {
+                    const rollNo = userData.rollNo;
+                    
+                    // Remove from students
+                    await db.ref('students/' + rollNo).remove();
+                    delete students[rollNo];
+                    
+                    // Remove from student_courses
+                    await db.ref('student_courses/' + rollNo).remove();
+                    delete studentCourses[rollNo];
+                    
+                    // Remove from attendance records
+                    const attendanceUpdates = {};
+                    Object.keys(attendance).forEach(date => {
+                        Object.keys(attendance[date] || {}).forEach(subject => {
+                            if (attendance[date][subject] && attendance[date][subject][rollNo]) {
+                                attendanceUpdates[`/attendance/${date}/${subject}/${rollNo}`] = null;
+                            }
+                        });
+                    });
+                    
+                    if (Object.keys(attendanceUpdates).length > 0) {
+                        await db.ref().update(attendanceUpdates);
+                        // Update local attendance
+                        Object.keys(attendance).forEach(date => {
+                            Object.keys(attendance[date] || {}).forEach(subject => {
+                                if (attendance[date][subject] && attendance[date][subject][rollNo]) {
+                                    delete attendance[date][subject][rollNo];
+                                }
+                            });
+                        });
+                    }
+                }
+                
+                // Remove from users
+                await db.ref('users/' + uid).remove();
+                delete users[uid];
+                
+                showToast('User removed', 'success');
+                renderUsersList();
+                updateStats();
+                
+                // Refresh views
+                const currentSubject = document.getElementById('attendanceSubject')?.value;
+                if (currentSubject) {
+                    renderSubjectAttendance(currentSubject);
+                }
+                if (studentListModal.style.display === 'flex') {
+                    renderStudentList();
+                }
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        // ==================== NEW CLEANUP FUNCTION ====================
+        async function cleanupOrphanedStudents() {
+            try {
+                console.log("Starting cleanup of orphaned students...");
+                let cleanedCount = 0;
+                const updates = {};
+                
+                // Check each entry in student_courses
+                for (const roll in studentCourses) {
+                    // If this roll number doesn't exist in students
+                    if (!students[roll]) {
+                        console.log(`Found orphaned student_courses entry for roll: ${roll}`);
+                        // Mark for deletion
+                        updates['/student_courses/' + roll] = null;
+                        cleanedCount++;
+                        
+                        // Also clean up any attendance records for this roll
+                        Object.keys(attendance).forEach(date => {
+                            Object.keys(attendance[date] || {}).forEach(subject => {
+                                if (attendance[date][subject] && attendance[date][subject][roll]) {
+                                    updates[`/attendance/${date}/${subject}/${roll}`] = null;
+                                }
+                            });
+                        });
+                    }
+                }
+                
+                // Apply all updates if any
+                if (cleanedCount > 0) {
+                    await db.ref().update(updates);
+                    
+                    // Update local objects
+                    Object.keys(updates).forEach(path => {
+                        if (path.startsWith('/student_courses/')) {
+                            const roll = path.replace('/student_courses/', '');
+                            delete studentCourses[roll];
+                        } else if (path.startsWith('/attendance/')) {
+                            // Parse path to update local attendance
+                            const parts = path.split('/');
+                            // path format: /attendance/date/subject/roll
+                            if (parts.length === 5) {
+                                const date = parts[2];
+                                const subject = parts[3];
+                                const roll = parts[4];
+                                if (attendance[date] && 
+                                    attendance[date][subject] && 
+                                    attendance[date][subject][roll]) {
+                                    delete attendance[date][subject][roll];
+                                }
+                            }
+                        }
+                    });
+                    
+                    showToast(`Cleaned up ${cleanedCount} orphaned student records`, 'success');
+                } else {
+                    showToast('No orphaned records found', 'info');
+                }
+                
+                // Refresh views
+                renderStudentList();
+                renderUsersList();
+                const currentSubject = document.getElementById('attendanceSubject')?.value;
+                if (currentSubject) {
+                    renderSubjectAttendance(currentSubject);
+                }
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error during cleanup:', error);
+                showToast('Error during cleanup: ' + error.message, 'error');
+            }
         }
-        
-        // Remove from users
-        await db.ref('users/' + uid).remove();
-        delete users[uid];
-        
-        showToast('User removed', 'success');
-        renderUsersList();
-        updateStats();
-        
-        // Refresh the attendance view if a subject is selected
-        const currentSubject = document.getElementById('attendanceSubject')?.value;
-        if (currentSubject) {
-            renderSubjectAttendance(currentSubject);
-        }
-        
-    } catch (error) {
-        showToast(error.message, 'error');
-    }
-};
+
+        // Make cleanup function globally accessible
+        window.cleanupOrphanedStudents = cleanupOrphanedStudents;
 
         document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
 
