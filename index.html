@@ -2733,22 +2733,43 @@
         };
 
         window.deleteUser = async (uid) => {
-            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
-            if (!confirm('Delete user?')) return;
-            try {
-                const userData = users[uid];
-                if (userData.role === 'student' && userData.rollNo) {
-                    await db.ref('students/' + userData.rollNo).remove();
-                    delete students[userData.rollNo];
-                }
-                await db.ref('users/' + uid).remove();
-                showToast('User removed', 'success');
-                renderUsersList();
-                updateStats();
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
-        };
+    if (uid === currentUser?.uid) { 
+        showToast('Cannot delete yourself', 'error'); 
+        return; 
+    }
+    if (!confirm('Delete user?')) return;
+    
+    try {
+        const userData = users[uid];
+        
+        if (userData.role === 'student' && userData.rollNo) {
+            // Remove from students
+            await db.ref('students/' + userData.rollNo).remove();
+            delete students[userData.rollNo];
+            
+            // IMPORTANT: Also remove from student_courses
+            await db.ref('student_courses/' + userData.rollNo).remove();
+            delete studentCourses[userData.rollNo];
+        }
+        
+        // Remove from users
+        await db.ref('users/' + uid).remove();
+        delete users[uid];
+        
+        showToast('User removed', 'success');
+        renderUsersList();
+        updateStats();
+        
+        // Refresh the attendance view if a subject is selected
+        const currentSubject = document.getElementById('attendanceSubject')?.value;
+        if (currentSubject) {
+            renderSubjectAttendance(currentSubject);
+        }
+        
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+};
 
         document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
 
