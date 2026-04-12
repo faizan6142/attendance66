@@ -6,6 +6,7 @@
     <title>AttenZen – Multi-Course Attendance System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -15,366 +16,604 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
-        /* Your existing styles */
         :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --light: #f8f9fa;
-            --dark: #212529;
+            --primary: #5b5ef4;
+            --secondary: #4042d4;
+            --accent: #00e5ff;
+            --success: #00d4aa;
+            --danger: #ff3d71;
+            --warning: #ffaa00;
+            --light: #f0f2ff;
+            --dark: #0d0f1c;
+            --surface: #ffffff;
+            --surface2: #f5f6ff;
+            --border: #e4e6ff;
+            --text-muted: #8890b5;
+            --shadow-sm: 0 2px 8px rgba(91,94,244,0.08);
+            --shadow-md: 0 8px 32px rgba(91,94,244,0.15);
+            --shadow-lg: 0 20px 60px rgba(91,94,244,0.2);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Sora', sans-serif;
+            background: #0a0b1a;
+            background-image: 
+                radial-gradient(ellipse at 20% 10%, rgba(91,94,244,0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,229,255,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(64,66,212,0.1) 0%, transparent 70%);
             min-height: 100vh;
             padding: 20px;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(31,38,135,0.37);
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
         }
+
+        /* ========== LOGIN ========== */
         .login-container {
-            max-width: 450px;
-            margin: 50px auto;
-            padding: 40px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideUp 0.5s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .dashboard-container { display: none; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .navbar {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 15px;
-            margin-bottom: 25px;
-            padding: 15px 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: white !important; display: flex; align-items: center; gap: 10px; }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 440px;
+            margin: 60px auto;
+            padding: 0;
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(91,94,244,0.3);
+            animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1);
             overflow: hidden;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .card-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .stats-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
+        .login-header {
+            background: linear-gradient(135deg, #1a1c3a 0%, #12142b 100%);
+            padding: 44px 44px 36px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.3s ease;
         }
-        .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: -60px; left: -60px;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(91,94,244,0.4) 0%, transparent 70%);
+        }
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; right: -40px;
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,229,255,0.2) 0%, transparent 70%);
+        }
+        .login-logo-wrap {
+            position: relative; z-index: 1;
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 32px rgba(91,94,244,0.5);
+        }
+        .login-logo-wrap i { font-size: 2rem; color: white; }
+        .login-header h2 {
+            font-size: 2rem; font-weight: 800; color: white;
+            position: relative; z-index: 1; margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .login-header p { color: rgba(255,255,255,0.55); font-size: 0.9rem; position: relative; z-index: 1; }
+        .login-body {
+            background: #ffffff;
+            padding: 36px 44px 40px;
+        }
+        .login-body .form-label {
+            font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 6px;
+        }
+        .login-body .input-group-text {
+            background: var(--light); border: 1.5px solid var(--border);
+            border-right: none; color: var(--primary);
+            border-radius: var(--radius-xs) 0 0 var(--radius-xs);
+        }
+        .login-body .form-control {
+            border: 1.5px solid var(--border); border-left: none;
+            background: var(--light); font-size: 0.95rem;
+            border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+            transition: all 0.2s;
+        }
+        .login-body .form-control:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,94,244,0.12);
+            background: white;
+        }
+        .login-body .input-group:focus-within .input-group-text {
+            border-color: var(--primary); background: white;
+        }
+        .login-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #7b7efc 100%);
+            border: none; color: white; width: 100%;
+            padding: 14px; border-radius: var(--radius-sm);
+            font-size: 0.95rem; font-weight: 700; letter-spacing: 0.3px;
+            transition: all 0.3s; position: relative; overflow: hidden;
+            box-shadow: 0 6px 24px rgba(91,94,244,0.4);
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(91,94,244,0.5); }
+        .login-btn:active { transform: translateY(0); }
+        .login-footer-text { color: var(--text-muted); font-size: 0.82rem; text-align: center; margin-top: 20px; }
+
+        @keyframes slideUp {
+            from { transform: translateY(60px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ========== DASHBOARD ========== */
+        .dashboard-container { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            background: linear-gradient(135deg, #1a1c3a 0%, #0e1028 100%);
+            border-radius: var(--radius);
+            margin-bottom: 28px;
+            padding: 14px 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            border: 1px solid rgba(91,94,244,0.2);
+        }
+        .navbar-brand {
+            font-weight: 800; font-size: 1.4rem; color: white !important;
+            display: flex; align-items: center; gap: 12px; letter-spacing: -0.3px;
+        }
+        .navbar-brand .brand-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(91,94,244,0.4);
+        }
+        .navbar-brand .brand-icon i { font-size: 1rem; color: white; }
+        .navbar .welcome-text {
+            color: rgba(255,255,255,0.7); font-size: 0.88rem; font-weight: 500;
+        }
+        .btn-nav {
+            background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.15);
+            padding: 8px 18px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;
+            transition: all 0.2s; backdrop-filter: blur(10px);
+        }
+        .btn-nav:hover { background: rgba(255,255,255,0.18); color: white; border-color: rgba(255,255,255,0.3); }
+
+        /* ========== CARDS ========== */
+        .card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            overflow: hidden;
+            background: var(--surface);
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .card-header {
+            background: linear-gradient(135deg, #1a1c3a 0%, #252850 100%);
+            color: white; border: none;
+            padding: 16px 22px; font-weight: 600;
+            font-size: 0.95rem; display: flex; align-items: center; gap: 8px;
+        }
+        .card-header i { opacity: 0.85; }
+        .card-body { padding: 22px; }
+
+        /* ========== STATS CARDS ========== */
+        .stats-card {
+            color: white; padding: 28px 24px;
+            border-radius: var(--radius); text-align: left;
+            position: relative; overflow: hidden; cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+        }
+        .stats-card:hover { transform: translateY(-6px); }
+        .stats-card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; right: -30px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
         }
         .stats-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+            top: -50%; right: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+            animation: rotate 25s linear infinite;
         }
+        .stats-icon {
+            width: 52px; height: 52px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px; position: relative; z-index: 1;
+        }
+        .stats-icon i { font-size: 1.4rem; }
+        .stats-number { font-size: 2.8rem; font-weight: 800; margin: 0 0 4px; position: relative; z-index: 1; letter-spacing: -1px; line-height: 1; }
+        .stats-label { font-size: 0.88rem; opacity: 0.85; position: relative; z-index: 1; font-weight: 500; }
+        .stats-sub { font-size: 0.75rem; opacity: 0.65; position: relative; z-index: 1; margin-top: 4px; }
+
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .stats-number { font-size: 2.5rem; font-weight: 700; margin: 10px 0; position: relative; z-index: 1; }
-        .stats-label { font-size: 1rem; opacity: 0.9; position: relative; z-index: 1; }
-        .attendance-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 5px;
-        }
+
+        /* ========== ATTENDANCE TABLE ========== */
+        .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
         .attendance-table th {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 12px;
-            font-weight: 600;
-            border: none;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            background: #1a1c3a; color: rgba(255,255,255,0.9);
+            padding: 12px 14px; font-weight: 600; font-size: 0.82rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            border: none; position: sticky; top: 0; z-index: 10;
         }
-        .attendance-table td { padding: 12px; background: white; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .attendance-table th:first-child { border-radius: 8px 0 0 8px; }
+        .attendance-table th:last-child { border-radius: 0 8px 8px 0; }
+        .attendance-table td {
+            padding: 11px 14px; background: white; border: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05); font-size: 0.9rem;
+            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        }
+        .attendance-table td:first-child { border-left: 1px solid var(--border); border-radius: 8px 0 0 8px; }
+        .attendance-table td:last-child { border-right: 1px solid var(--border); border-radius: 0 8px 8px 0; }
+        .attendance-table tr:hover td { background: var(--light); }
+
+        /* ========== STATUS TOGGLES ========== */
         .status-toggle {
-            cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-block;
-            min-width: 60px;
-            text-align: center;
+            cursor: pointer; padding: 6px 14px; border-radius: 8px;
+            font-weight: 700; font-size: 0.78rem; letter-spacing: 0.5px;
+            transition: all 0.2s ease; display: inline-block;
+            min-width: 52px; text-align: center; text-transform: uppercase;
         }
-        .status-toggle.present { background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white; box-shadow: 0 4px 10px rgba(76,201,240,0.3); }
-        .status-toggle.absent { background: linear-gradient(135deg, #f72585, #b5179e); color: white; box-shadow: 0 4px 10px rgba(247,37,133,0.3); }
-        .status-toggle.holiday { background: linear-gradient(135deg, #f8961e, #f3722c); color: white; box-shadow: 0 4px 10px rgba(248,150,30,0.3); }
-        .status-toggle:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .status-toggle.present {
+            background: rgba(0,212,170,0.12); color: #00a37d;
+            border: 1.5px solid rgba(0,212,170,0.35);
+        }
+        .status-toggle.absent {
+            background: rgba(255,61,113,0.1); color: #e02060;
+            border: 1.5px solid rgba(255,61,113,0.3);
+        }
+        .status-toggle.holiday {
+            background: rgba(255,170,0,0.1); color: #cc8800;
+            border: 1.5px solid rgba(255,170,0,0.3);
+        }
+        .status-toggle:hover { transform: scale(1.08); filter: brightness(1.05); }
+
+        /* ========== BUTTONS ========== */
         .btn-modern {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            position: relative;
-            overflow: hidden;
+            padding: 9px 18px; border-radius: var(--radius-sm);
+            font-weight: 600; font-size: 0.88rem; transition: all 0.25s ease;
+            border: none; position: relative; overflow: hidden;
         }
         .btn-modern::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%,-50%);
-            transition: width 0.6s, height 0.6s;
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 0; height: 0; border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            transform: translate(-50%,-50%); transition: width 0.5s, height 0.5s;
         }
         .btn-modern:hover::before { width: 300px; height: 300px; }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
-        .btn-success { background: linear-gradient(135deg, #4cc9f0, #4895ef); }
-        .btn-danger { background: linear-gradient(135deg, #f72585, #b5179e); }
-        .btn-warning { background: linear-gradient(135deg, #f8961e, #f3722c); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, #7b7efc 100%); color: white; box-shadow: 0 4px 16px rgba(91,94,244,0.35); }
+        .btn-primary:hover { color: white; box-shadow: 0 6px 20px rgba(91,94,244,0.5); transform: translateY(-1px); }
+        .btn-success { background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 100%); color: white; box-shadow: 0 4px 16px rgba(0,212,170,0.3); }
+        .btn-success:hover { color: white; transform: translateY(-1px); }
+        .btn-danger { background: linear-gradient(135deg, #ff3d71 0%, #c2185b 100%); color: white; box-shadow: 0 4px 16px rgba(255,61,113,0.3); }
+        .btn-danger:hover { color: white; transform: translateY(-1px); }
+        .btn-warning { background: linear-gradient(135deg, #ffaa00 0%, #ff7c00 100%); color: white; box-shadow: 0 4px 16px rgba(255,170,0,0.3); }
+        .btn-warning:hover { color: white; transform: translateY(-1px); }
+
+        /* ========== DATE PICKER CONTAINERS ========== */
         .date-picker-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 15px;
-            color: white;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1a1c3a 0%, #252850 100%);
+            padding: 22px; border-radius: var(--radius);
+            color: white; margin-bottom: 20px;
+            border: 1px solid rgba(91,94,244,0.2);
         }
+        .date-picker-container h5 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px !important; }
+        /* ========== CLOUD SYNC ========== */
         .cloud-sync {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
+            position: fixed; bottom: 30px; right: 30px;
+            background: linear-gradient(135deg, var(--primary), #7b7efc);
+            color: white; width: 56px; height: 56px;
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 24px rgba(91,94,244,0.5); cursor: pointer;
+            z-index: 1000; transition: all 0.3s ease;
+            animation: pulse 3s infinite;
         }
-        .cloud-sync:hover { transform: scale(1.1) rotate(180deg); }
+        .cloud-sync:hover { transform: scale(1.1) rotate(180deg); box-shadow: 0 12px 30px rgba(91,94,244,0.7); }
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(67,97,238,0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(67,97,238,0); }
-            100% { box-shadow: 0 0 0 0 rgba(67,97,238,0); }
+            0% { box-shadow: 0 0 0 0 rgba(91,94,244,0.6); }
+            70% { box-shadow: 0 0 0 14px rgba(91,94,244,0); }
+            100% { box-shadow: 0 0 0 0 rgba(91,94,244,0); }
         }
+
+        /* ========== TOASTS ========== */
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1055; }
         .toast {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            border-left: 5px solid var(--primary);
-            margin-bottom: 10px;
+            background: #1a1c3a; color: white;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: none; border-left: 4px solid var(--primary);
+            margin-bottom: 10px; min-width: 280px;
         }
-        .toast-success { border-left-color: #4cc9f0; }
-        .toast-error { border-left-color: #f72585; }
-        .toast-warning { border-left-color: #f8961e; }
+        .toast .toast-body { color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.88rem; }
+        .toast .btn-close { filter: invert(1) opacity(0.7); }
+        .toast-success { border-left-color: var(--success); }
+        .toast-error { border-left-color: var(--danger); }
+        .toast-warning { border-left-color: var(--warning); }
+
+        /* ========== LEGEND ========== */
         .attendance-legend {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin: 20px 0;
+            display: flex; gap: 24px; justify-content: center;
+            margin: 16px 0;
+            background: var(--surface); padding: 12px 24px;
+            border-radius: var(--radius-sm); border: 1px solid var(--border);
+            width: fit-content; margin: 16px auto;
         }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .legend-color { width: 20px; height: 20px; border-radius: 5px; }
-        .legend-color.present { background: linear-gradient(135deg, #4cc9f0, #4895ef); }
-        .legend-color.absent { background: linear-gradient(135deg, #f72585, #b5179e); }
-        .legend-color.holiday { background: linear-gradient(135deg, #f8961e, #f3722c); }
-        .bulk-update-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #444; }
+        .legend-color { width: 18px; height: 18px; border-radius: 5px; }
+        .legend-color.present { background: rgba(0,212,170,0.8); border: 1.5px solid rgba(0,212,170,0.5); }
+        .legend-color.absent { background: rgba(255,61,113,0.7); border: 1.5px solid rgba(255,61,113,0.4); }
+        .legend-color.holiday { background: rgba(255,170,0,0.7); border: 1.5px solid rgba(255,170,0,0.4); }
+
+        /* ========== MODALS ========== */
+        .bulk-update-modal, .student-list-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+            display: none; justify-content: center; align-items: center; z-index: 2000;
         }
-        .bulk-update-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
+        .bulk-update-content, .student-list-content {
+            background: white; padding: 32px; border-radius: 20px;
+            max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
         }
+        .student-list-content { max-width: 1200px; width: 95%; }
+        .bulk-update-content h4, .student-list-content h4 {
+            font-weight: 800; font-size: 1.2rem; color: #1a1c3a; margin-bottom: 8px;
+        }
+
+        /* ========== USER LIST ========== */
         .user-list { max-height: 400px; overflow-y: auto; }
+
+        /* ========== QUICK ACTIONS ========== */
         .quick-action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
+            display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
         }
         .quick-action-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 15px;
-            border-radius: 10px;
-            background: white;
-            border: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+            flex: 1; min-width: 120px; padding: 18px 12px;
+            border-radius: var(--radius); background: var(--surface);
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-sm); transition: all 0.25s ease;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            color: #444; cursor: pointer;
         }
+        .quick-action-btn i { font-size: 1.5rem; color: var(--primary); transition: color 0.25s; }
+        .quick-action-btn span { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .quick-action-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
+            transform: translateY(-5px); border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(91,94,244,0.2);
+            background: linear-gradient(135deg, var(--primary), #7b7efc); color: white;
         }
-        .loading-spinner { display: none; text-align: center; padding: 40px; }
+        .quick-action-btn:hover i { color: white; }
+
+        /* ========== SPINNER ========== */
+        .loading-spinner { display: none; text-align: center; padding: 48px; }
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+            width: 44px; height: 44px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .badge-custom { padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
-        .badge-present { background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white; }
-        .badge-absent { background: linear-gradient(135deg, #f72585, #b5179e); color: white; }
-        .nav-tabs .nav-link { color: white; border: none; }
-        .nav-tabs .nav-link.active { background-color: rgba(255,255,255,0.2); color: white; border: none; }
-        .user-management-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+
+        /* ========== BADGES ========== */
+        .badge-custom { padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.3px; }
+        .badge-present { background: rgba(0,212,170,0.12); color: #008a6e; border: 1px solid rgba(0,212,170,0.3); }
+        .badge-absent { background: rgba(255,61,113,0.1); color: #c01555; border: 1px solid rgba(255,61,113,0.3); }
+
+        /* ========== TABS ========== */
+        .nav-tabs { border-bottom: none; gap: 4px; padding: 0 4px; }
+        .nav-tabs .nav-link {
+            color: rgba(255,255,255,0.65); border: none;
+            padding: 10px 20px; border-radius: var(--radius-sm);
+            font-weight: 600; font-size: 0.88rem; transition: all 0.2s;
         }
+        .nav-tabs .nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
+        .nav-tabs .nav-link.active { background: rgba(255,255,255,0.18); color: white; border: none; }
+
+        /* ========== MANAGEMENT SECTION ========== */
+        .user-management-section {
+            background: linear-gradient(135deg, #1a1c3a 0%, #252850 100%);
+            color: white; padding: 18px 22px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            margin-bottom: 0; border: 1px solid rgba(91,94,244,0.2);
+        }
+        .user-management-section h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; }
+
+        /* ========== COURSE STRUCTURE ========== */
         .course-structure { max-height: 500px; overflow-y: auto; }
         .subject-checkbox-group { max-height: 200px; overflow-y: auto; }
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
-        }
+        .action-buttons { display: flex; gap: 5px; justify-content: flex-end; }
         .course-item {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
+            border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+            padding: 16px; margin-bottom: 14px; background: var(--light);
         }
         .semester-item {
-            margin-left: 20px;
-            margin-top: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
+            margin-left: 20px; margin-top: 10px; padding: 12px;
+            background: white; border-radius: 8px;
             border-left: 3px solid var(--primary);
         }
         .subject-item {
-            margin-left: 30px;
-            padding: 5px 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px dashed #dee2e6;
+            margin-left: 30px; padding: 6px 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px dashed var(--border); font-size: 0.88rem;
         }
         .edit-mode input {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
+            width: 100%; padding: 6px; border: 1.5px solid var(--border); border-radius: 4px;
         }
-        .student-list-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
+
+        /* ========== FORM CONTROLS ========== */
+        .form-control, .form-select {
+            border: 1.5px solid var(--border); border-radius: var(--radius-xs);
+            font-size: 0.9rem; color: #222; transition: all 0.2s;
+            background: var(--light);
         }
-        .student-list-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 1200px;
-            width: 95%;
-            max-height: 90vh;
-            overflow-y: auto;
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary); background: white;
+            box-shadow: 0 0 0 3px rgba(91,94,244,0.1);
         }
-        .student-table {
-            width: 100%;
-            border-collapse: collapse;
+        .form-label { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+
+        /* ========== TABLE (global) ========== */
+        .table { font-size: 0.88rem; }
+        .table th { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-color: var(--border); }
+        .table td { border-color: var(--border); vertical-align: middle; }
+        .table-striped > tbody > tr:nth-of-type(odd) > * { background-color: var(--light); }
+
+        /* ========== CHART CONTAINER ========== */
+        .chart-container {
+            background: var(--surface); border-radius: var(--radius);
+            padding: 24px; border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm); margin-top: 20px;
         }
+        .chart-container h5 { font-weight: 700; font-size: 0.95rem; color: #1a1c3a; }
+
+        /* ========== DATE SELECTOR ========== */
+        .date-selector { border: 1.5px solid rgba(255,255,255,0.25) !important; background: rgba(255,255,255,0.1) !important; color: white !important; border-radius: var(--radius-xs) !important; }
+
+        /* ========== STUDENT DASHBOARD ========== */
+        .attendance-summary {
+            background: linear-gradient(135deg, #1a1c3a, #252850);
+            color: white; padding: 20px; border-radius: var(--radius);
+            margin-bottom: 12px; text-align: center;
+        }
+        .attendance-summary .stats-number { font-size: 2.2rem; }
+
+        /* ========== PROGRESS ========== */
+        .progress { border-radius: 50px; background: var(--border); overflow: hidden; }
+        .progress-bar { font-size: 0.78rem; font-weight: 700; }
+
+        /* ========== PROFILE CARD ========== */
+        .profile-photo-wrap {
+            width: 100px; height: 100px; border-radius: 24px;
+            border: 3px solid var(--primary); overflow: hidden;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 24px rgba(91,94,244,0.3);
+        }
+        .profile-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ========== STUDENT TABLE ========== */
+        .student-table { width: 100%; border-collapse: collapse; }
         .student-table th {
-            background: var(--primary);
-            color: white;
-            padding: 12px;
-            position: sticky;
-            top: 0;
+            background: #1a1c3a; color: rgba(255,255,255,0.85);
+            padding: 12px 14px; position: sticky; top: 0;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .student-table td {
-            padding: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .student-table tr:hover {
-            background: #f8f9fa;
-        }
+        .student-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+        .student-table tr:hover td { background: var(--light); }
         .edit-student-form {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
+            background: var(--light); padding: 24px; border-radius: var(--radius);
+            margin-top: 20px; border: 1.5px solid var(--border);
         }
         .subject-code-badge {
-            display: inline-block;
-            background: #e9ecef;
-            padding: 3px 8px;
-            border-radius: 12px;
-            margin: 2px;
-            font-size: 0.85rem;
-            font-family: monospace;
+            display: inline-block; background: var(--light);
+            padding: 3px 9px; border-radius: 12px; margin: 2px;
+            font-size: 0.8rem; font-family: 'DM Mono', monospace;
+            border: 1px solid var(--border); color: var(--primary); font-weight: 600;
+        }
+
+        /* ========== ANNOUNCEMENTS ========== */
+        .announcement-card {
+            padding: 16px; margin-bottom: 14px;
+            background: var(--light); border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            transition: box-shadow 0.2s;
+        }
+        .announcement-card:hover { box-shadow: var(--shadow-sm); }
+        .announcement-card .announcement-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+        .announcement-card .announcement-title { font-weight: 700; font-size: 1rem; color: #1a1c3a; margin-bottom: 6px; }
+        .announcement-card .announcement-body { font-size: 0.9rem; color: #444; white-space: pre-wrap; line-height: 1.6; }
+
+        /* ========== DELETION REQUEST CARDS ========== */
+        .deletion-request-card {
+            border: 1.5px solid var(--border); padding: 16px;
+            border-radius: var(--radius-sm); margin-bottom: 14px;
+            background: white; border-left: 4px solid var(--danger);
+            transition: box-shadow 0.2s;
+        }
+        .deletion-request-card:hover { box-shadow: var(--shadow-sm); }
+        .deletion-request-card .request-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+        .deletion-request-card .request-title { font-weight: 700; color: var(--danger); font-size: 0.98rem; }
+
+        /* ========== ANNOUNCEMENT POPUP ========== */
+        .announcement-popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+            display: none; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .announcement-popup-box {
+            background: white; border-radius: 20px; padding: 32px;
+            max-width: 480px; width: 90%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            position: relative; animation: slideUp 0.4s ease;
+        }
+        .announcement-popup-close {
+            position: absolute; top: 14px; right: 14px;
+            background: var(--light); border: none; border-radius: 50%;
+            width: 32px; height: 32px; cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); transition: all 0.2s;
+        }
+        .announcement-popup-close:hover { background: var(--border); color: #333; }
+        .announcement-popup-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .announcement-popup-header .popup-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--primary), #7b7efc);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .announcement-popup-title { font-weight: 800; font-size: 1.1rem; color: #1a1c3a; }
+        .announcement-popup-time { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .announcement-popup-message {
+            font-size: 0.92rem; color: #444; line-height: 1.7;
+            white-space: pre-wrap; background: var(--light);
+            border-radius: var(--radius-sm); padding: 14px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* ========== MESSAGING ========== */
+        .msg-conversation-list { max-height: 420px; overflow-y: auto; }
+        .msg-conversation-item {
+            padding: 12px 14px; border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: background 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .msg-conversation-item:hover, .msg-conversation-item.active { background: var(--light); }
+        .msg-conversation-item .conv-name { font-weight: 600; font-size: 0.9rem; color: #1a1c3a; }
+        .msg-conversation-item .conv-preview { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .msg-unread-badge { background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .msg-chat-area { display: flex; flex-direction: column; }
+        .msg-chat-header { padding: 12px 16px; background: linear-gradient(135deg, #1a1c3a, #252850); color: white; border-radius: var(--radius-sm) var(--radius-sm) 0 0; display: flex; align-items: center; gap: 10px; }
+        .msg-chat-header .msg-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .msg-chat-header .msg-recipient-name { font-weight: 700; font-size: 0.95rem; }
+        .msg-chat-messages { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--surface2); min-height: 280px; max-height: 360px; }
+        .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 0.88rem; line-height: 1.5; word-break: break-word; }
+        .msg-bubble.sent { align-self: flex-end; background: linear-gradient(135deg, var(--primary), #7b7efc); color: white; border-radius: 14px 14px 4px 14px; }
+        .msg-bubble.received { align-self: flex-start; background: white; color: #333; border: 1px solid var(--border); border-radius: 14px 14px 14px 4px; }
+        .msg-bubble .msg-time { font-size: 0.7rem; opacity: 0.65; margin-top: 4px; }
+        .msg-input-area { padding: 12px; background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm); display: flex; gap: 8px; align-items: flex-end; }
+        .msg-input-area textarea { flex: 1; resize: none; border: 1.5px solid var(--border); border-radius: var(--radius-xs); padding: 8px 12px; font-size: 0.88rem; font-family: inherit; }
+        .msg-input-area textarea:focus { border-color: var(--primary); outline: none; }
+        .msg-empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .msg-empty-state i { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+        .msg-no-conv { display: flex; align-items: center; justify-content: center; height: 280px; }
+
+        /* ========== VIEW-ONLY DASHBOARD ========== */
+        .view-only-badge {
+            background: rgba(255,255,255,0.15); color: white;
+            padding: 5px 12px; border-radius: 8px; font-size: 0.8rem;
+            border: 1px solid rgba(255,255,255,0.25);
         }
     </style>
 </head>
@@ -383,17 +622,20 @@
 
     <!-- LOGIN SECTION -->
     <div id="loginSection" class="login-container">
-        <div class="text-center mb-4">
-            <i class="fas fa-calendar-check fa-4x" style="color: var(--primary);"></i>
-            <h2 class="mt-3">AttenZen</h2>
-            <p class="text-muted">Multi-Course Attendance Management</p>
+        <div class="login-header">
+            <div class="login-logo-wrap">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h2>AttenZen</h2>
+            <p>Multi-Course Attendance Management</p>
         </div>
+        <div class="login-body">
         <form id="loginForm">
             <div class="mb-4">
-                <label class="form-label">Email</label>
+                <label class="form-label">Email Address</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                    <input type="email" class="form-control" id="username" required placeholder="Enter email">
+                    <input type="email" class="form-control" id="username" required placeholder="Enter your email">
                 </div>
             </div>
             <div class="mb-4">
@@ -404,17 +646,16 @@
                 </div>
             </div>
             
-            <div class="mb-3 form-check">
+            <div class="mb-4 form-check">
                 <input type="checkbox" class="form-check-input" id="rememberMe" checked>
-                <label class="form-check-label" for="rememberMe">Remember me (stay logged in)</label>
+                <label class="form-check-label" style="font-size:0.88rem;color:#666;" for="rememberMe">Remember me (stay logged in)</label>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-modern w-100 py-3">
-                <i class="fas fa-sign-in-alt me-2"></i>Login
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
             </button>
         </form>
-        <div class="text-center mt-4">
-            <small class="text-muted">contact faizanameenshah.dt@gmail.com</small>
+        <p class="login-footer-text">contact <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8debece4f7ece3ece0e8e8e3fee5ece5a3e9f9cdeae0ece4e1a3eee2e0">[email&#160;protected]</a></p>
         </div>
     </div>
 
@@ -422,10 +663,13 @@
     <div id="adminDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen</a>
+                <a class="navbar-brand" href="#">
+                    <div class="brand-icon"><i class="fas fa-calendar-check"></i></div>
+                    AttenZen
+                </a>
                 <div class="d-flex align-items-center gap-3">
-                    <span class="text-white" id="adminWelcome">Welcome, Admin</span>
-                    <button class="btn btn-light btn-modern" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+                    <span class="welcome-text" id="adminWelcome">Welcome, Admin</span>
+                    <button class="btn btn-nav btn-modern" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
                 </div>
             </div>
         </nav>
@@ -434,32 +678,35 @@
             <!-- QUICK STATS -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
-                    <div class="stats-card" id="totalStudentsCard">
-                        <i class="fas fa-users fa-2x mb-3"></i>
+                    <div class="stats-card" id="totalStudentsCard" style="background: linear-gradient(135deg, #5b5ef4 0%, #4042d4 100%);">
+                        <div class="stats-icon"><i class="fas fa-users"></i></div>
                         <div class="stats-number" id="totalStudents">0</div>
                         <div class="stats-label">Total Students Enrolled</div>
-                        <small class="text-white-50">Click to view details</small>
+                        <div class="stats-sub">Click to view details</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="stats-card" style="background:linear-gradient(135deg,#4cc9f0,#4895ef)">
-                        <i class="fas fa-check-circle fa-2x mb-3"></i>
+                    <div class="stats-card" style="background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 100%);">
+                        <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
                         <div class="stats-number" id="presentToday">0</div>
                         <div class="stats-label">Present Today</div>
+                        <div class="stats-sub">&nbsp;</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="stats-card" style="background:linear-gradient(135deg,#f72585,#b5179e)">
-                        <i class="fas fa-times-circle fa-2x mb-3"></i>
+                    <div class="stats-card" style="background: linear-gradient(135deg, #ff3d71 0%, #c2185b 100%);">
+                        <div class="stats-icon"><i class="fas fa-times-circle"></i></div>
                         <div class="stats-number" id="absentToday">0</div>
                         <div class="stats-label">Absent Today</div>
+                        <div class="stats-sub">&nbsp;</div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="stats-card" style="background:linear-gradient(135deg,#f8961e,#f3722c)">
-                        <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                    <div class="stats-card" style="background: linear-gradient(135deg, #ffaa00 0%, #ff7c00 100%);">
+                        <div class="stats-icon"><i class="fas fa-calendar-alt"></i></div>
                         <div class="stats-number" id="totalAttendanceDays">0</div>
                         <div class="stats-label">Attendance Days</div>
+                        <div class="stats-sub">&nbsp;</div>
                     </div>
                 </div>
             </div>
@@ -482,6 +729,9 @@
                     <li class="nav-item"><a class="nav-link" href="#coursesTab" data-bs-toggle="tab">Courses & Subjects</a></li>
                     <li class="nav-item"><a class="nav-link" href="#attendanceTab" data-bs-toggle="tab">Attendance</a></li>
                     <li class="nav-item"><a class="nav-link" href="#reportsTab" data-bs-toggle="tab">Reports</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#announcementsTab" data-bs-toggle="tab" id="announcementsTabLink"><i class="fas fa-bullhorn me-1"></i>Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#messagesTab" data-bs-toggle="tab" id="messagesTabLink"><i class="fas fa-comments me-1"></i>Messages</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#approvalsTab" data-bs-toggle="tab" id="approvalsTabLink"><i class="fas fa-clipboard-check me-1"></i>Pending Approvals <span id="pendingApprovalsCount" class="badge bg-danger ms-1" style="display:none">0</span></a></li>
                 </ul>
             </div>
 
@@ -499,6 +749,7 @@
                                             <select class="form-control" id="newUserRole" required>
                                                 <option value="admin">Admin</option>
                                                 <option value="student" selected>Student</option>
+                                                <option value="view_only">View Only</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">
@@ -537,19 +788,9 @@
                                     <div class="mb-3">
                                         <label for="bulkRollInput" class="form-label">Roll Numbers (comma separated)</label>
                                         <textarea class="form-control bulk-roll-input" id="bulkRollInput" rows="3" placeholder="e.g., 38,14,44,18,17"></textarea>
-                                        <small class="text-muted">Accounts created with email: roll@attenzen.com, password: roll123</small>
+                                        <small class="text-muted">Accounts created with email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c8baa7a4a488a9bcbcada6b2ada6e6aba7a5">[email&#160;protected]</a>, password: roll123</small>
                                     </div>
                                     <button class="btn btn-outline-primary w-100" type="button" id="addRollNumbersBtn"><i class="fas fa-user-plus me-2"></i>Add Students</button>
-                                </div>
-                            </div>
-                            <!-- NEW: Database Cleanup Card -->
-                            <div class="card mt-3">
-                                <div class="card-header bg-warning"><i class="fas fa-broom me-2"></i>Database Cleanup</div>
-                                <div class="card-body">
-                                    <p class="text-muted">Remove orphaned student records from courses and attendance (e.g., "Unknown" entries).</p>
-                                    <button class="btn btn-warning w-100" type="button" onclick="cleanupOrphanedStudents()">
-                                        <i class="fas fa-broom me-2"></i>Clean Up Database
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -575,7 +816,7 @@
                     </div>
                 </div>
 
-                <!-- COURSES & SUBJECTS TAB (unchanged) -->
+                <!-- COURSES & SUBJECTS TAB -->
                 <div class="tab-pane fade" id="coursesTab">
                     <div class="row">
                         <div class="col-md-4">
@@ -676,7 +917,7 @@
                     </div>
                 </div>
 
-                <!-- ATTENDANCE TAB (unchanged) -->
+                <!-- ATTENDANCE TAB -->
                 <div class="tab-pane fade" id="attendanceTab">
                     <div class="row mb-4">
                         <div class="col-md-6">
@@ -689,7 +930,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="date-picker-container" style="background:linear-gradient(135deg,#f72585,#b5179e)">
+                            <div class="date-picker-container" style="background:linear-gradient(135deg,#2d0a1e,#4a1030)">
                                 <h5 class="mb-3"><i class="fas fa-minus-circle me-2"></i>Delete Date</h5>
                                 <div class="d-flex gap-3">
                                     <select id="deleteDateSelect2" class="form-control"><option value="">Select date</option></select>
@@ -765,7 +1006,7 @@
                     </div>
                 </div>
 
-                <!-- REPORTS TAB (unchanged) -->
+                <!-- REPORTS TAB -->
                 <div class="tab-pane fade" id="reportsTab">
                     <div class="card">
                         <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</div>
@@ -805,17 +1046,111 @@
                     </div>
                 </div>
             </div>
+
+                <!-- ANNOUNCEMENTS TAB -->
+                <div class="tab-pane fade" id="announcementsTab">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="card">
+                                <div class="card-header"><i class="fas fa-bullhorn me-2"></i>Send Announcement</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" class="form-control" id="announcementTitle" placeholder="Announcement title...">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Message</label>
+                                        <textarea class="form-control" id="announcementMessage" rows="6" placeholder="Write your message here... Students will see this in their dashboard."></textarea>
+                                    </div>
+                                    <button class="btn btn-primary w-100 btn-modern" onclick="sendAnnouncement()"><i class="fas fa-paper-plane me-2"></i>Send to All Students</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-history me-2"></i>Sent Announcements</span>
+                                    <button class="btn btn-sm btn-outline-light" onclick="loadAnnouncements()"><i class="fas fa-sync-alt"></i></button>
+                                </div>
+                                <div class="card-body" id="adminAnnouncementsList" style="max-height:500px;overflow-y:auto;">
+                                    <p class="text-muted text-center">No announcements yet.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PENDING APPROVALS TAB -->
+                <div class="tab-pane fade" id="approvalsTab">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-clipboard-check me-2"></i>Pending Deletion Requests</span>
+                            <button class="btn btn-sm btn-outline-light" onclick="loadDeletionRequests()"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div class="card-body" id="deletionRequestsList">
+                            <p class="text-muted text-center py-4"><i class="fas fa-check-circle me-2"></i>No pending deletion requests.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MESSAGES TAB -->
+                <div class="tab-pane fade" id="messagesTab">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-comments me-2"></i>Conversations</span>
+                                    <button class="btn btn-sm btn-outline-light" onclick="loadAdminConversations()"><i class="fas fa-sync-alt"></i></button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="msg-conversation-list" id="adminConversationList">
+                                        <p class="text-muted text-center p-3">Loading conversations...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mt-3">
+                                <div class="card-header"><i class="fas fa-broadcast-tower me-2"></i>Broadcast to All Students</div>
+                                <div class="card-body">
+                                    <textarea class="form-control mb-2" id="broadcastMessage" rows="3" placeholder="Type a broadcast message to all students..."></textarea>
+                                    <button class="btn btn-warning w-100 btn-modern" onclick="sendBroadcastMessage()"><i class="fas fa-bullhorn me-2"></i>Send to All Students</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="msg-chat-header">
+                                    <div class="msg-avatar"><i class="fas fa-user"></i></div>
+                                    <span class="msg-recipient-name" id="adminChatRecipientName">Select a conversation</span>
+                                </div>
+                                <div class="msg-chat-messages" id="adminChatMessages">
+                                    <div class="msg-no-conv">
+                                        <div class="msg-empty-state">
+                                            <i class="fas fa-comments d-block"></i>
+                                            <p>Select a student conversation to start messaging</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="msg-input-area">
+                                    <textarea id="adminMessageInput" rows="2" placeholder="Type a reply to this student..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdminReply();}"></textarea>
+                                    <button class="btn btn-primary btn-modern" onclick="sendAdminReply()"><i class="fas fa-paper-plane"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- STUDENT DASHBOARD (unchanged) -->
     <div id="studentDashboard" class="dashboard-container">
         <nav class="navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#"><i class="fas fa-calendar-check"></i> AttenZen</a>
+                <a class="navbar-brand" href="#">
+                    <div class="brand-icon"><i class="fas fa-calendar-check"></i></div>
+                    AttenZen
+                </a>
                 <div class="d-flex align-items-center gap-3">
-                    <span class="text-white" id="studentWelcome">Welcome, Student</span>
-                    <button class="btn btn-light btn-modern" id="studentLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+                    <span class="welcome-text" id="studentWelcome">Welcome, Student</span>
+                    <button class="btn btn-nav btn-modern" id="studentLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
                 </div>
             </div>
         </nav>
@@ -845,8 +1180,8 @@
                         <div class="card-header"><i class="fas fa-chart-pie me-2"></i>Attendance Summary</div>
                         <div class="card-body">
                             <div class="attendance-summary text-center"><div class="stats-number" id="presentCount">0</div><div class="stats-label">Present</div></div>
-                            <div class="attendance-summary text-center" style="background:linear-gradient(135deg,#f72585,#b5179e)"><div class="stats-number" id="absentCount">0</div><div class="stats-label">Absent</div></div>
-                            <div class="progress mb-3" style="height:25px"><div id="attendancePercentage" class="progress-bar bg-success" style="width:0%">0%</div></div>
+                            <div class="attendance-summary text-center" style="background:linear-gradient(135deg,#ff3d71,#c2185b)"><div class="stats-number" id="absentCount">0</div><div class="stats-label">Absent</div></div>
+                            <div class="progress mb-3" style="height:22px"><div id="attendancePercentage" class="progress-bar bg-success" style="width:0%">0%</div></div>
                             <p id="attendanceMessage" class="text-muted text-center"></p>
                         </div>
                     </div>
@@ -854,17 +1189,56 @@
                         <div class="card-header"><i class="fas fa-user-circle me-2"></i>My Profile</div>
                         <div class="card-body">
                             <div class="text-center mb-4">
+                                <div class="profile-photo-wrap">
                                 <img id="studentPhoto" src="" alt="Student Photo" 
-                                     style="width: 120px; height: 120px; border-radius: 5%; object-fit: cover; border: 3px solid var(--primary);"
+                                     style="width:100%;height:100%;object-fit:cover;"
                                      onerror="this.onerror=null; this.src='https://via.placeholder.com/120?text=No+Image';">
+                                </div>
                             </div>
                             <p><strong>Name:</strong> <span id="studentName">-</span></p>
                             <p><strong>Roll No:</strong> <span id="studentRollNo">-</span></p>
                             <p><strong>Registration No:</strong> <span id="studentRegNo">-</span></p>
                             <p><strong>Email:</strong> <span id="studentEmail">-</span></p>
-                            <p><strong>Subject/Course:</strong> <span id="studentCourse">-</span></p>
+                            <p><strong>Course:</strong> <span id="studentCourse">-</span></p>
                             <p><strong>Semester:</strong> <span id="studentSemester">-</span></p>
                             <button class="btn btn-primary btn-modern w-100 mt-3" id="changePasswordBtn"><i class="fas fa-key me-2"></i>Change Password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- STUDENT ANNOUNCEMENTS -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-bullhorn me-2"></i>Announcements</span>
+                            <button class="btn btn-sm btn-outline-light" onclick="loadAnnouncements()"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div class="card-body" id="studentAnnouncementsList" style="max-height:400px;overflow-y:auto;">
+                            <p class="text-muted text-center">Loading announcements...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- STUDENT MESSAGES -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-comments me-2"></i>Messages</span>
+                            <button class="btn btn-sm btn-outline-light" onclick="loadStudentMessages()"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="msg-chat-messages" id="studentChatMessages" style="min-height:200px;max-height:320px;">
+                                <div class="msg-empty-state">
+                                    <i class="fas fa-comments d-block"></i>
+                                    <p>No messages yet. Send a message to your admin below!</p>
+                                </div>
+                            </div>
+                            <div class="msg-input-area">
+                                <textarea id="studentMessageInput" rows="2" placeholder="Type a message to admin..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendStudentMessage();}"></textarea>
+                                <button class="btn btn-primary btn-modern" onclick="sendStudentMessage()"><i class="fas fa-paper-plane"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -872,8 +1246,190 @@
         </div>
     </div>
 
-    <!-- CLOUD SYNC BUTTON -->
-    <div class="cloud-sync" id="cloudSyncBtn" title="Refresh from cloud"><i class="fas fa-sync-alt fa-2x"></i></div>
+    <!-- VIEW-ONLY DASHBOARD -->
+    <div id="viewOnlyDashboard" class="dashboard-container">
+        <nav class="navbar">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <div class="brand-icon"><i class="fas fa-calendar-check"></i></div>
+                    AttenZen
+                </a>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="view-only-badge"><i class="fas fa-eye me-1"></i>View Only</span>
+                    <span class="welcome-text" id="viewOnlyWelcome">Welcome</span>
+                    <button class="btn btn-nav btn-modern" id="viewOnlyLogoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+                </div>
+            </div>
+        </nav>
+        <div class="container-fluid">
+            <!-- STATS (read-only) -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #5b5ef4 0%, #4042d4 100%);">
+                        <div class="stats-icon"><i class="fas fa-users"></i></div>
+                        <div class="stats-number" id="voTotalStudents">0</div>
+                        <div class="stats-label">Total Students</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #00d4aa 0%, #00b4d8 100%);">
+                        <div class="stats-icon"><i class="fas fa-book"></i></div>
+                        <div class="stats-number" id="voTotalCourses">0</div>
+                        <div class="stats-label">Total Courses</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #ff3d71 0%, #c2185b 100%);">
+                        <div class="stats-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="stats-number" id="voAttendanceDays">0</div>
+                        <div class="stats-label">Attendance Days</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card" style="background: linear-gradient(135deg, #ffaa00 0%, #ff7c00 100%);">
+                        <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stats-number" id="voPresentToday">0</div>
+                        <div class="stats-label">Present Today</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="user-management-section">
+                <h4><i class="fas fa-eye me-2"></i>View Data <small style="font-size:0.75rem;opacity:0.7;">(Read Only – cannot edit)</small></h4>
+                <ul class="nav nav-tabs" id="viewOnlyTabs">
+                    <li class="nav-item"><a class="nav-link active" href="#voCourseTab" data-bs-toggle="tab"><i class="fas fa-book me-1"></i>Courses</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#voStudentsTab" data-bs-toggle="tab"><i class="fas fa-users me-1"></i>Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#voAttendanceTab" data-bs-toggle="tab" id="voAttendanceTabLink"><i class="fas fa-table me-1"></i>Attendance</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#voReportsTab" data-bs-toggle="tab"><i class="fas fa-chart-bar me-1"></i>Reports</a></li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+                <!-- COURSES TAB (read-only) -->
+                <div class="tab-pane fade show active" id="voCourseTab">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-sitemap me-2"></i>Course Structure (Read Only)</div>
+                        <div class="card-body course-structure" id="voCourseStructure">
+                            <p class="text-muted text-center">Loading courses...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STUDENTS TAB (read-only) -->
+                <div class="tab-pane fade" id="voStudentsTab">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-users me-2"></i>Student List (Read Only)</div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="student-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Roll No</th>
+                                            <th>Name</th>
+                                            <th>Registration No</th>
+                                            <th>Course</th>
+                                            <th>Semester</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="voStudentTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATTENDANCE TAB (view-only) -->
+                <div class="tab-pane fade" id="voAttendanceTab">
+                    <div class="card mb-3">
+                        <div class="card-header"><i class="fas fa-filter me-2"></i>Select Course &amp; Subject</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <select id="voAttendanceCourse" class="form-control">
+                                        <option value="">Select Course</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="voAttendanceSemester" class="form-control">
+                                        <option value="">Select Semester</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="voAttendanceSubject" class="form-control">
+                                        <option value="">Select Subject</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <button class="btn btn-primary" id="voLoadAttendanceBtn"><i class="fas fa-search me-2"></i>View Attendance</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="attendance-legend">
+                        <div class="legend-item"><div class="legend-color present"></div><span>Present</span></div>
+                        <div class="legend-item"><div class="legend-color absent"></div><span>Absent</span></div>
+                        <div class="legend-item"><div class="legend-color holiday"></div><span>Holiday</span></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-table me-2"></i>Attendance (Read Only – no editing)</div>
+                        <div class="card-body">
+                            <div class="table-responsive" id="voAttendanceTableContainer">
+                                <table class="table attendance-table" id="voAttendanceTable">
+                                    <thead><tr><th>Roll No</th><th>Student Name</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTS TAB -->
+                <div class="tab-pane fade" id="voReportsTab">
+                    <div class="card">
+                        <div class="card-header"><i class="fas fa-chart-bar me-2"></i>Attendance Reports (Read Only)</div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label>Course</label>
+                                    <select id="voReportCourse" class="form-control" onchange="voLoadSemestersForReport()">
+                                        <option value="">All Courses</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Semester</label>
+                                    <select id="voReportSemester" class="form-control" onchange="voLoadSubjectsForReport()">
+                                        <option value="">All Semesters</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Subject</label>
+                                    <select id="voReportSubject" class="form-control">
+                                        <option value="">All Subjects</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4"><label>From Date</label><input type="date" class="form-control" id="voReportFromDate"></div>
+                                <div class="col-md-4"><label>To Date</label><input type="date" class="form-control" id="voReportToDate"></div>
+                                <div class="col-md-4"><label>&nbsp;</label><button class="btn btn-primary w-100" id="voGenerateReportBtn"><i class="fas fa-chart-pie me-2"></i>Generate Report</button></div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead><tr><th>Roll No</th><th>Student Name</th><th>Present</th><th>Absent</th><th>Total</th><th>Percentage</th></tr></thead>
+                                    <tbody id="voReportData"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cloud-sync" id="cloudSyncBtn" title="Refresh from cloud"><i class="fas fa-sync-alt fa-lg"></i></div>
 
     <!-- BULK UPDATE MODAL -->
     <div class="bulk-update-modal" id="bulkUpdateModal">
@@ -1000,6 +1556,23 @@
         </div>
     </div>
 
+    <!-- ANNOUNCEMENT POPUP -->
+    <div class="announcement-popup-overlay" id="announcementPopup">
+        <div class="announcement-popup-box">
+            <button class="announcement-popup-close" id="closeAnnouncementPopup" title="Dismiss"><i class="fas fa-times"></i></button>
+            <div class="announcement-popup-header">
+                <div class="popup-icon"><i class="fas fa-bullhorn"></i></div>
+                <div>
+                    <div class="announcement-popup-title" id="popupAnnouncementTitle">New Announcement</div>
+                    <div class="announcement-popup-time" id="popupAnnouncementTime"></div>
+                </div>
+            </div>
+            <div class="announcement-popup-message" id="popupAnnouncementMessage"></div>
+        </div>
+    </div>
+
+    <!-- Scripts: Keep external Bootstrap and replace inline script with complete working version from index (6).html -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ==================== FIREBASE INIT ====================
@@ -1119,6 +1692,12 @@
             toast.addEventListener('hidden.bs.toast', () => toast.remove());
         }
 
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str == null ? '' : String(str)));
+            return div.innerHTML;
+        }
+
         // Load all data from Firebase
         async function loadAllData() {
             try {
@@ -1158,43 +1737,43 @@
         }
 
         // Update stats cards – if subjectId provided, count only for that subject
-        function updateStats(subjectId = null) {
-            totalStudents.textContent = Object.keys(students).length;
-            const today = new Date().toISOString().split('T')[0];
-            let p = 0, a = 0;
-            
-            console.log("Updating stats for subject:", subjectId);
-            console.log("Today's date:", today);
-            console.log("Today's attendance data:", attendance[today]);
-            
-            if (subjectId) {
-                // Count for specific subject
-                if (attendance[today] && attendance[today][subjectId]) {
-                    console.log(`Found data for subject ${subjectId}:`, attendance[today][subjectId]);
-                    Object.values(attendance[today][subjectId]).forEach(s => {
-                        if (s === 'P') p++;
-                        else if (s === 'A') a++;
-                    });
-                } else {
-                    console.log(`No data for subject ${subjectId} today`);
-                }
-            } else {
-                // Count across all subjects
-                if (attendance[today]) {
-                    Object.values(attendance[today]).forEach(subjectAttendance => {
-                        Object.values(subjectAttendance || {}).forEach(s => {
-                            if (s === 'P') p++;
-                            else if (s === 'A') a++;
-                        });
-                    });
-                }
-            }
-            presentToday.textContent = p;
-            absentToday.textContent = a;
-            totalAttendanceDays.textContent = Object.keys(attendance).length;
-            
-            console.log(`Present: ${p}, Absent: ${a}`);
+      function updateStats(subjectId = null) {
+    totalStudents.textContent = Object.keys(students).length;
+    const today = new Date().toISOString().split('T')[0];
+    let p = 0, a = 0;
+    
+    console.log("Updating stats for subject:", subjectId);
+    console.log("Today's date:", today);
+    console.log("Today's attendance data:", attendance[today]);
+    
+    if (subjectId) {
+        // Count for specific subject
+        if (attendance[today] && attendance[today][subjectId]) {
+            console.log(`Found data for subject ${subjectId}:`, attendance[today][subjectId]);
+            Object.values(attendance[today][subjectId]).forEach(s => {
+                if (s === 'P') p++;
+                else if (s === 'A') a++;
+            });
+        } else {
+            console.log(`No data for subject ${subjectId} today`);
         }
+    } else {
+        // Count across all subjects
+        if (attendance[today]) {
+            Object.values(attendance[today]).forEach(subjectAttendance => {
+                Object.values(subjectAttendance || {}).forEach(s => {
+                    if (s === 'P') p++;
+                    else if (s === 'A') a++;
+                });
+            });
+        }
+    }
+    presentToday.textContent = p;
+    absentToday.textContent = a;
+    totalAttendanceDays.textContent = Object.keys(attendance).length;
+    
+    console.log(`Present: ${p}, Absent: ${a}`);
+}
 
         // ==================== STUDENT LIST MODAL FUNCTIONS ====================
         function openStudentListModal() {
@@ -1429,6 +2008,13 @@
                     renderUsersList();
                     const currentSubject = document.getElementById('attendanceSubject')?.value;
                     updateStats(currentSubject || null);
+                    loadPendingRequestsCount();
+                    loadAnnouncements();
+                } else if (currentUser.role === 'view_only') {
+                    const voDash = document.getElementById('viewOnlyDashboard');
+                    if (voDash) voDash.style.display = 'block';
+                    document.getElementById('viewOnlyWelcome').textContent = `Welcome, ${currentUser.fullName}`;
+                    loadViewOnlyDashboard();
                 } else {
                     studentDash.style.display = 'block';
                     studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
@@ -1452,8 +2038,10 @@
                         studentCourse.textContent = course?.name || 'N/A';
                         studentSemester.textContent = semester?.name || 'N/A';
                         
+                        // FIXED: Populate subject dropdown with FORCE RERENDER
                         const subjectSelect = document.getElementById('studentSubjectSelector');
-                        subjectSelect.innerHTML = '';
+                        subjectSelect.innerHTML = ''; // Clear
+                        
                         studentCourseData.subjects.forEach((subId, index) => {
                             const subject = semester?.subjects[subId];
                             if (subject) {
@@ -1461,21 +2049,24 @@
                                 option.value = subId;
                                 option.textContent = subject.name;
                                 subjectSelect.appendChild(option);
+                                // Set first subject as selected
                                 if (index === 0) {
                                     option.selected = true;
                                 }
                             }
                         });
-                        if (subjectSelect.options.length === 0) {
-                            subjectSelect.innerHTML = '<option value="">No subjects</option>';
-                        }
-                    } else {
-                        studentCourse.textContent = 'N/A';
-                        studentSemester.textContent = 'N/A';
-                        document.getElementById('studentSubjectSelector').innerHTML = '<option value="">No subjects</option>';
+                        
+                        // Force a change event to trigger render
+                        setTimeout(() => {
+                            renderStudentDashboard();
+                        }, 100);
                     }
                     
                     renderStudentDashboard();
+                    loadAnnouncements();
+                    loadStudentMessages();
+                    setupStudentMessagesListener();
+                    checkAndShowAnnouncementPopup();
                 }
                 showToast('Login successful!', 'success');
             } catch (error) {
@@ -1488,6 +2079,8 @@
                 currentUser = null;
                 adminDash.style.display = 'none';
                 studentDash.style.display = 'none';
+                const viewOnlyDash = document.getElementById('viewOnlyDashboard');
+                if (viewOnlyDash) viewOnlyDash.style.display = 'none';
                 loginSection.style.display = 'block';
                 showToast('Logged out', 'success');
             }).catch(showToast);
@@ -1622,18 +2215,11 @@
         }
 
         window.deleteCourse = async function(courseId) {
-            if (!confirm('Are you sure you want to delete this course? This will also delete all semesters and subjects in this course.')) return;
-            
-            const hasAssignments = Object.values(studentCourses).some(sc => sc.courseId === courseId);
-            if (hasAssignments) {
-                if (!confirm('This course has students assigned. Deleting it will remove their assignments. Continue?')) return;
-            }
-            
-            await db.ref('courses/' + courseId).remove();
-            showToast('Course deleted', 'success');
-            await loadAllData();
-            loadCoursesForDropdowns();
-            displayCourseStructure();
+            const course = courses[courseId];
+            const courseName = course?.name || courseId;
+            if (!confirm(`Request deletion of course "${courseName}"?\n\nThis requires approval from another admin before it is executed.`)) return;
+            await createDeletionRequest('course', courseId, courseName, { courseName: course?.name, courseCode: course?.code });
+            showToast('Deletion request submitted. Another admin must approve it.', 'warning');
         }
 
         window.editSemester = function(courseId, semesterId) {
@@ -1654,20 +2240,11 @@
         }
 
         window.deleteSemester = async function(courseId, semesterId) {
-            if (!confirm('Are you sure you want to delete this semester? This will also delete all subjects in this semester.')) return;
-            
-            const hasAssignments = Object.values(studentCourses).some(sc => 
-                sc.courseId === courseId && sc.semester === semesterId
-            );
-            if (hasAssignments) {
-                if (!confirm('This semester has students assigned. Deleting it will remove their assignments. Continue?')) return;
-            }
-            
-            await db.ref(`courses/${courseId}/semesters/${semesterId}`).remove();
-            showToast('Semester deleted', 'success');
-            await loadAllData();
-            loadCoursesForDropdowns();
-            displayCourseStructure();
+            const semester = courses[courseId]?.semesters[semesterId];
+            const semName = semester?.name || semesterId;
+            if (!confirm(`Request deletion of semester "${semName}"?\n\nThis requires approval from another admin before it is executed.`)) return;
+            await createDeletionRequest('semester', semesterId, semName, { courseId, semesterName: semester?.name });
+            showToast('Deletion request submitted. Another admin must approve it.', 'warning');
         }
 
         window.editSubject = function(courseId, semesterId, subjectId) {
@@ -1692,20 +2269,11 @@
         }
 
         window.deleteSubject = async function(courseId, semesterId, subjectId) {
-            if (!confirm('Are you sure you want to delete this subject?')) return;
-            
-            const hasAssignments = Object.values(studentCourses).some(sc => 
-                sc.courseId === courseId && sc.semester === semesterId && sc.subjects.includes(subjectId)
-            );
-            if (hasAssignments) {
-                if (!confirm('This subject has students assigned. Deleting it will remove their assignments. Continue?')) return;
-            }
-            
-            await db.ref(`courses/${courseId}/semesters/${semesterId}/subjects/${subjectId}`).remove();
-            showToast('Subject deleted', 'success');
-            await loadAllData();
-            loadCoursesForDropdowns();
-            displayCourseStructure();
+            const subject = courses[courseId]?.semesters[semesterId]?.subjects[subjectId];
+            const subjectName = subject?.name || subjectId;
+            if (!confirm(`Request deletion of subject "${subjectName}"?\n\nThis requires approval from another admin before it is executed.`)) return;
+            await createDeletionRequest('subject', subjectId, subjectName, { courseId, semesterId, subjectName: subject?.name });
+            showToast('Deletion request submitted. Another admin must approve it.', 'warning');
         }
 
         function displayCourseStructure() {
@@ -2647,8 +3215,11 @@
                         renderUsersList();
                         const currentSubject = document.getElementById('attendanceSubject')?.value;
                         updateStats(currentSubject || null);
+                    } else if (currentUser.role === 'view_only') {
+                        loadViewOnlyDashboard();
+                    } else {
+                        renderStudentDashboard();
                     }
-                    else renderStudentDashboard();
                 }
                 updateDateSelects();
                 showToast('Data refreshed from cloud', 'success');
@@ -2717,9 +3288,11 @@
             tbody.innerHTML = '';
             
             Object.entries(users).forEach(([uid, u]) => {
+                const roleBadgeClass = u.role === 'admin' ? 'bg-danger' : u.role === 'view_only' ? 'bg-secondary' : 'bg-primary';
+                const roleLabel = u.role === 'view_only' ? 'View Only' : u.role;
                 tbody.innerHTML += `<tr>
                     <td>${u.email}</td>
-                    <td><span class="badge ${u.role==='admin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
+                    <td><span class="badge ${roleBadgeClass}">${roleLabel}</span></td>
                     <td>${u.fullName}</td>
                     <td>${u.rollNo || '-'}</td>
                     <td>
@@ -2741,148 +3314,18 @@
             }
         };
 
-        // ==================== UPDATED DELETE USER ====================
         window.deleteUser = async (uid) => {
-            if (uid === currentUser?.uid) { 
-                showToast('Cannot delete yourself', 'error'); 
-                return; 
-            }
-            if (!confirm('Delete user?')) return;
-            
+            if (uid === currentUser?.uid) { showToast('Cannot delete yourself', 'error'); return; }
+            const userData = users[uid];
+            const userName = userData?.fullName || uid;
+            if (!confirm(`Request deletion of user "${userName}"?\n\nThis requires approval from another admin before it is executed.`)) return;
             try {
-                const userData = users[uid];
-                
-                if (userData.role === 'student' && userData.rollNo) {
-                    const rollNo = userData.rollNo;
-                    
-                    // Remove from students
-                    await db.ref('students/' + rollNo).remove();
-                    delete students[rollNo];
-                    
-                    // Remove from student_courses
-                    await db.ref('student_courses/' + rollNo).remove();
-                    delete studentCourses[rollNo];
-                    
-                    // Remove from attendance records
-                    const attendanceUpdates = {};
-                    Object.keys(attendance).forEach(date => {
-                        Object.keys(attendance[date] || {}).forEach(subject => {
-                            if (attendance[date][subject] && attendance[date][subject][rollNo]) {
-                                attendanceUpdates[`/attendance/${date}/${subject}/${rollNo}`] = null;
-                            }
-                        });
-                    });
-                    
-                    if (Object.keys(attendanceUpdates).length > 0) {
-                        await db.ref().update(attendanceUpdates);
-                        // Update local attendance
-                        Object.keys(attendance).forEach(date => {
-                            Object.keys(attendance[date] || {}).forEach(subject => {
-                                if (attendance[date][subject] && attendance[date][subject][rollNo]) {
-                                    delete attendance[date][subject][rollNo];
-                                }
-                            });
-                        });
-                    }
-                }
-                
-                // Remove from users
-                await db.ref('users/' + uid).remove();
-                delete users[uid];
-                
-                showToast('User removed', 'success');
-                renderUsersList();
-                updateStats();
-                
-                // Refresh views
-                const currentSubject = document.getElementById('attendanceSubject')?.value;
-                if (currentSubject) {
-                    renderSubjectAttendance(currentSubject);
-                }
-                if (studentListModal.style.display === 'flex') {
-                    renderStudentList();
-                }
-                
+                await createDeletionRequest('user', uid, userName, { rollNo: userData?.rollNo, role: userData?.role });
+                showToast('Deletion request submitted. Another admin must approve it.', 'warning');
             } catch (error) {
                 showToast(error.message, 'error');
             }
         };
-
-        // ==================== NEW CLEANUP FUNCTION ====================
-        async function cleanupOrphanedStudents() {
-            try {
-                console.log("Starting cleanup of orphaned students...");
-                let cleanedCount = 0;
-                const updates = {};
-                
-                // Check each entry in student_courses
-                for (const roll in studentCourses) {
-                    // If this roll number doesn't exist in students
-                    if (!students[roll]) {
-                        console.log(`Found orphaned student_courses entry for roll: ${roll}`);
-                        // Mark for deletion
-                        updates['/student_courses/' + roll] = null;
-                        cleanedCount++;
-                        
-                        // Also clean up any attendance records for this roll
-                        Object.keys(attendance).forEach(date => {
-                            Object.keys(attendance[date] || {}).forEach(subject => {
-                                if (attendance[date][subject] && attendance[date][subject][roll]) {
-                                    updates[`/attendance/${date}/${subject}/${roll}`] = null;
-                                }
-                            });
-                        });
-                    }
-                }
-                
-                // Apply all updates if any
-                if (cleanedCount > 0) {
-                    await db.ref().update(updates);
-                    
-                    // Update local objects
-                    Object.keys(updates).forEach(path => {
-                        if (path.startsWith('/student_courses/')) {
-                            const roll = path.replace('/student_courses/', '');
-                            delete studentCourses[roll];
-                        } else if (path.startsWith('/attendance/')) {
-                            // Parse path to update local attendance
-                            const parts = path.split('/');
-                            // path format: /attendance/date/subject/roll
-                            if (parts.length === 5) {
-                                const date = parts[2];
-                                const subject = parts[3];
-                                const roll = parts[4];
-                                if (attendance[date] && 
-                                    attendance[date][subject] && 
-                                    attendance[date][subject][roll]) {
-                                    delete attendance[date][subject][roll];
-                                }
-                            }
-                        }
-                    });
-                    
-                    showToast(`Cleaned up ${cleanedCount} orphaned student records`, 'success');
-                } else {
-                    showToast('No orphaned records found', 'info');
-                }
-                
-                // Refresh views
-                renderStudentList();
-                renderUsersList();
-                const currentSubject = document.getElementById('attendanceSubject')?.value;
-                if (currentSubject) {
-                    renderSubjectAttendance(currentSubject);
-                }
-                updateStats();
-                
-            } catch (error) {
-                console.error('Error during cleanup:', error);
-                showToast('Error during cleanup: ' + error.message, 'error');
-            }
-        }
-
-        // Make cleanup function globally accessible
-        window.cleanupOrphanedStudents = cleanupOrphanedStudents;
 
         document.getElementById('showPasswords')?.addEventListener('change', renderUsersList);
 
@@ -2938,6 +3381,743 @@
             });
         }
 
+        // ==================== DELETION REQUEST SYSTEM ====================
+        async function createDeletionRequest(type, targetId, targetName, extraData) {
+            if (!currentUser) { showToast('You must be logged in to request a deletion', 'error'); return; }
+            const request = Object.assign({
+                type,
+                targetId,
+                targetName,
+                requestedBy: currentUser.uid,
+                requestedByName: currentUser.fullName,
+                timestamp: Date.now(),
+                status: 'pending'
+            }, extraData || {});
+            await db.ref('deletionRequests').push(request);
+            loadPendingRequestsCount();
+        }
+
+        async function loadPendingRequestsCount() {
+            try {
+                const snap = await db.ref('deletionRequests').orderByChild('status').equalTo('pending').once('value');
+                const count = snap.numChildren();
+                const countEl = document.getElementById('pendingApprovalsCount');
+                if (countEl) {
+                    if (count > 0) {
+                        countEl.textContent = count;
+                        countEl.style.display = 'inline';
+                    } else {
+                        countEl.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading pending requests count:', error);
+            }
+        }
+
+        window.loadDeletionRequests = async function() {
+            try {
+                const snap = await db.ref('deletionRequests').orderByChild('status').equalTo('pending').once('value');
+                const requests = snap.val() || {};
+                const container = document.getElementById('deletionRequestsList');
+                if (!container) return;
+
+                if (Object.keys(requests).length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center py-4"><i class="fas fa-check-circle me-2"></i>No pending deletion requests.</p>';
+                    return;
+                }
+
+                const sorted = Object.entries(requests).sort((a, b) => b[1].timestamp - a[1].timestamp);
+                let html = '';
+                sorted.forEach(([reqId, req]) => {
+                    const date = new Date(req.timestamp).toLocaleString();
+                    const typeLabel = { course: 'Course', semester: 'Semester', subject: 'Subject', user: 'User' }[req.type] || 'Unknown';
+                    const canApprove = req.requestedBy !== currentUser?.uid;
+                    let extraInfo = '';
+                    if (req.type === 'semester' && req.courseId) {
+                        extraInfo = `<div class="request-meta"><i class="fas fa-book me-1"></i>In course: <strong>${escapeHtml(courses[req.courseId]?.name || req.courseId)}</strong></div>`;
+                    } else if (req.type === 'subject' && req.courseId) {
+                        const courseName = escapeHtml(courses[req.courseId]?.name || req.courseId);
+                        const semName = escapeHtml(courses[req.courseId]?.semesters?.[req.semesterId]?.name || req.semesterId);
+                        extraInfo = `<div class="request-meta"><i class="fas fa-book me-1"></i>In: <strong>${courseName} / ${semName}</strong></div>`;
+                    } else if (req.type === 'user') {
+                        extraInfo = `<div class="request-meta"><i class="fas fa-id-card me-1"></i>Role: <strong>${escapeHtml(req.role || 'unknown')}</strong>${req.rollNo ? ` &bull; Roll: <strong>${escapeHtml(req.rollNo)}</strong>` : ''}</div>`;
+                    }
+                    html += `<div class="deletion-request-card">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <div class="request-title"><i class="fas fa-trash me-2"></i>Delete ${typeLabel}: <strong>${escapeHtml(req.targetName)}</strong></div>
+                                <div class="request-meta mt-1"><i class="fas fa-user me-1"></i>Requested by <strong>${escapeHtml(req.requestedByName)}</strong> &bull; ${escapeHtml(date)}</div>
+                                ${extraInfo}
+                            </div>
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                ${canApprove
+                                    ? `<button class="btn btn-success btn-sm" onclick="approveDeletion('${reqId}')"><i class="fas fa-check me-1"></i>Approve</button>
+                                       <button class="btn btn-secondary btn-sm" onclick="rejectDeletion('${reqId}')"><i class="fas fa-times me-1"></i>Reject</button>`
+                                    : `<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Awaiting another admin</span>
+                                       <button class="btn btn-outline-danger btn-sm" onclick="cancelDeletionRequest('${reqId}')"><i class="fas fa-ban me-1"></i>Cancel</button>`}
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading deletion requests:', error);
+                showToast('Error loading deletion requests', 'error');
+            }
+        }
+
+        window.approveDeletion = async function(reqId) {
+            if (!confirm('Approve this deletion? This action cannot be undone.')) return;
+            try {
+                const snap = await db.ref('deletionRequests/' + reqId).once('value');
+                const req = snap.val();
+                if (!req || req.status !== 'pending') { showToast('Request no longer available', 'error'); return; }
+                if (req.requestedBy === currentUser?.uid) { showToast('You cannot approve your own deletion request', 'error'); return; }
+
+                switch (req.type) {
+                    case 'course':
+                        await db.ref('courses/' + req.targetId).remove();
+                        break;
+                    case 'semester':
+                        await db.ref(`courses/${req.courseId}/semesters/${req.targetId}`).remove();
+                        break;
+                    case 'subject':
+                        await db.ref(`courses/${req.courseId}/semesters/${req.semesterId}/subjects/${req.targetId}`).remove();
+                        break;
+                    case 'user':
+                        if (req.rollNo) await db.ref('students/' + req.rollNo).remove();
+                        await db.ref('users/' + req.targetId).remove();
+                        break;
+                }
+
+                await db.ref('deletionRequests/' + reqId).update({
+                    status: 'approved',
+                    approvedBy: currentUser.uid,
+                    approvedByName: currentUser.fullName,
+                    approvedAt: Date.now()
+                });
+
+                showToast('Deletion approved and executed successfully', 'success');
+                await loadAllData();
+                loadCoursesForDropdowns();
+                displayCourseStructure();
+                renderUsersList();
+                loadDeletionRequests();
+                loadPendingRequestsCount();
+                updateStats();
+            } catch (error) {
+                showToast('Error approving deletion: ' + error.message, 'error');
+                console.error('Approve deletion error:', error);
+            }
+        }
+
+        window.rejectDeletion = async function(reqId) {
+            if (!confirm('Reject this deletion request?')) return;
+            try {
+                await db.ref('deletionRequests/' + reqId).update({
+                    status: 'rejected',
+                    rejectedBy: currentUser.uid,
+                    rejectedByName: currentUser.fullName,
+                    rejectedAt: Date.now()
+                });
+                showToast('Deletion request rejected', 'success');
+                loadDeletionRequests();
+                loadPendingRequestsCount();
+            } catch (error) {
+                showToast('Error rejecting deletion: ' + error.message, 'error');
+            }
+        }
+
+        window.cancelDeletionRequest = async function(reqId) {
+            if (!confirm('Cancel your deletion request?')) return;
+            try {
+                await db.ref('deletionRequests/' + reqId).update({
+                    status: 'cancelled',
+                    cancelledBy: currentUser.uid,
+                    cancelledAt: Date.now()
+                });
+                showToast('Deletion request cancelled', 'success');
+                loadDeletionRequests();
+                loadPendingRequestsCount();
+            } catch (error) {
+                showToast('Error cancelling request: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== ANNOUNCEMENT SYSTEM ====================
+        window.sendAnnouncement = async function() {
+            const title = document.getElementById('announcementTitle')?.value?.trim();
+            const message = document.getElementById('announcementMessage')?.value?.trim();
+            if (!title) { showToast('Please enter a title', 'error'); return; }
+            if (!message) { showToast('Please enter a message', 'error'); return; }
+            try {
+                await db.ref('announcements').push({
+                    title,
+                    message,
+                    sentBy: currentUser.uid,
+                    sentByName: currentUser.fullName,
+                    timestamp: Date.now()
+                });
+                document.getElementById('announcementTitle').value = '';
+                document.getElementById('announcementMessage').value = '';
+                showToast('Announcement sent to all students!', 'success');
+                loadAnnouncements();
+            } catch (error) {
+                showToast('Error sending announcement: ' + error.message, 'error');
+            }
+        }
+
+        window.loadAnnouncements = async function() {
+            try {
+                const snap = await db.ref('announcements').orderByChild('timestamp').once('value');
+                const announcementsData = snap.val() || {};
+                const sorted = Object.entries(announcementsData).sort((a, b) => b[1].timestamp - a[1].timestamp);
+
+                const adminContainer = document.getElementById('adminAnnouncementsList');
+                if (adminContainer) {
+                    if (sorted.length === 0) {
+                        adminContainer.innerHTML = '<p class="text-muted text-center py-4">No announcements yet.</p>';
+                    } else {
+                        adminContainer.innerHTML = sorted.map(([id, ann]) => {
+                            const date = new Date(ann.timestamp).toLocaleString();
+                            return `<div class="announcement-card">
+                                <div class="announcement-meta"><i class="fas fa-user-tie me-1"></i><strong>${escapeHtml(ann.sentByName)}</strong> &bull; ${escapeHtml(date)}</div>
+                                <div class="announcement-title">${escapeHtml(ann.title)}</div>
+                                <div class="announcement-body">${escapeHtml(ann.message)}</div>
+                                <button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteAnnouncement('${id}')"><i class="fas fa-trash me-1"></i>Delete</button>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+
+                const studentContainer = document.getElementById('studentAnnouncementsList');
+                if (studentContainer) {
+                    if (sorted.length === 0) {
+                        studentContainer.innerHTML = '<p class="text-muted text-center py-3"><i class="fas fa-info-circle me-2"></i>No announcements yet.</p>';
+                    } else {
+                        studentContainer.innerHTML = sorted.map(([id, ann]) => {
+                            const date = new Date(ann.timestamp).toLocaleString();
+                            return `<div class="announcement-card">
+                                <div class="announcement-meta"><i class="fas fa-user-tie me-1"></i><strong>${escapeHtml(ann.sentByName)}</strong> &bull; ${escapeHtml(date)}</div>
+                                <div class="announcement-title">${escapeHtml(ann.title)}</div>
+                                <div class="announcement-body">${escapeHtml(ann.message)}</div>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+            }
+        }
+
+        window.deleteAnnouncement = async function(annId) {
+            if (!confirm('Delete this announcement?')) return;
+            try {
+                await db.ref('announcements/' + annId).remove();
+                showToast('Announcement deleted', 'success');
+                loadAnnouncements();
+            } catch (error) {
+                showToast('Error deleting announcement: ' + error.message, 'error');
+            }
+        }
+
+        // Tab click listeners for lazy-loading
+        document.getElementById('approvalsTabLink')?.addEventListener('shown.bs.tab', loadDeletionRequests);
+        document.getElementById('announcementsTabLink')?.addEventListener('shown.bs.tab', loadAnnouncements);
+        document.getElementById('messagesTabLink')?.addEventListener('shown.bs.tab', loadAdminConversations);
+
+        // ==================== CANCEL STUDENT EDIT ====================
+        window.cancelStudentEdit = function() {
+            document.getElementById('studentEditForm').style.display = 'none';
+        }
+
+        // ==================== VIEW-ONLY LOGOUT ====================
+        document.getElementById('viewOnlyLogoutBtn')?.addEventListener('click', logout);
+
+        // ==================== VIEW-ONLY DASHBOARD ====================
+        function loadViewOnlyDashboard() {
+            document.getElementById('voTotalStudents').textContent = Object.keys(students).length;
+            document.getElementById('voTotalCourses').textContent = Object.keys(courses).length;
+            document.getElementById('voAttendanceDays').textContent = Object.keys(attendance).length;
+
+            const today = new Date().toISOString().split('T')[0];
+            let p = 0;
+            if (attendance[today]) {
+                Object.values(attendance[today]).forEach(subAtt => {
+                    Object.values(subAtt || {}).forEach(s => { if (s === 'P') p++; });
+                });
+            }
+            document.getElementById('voPresentToday').textContent = p;
+
+            displayViewOnlyCourseStructure();
+            loadViewOnlyDropdowns();
+            renderViewOnlyStudents();
+
+            const today2 = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today2.getDate() - 30);
+            const voFromDate = document.getElementById('voReportFromDate');
+            const voToDate = document.getElementById('voReportToDate');
+            if (voFromDate) voFromDate.valueAsDate = thirtyDaysAgo;
+            if (voToDate) voToDate.valueAsDate = today2;
+        }
+
+        function displayViewOnlyCourseStructure() {
+            const container = document.getElementById('voCourseStructure');
+            if (!container) return;
+            if (!courses || Object.keys(courses).length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No courses added yet.</p>';
+                return;
+            }
+            let html = '';
+            Object.entries(courses).forEach(([courseId, course]) => {
+                html += `<div class="course-item">
+                    <h5><strong>${escapeHtml(course.name)}</strong> (${escapeHtml(course.code)})</h5>`;
+                if (course.semesters && Object.keys(course.semesters).length > 0) {
+                    Object.entries(course.semesters).forEach(([semId, sem]) => {
+                        html += `<div class="semester-item"><h6>📚 ${escapeHtml(sem.name)}</h6>`;
+                        if (sem.subjects && Object.keys(sem.subjects).length > 0) {
+                            Object.entries(sem.subjects).forEach(([subId, sub]) => {
+                                html += `<div class="subject-item"><span>📖 ${escapeHtml(sub.name)} (${escapeHtml(sub.code)}) - ${escapeHtml(String(sub.credits))} credits</span></div>`;
+                            });
+                        } else {
+                            html += '<p class="text-muted">No subjects</p>';
+                        }
+                        html += `</div>`;
+                    });
+                } else {
+                    html += '<p class="text-muted">No semesters</p>';
+                }
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function loadViewOnlyDropdowns() {
+            ['voAttendanceCourse', 'voReportCourse'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                sel.innerHTML = '<option value="">Select Course</option>';
+                Object.entries(courses).forEach(([cid, course]) => {
+                    sel.innerHTML += `<option value="${cid}">${escapeHtml(course.name)} (${escapeHtml(course.code)})</option>`;
+                });
+            });
+
+            const voCourseSel = document.getElementById('voAttendanceCourse');
+            const voSemSel = document.getElementById('voAttendanceSemester');
+            const voSubSel = document.getElementById('voAttendanceSubject');
+
+            if (voCourseSel && !voCourseSel._voListenerAdded) {
+                voCourseSel._voListenerAdded = true;
+                voCourseSel.addEventListener('change', function() {
+                    voSemSel.innerHTML = '<option value="">Select Semester</option>';
+                    voSubSel.innerHTML = '<option value="">Select Subject</option>';
+                    const courseId = this.value;
+                    if (!courseId || !courses[courseId]) return;
+                    Object.entries(courses[courseId].semesters || {}).forEach(([id, sem]) => {
+                        voSemSel.innerHTML += `<option value="${id}">${escapeHtml(sem.name)}</option>`;
+                    });
+                });
+            }
+
+            if (voSemSel && !voSemSel._voListenerAdded) {
+                voSemSel._voListenerAdded = true;
+                voSemSel.addEventListener('change', function() {
+                    voSubSel.innerHTML = '<option value="">Select Subject</option>';
+                    const courseId = voCourseSel?.value;
+                    const semId = this.value;
+                    if (!courseId || !semId) return;
+                    const subjects = courses[courseId]?.semesters[semId]?.subjects || {};
+                    Object.entries(subjects).forEach(([id, sub]) => {
+                        voSubSel.innerHTML += `<option value="${id}">${escapeHtml(sub.name)} (${escapeHtml(sub.code)})</option>`;
+                    });
+                });
+            }
+        }
+
+        function renderViewOnlyStudents() {
+            const tbody = document.getElementById('voStudentTableBody');
+            if (!tbody) return;
+            let html = '';
+            Object.entries(students).forEach(([roll, student]) => {
+                const courseData = studentCourses[roll];
+                const course = courseData ? courses[courseData.courseId] : null;
+                const semester = course && courseData ? course.semesters?.[courseData.semester] : null;
+                html += `<tr>
+                    <td><strong>${escapeHtml(roll)}</strong></td>
+                    <td>${escapeHtml(student.name)}</td>
+                    <td>${escapeHtml(student.regNo || '-')}</td>
+                    <td>${escapeHtml(course?.name || 'N/A')}</td>
+                    <td>${escapeHtml(semester?.name || 'N/A')}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html || '<tr><td colspan="5" class="text-center">No students found</td></tr>';
+        }
+
+        document.getElementById('voLoadAttendanceBtn')?.addEventListener('click', function() {
+            const subjectId = document.getElementById('voAttendanceSubject').value;
+            if (!subjectId) { showToast('Please select a subject', 'error'); return; }
+            renderViewOnlyAttendance(subjectId);
+        });
+
+        function renderViewOnlyAttendance(subjectId) {
+            const table = document.getElementById('voAttendanceTable');
+            if (!table) return;
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            thead.innerHTML = '<th>Roll No</th><th>Student Name</th>';
+            tbody.innerHTML = '';
+
+            const studentsForSubject = [];
+            Object.entries(studentCourses).forEach(([roll, data]) => {
+                if (data.subjects && data.subjects.includes(subjectId)) studentsForSubject.push(roll);
+            });
+
+            if (studentsForSubject.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="100%" class="text-center">No students assigned to this subject</td></tr>';
+                return;
+            }
+
+            const dates = Object.keys(attendance).filter(d => attendance[d] && attendance[d][subjectId]).sort();
+            if (dates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="100%" class="text-center">No attendance records for this subject</td></tr>';
+                return;
+            }
+
+            dates.forEach(date => {
+                const th = document.createElement('th');
+                th.textContent = formatDate(date);
+                thead.appendChild(th);
+            });
+
+            studentsForSubject.forEach(roll => {
+                const student = students[roll];
+                if (!student) return;
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${escapeHtml(roll)}</td><td>${escapeHtml(student.name)}</td>`;
+                dates.forEach(date => {
+                    const td = document.createElement('td');
+                    const status = attendance[date]?.[subjectId]?.[roll] || 'A';
+                    const cls = status === 'P' ? 'present' : status === 'H' ? 'holiday' : 'absent';
+                    td.innerHTML = `<span class="status-toggle ${cls}" style="cursor:default;">${status}</span>`;
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+        }
+
+        window.voLoadSemestersForReport = function() {
+            const courseId = document.getElementById('voReportCourse').value;
+            const semSelect = document.getElementById('voReportSemester');
+            semSelect.innerHTML = '<option value="">All Semesters</option>';
+            if (!courseId) return;
+            const course = courses[courseId];
+            if (course && course.semesters) {
+                Object.entries(course.semesters).forEach(([id, sem]) => {
+                    semSelect.innerHTML += `<option value="${id}">${escapeHtml(sem.name)}</option>`;
+                });
+            }
+        }
+
+        window.voLoadSubjectsForReport = function() {
+            const courseId = document.getElementById('voReportCourse').value;
+            const semesterId = document.getElementById('voReportSemester').value;
+            const subSelect = document.getElementById('voReportSubject');
+            subSelect.innerHTML = '<option value="">All Subjects</option>';
+            if (!courseId || !semesterId) return;
+            const subjects = courses[courseId]?.semesters[semesterId]?.subjects || {};
+            Object.entries(subjects).forEach(([id, sub]) => {
+                subSelect.innerHTML += `<option value="${id}">${escapeHtml(sub.name)}</option>`;
+            });
+        }
+
+        document.getElementById('voGenerateReportBtn')?.addEventListener('click', function() {
+            const from = document.getElementById('voReportFromDate').value;
+            const to = document.getElementById('voReportToDate').value;
+            const courseId = document.getElementById('voReportCourse').value;
+            const semesterId = document.getElementById('voReportSemester').value;
+            const subjectId = document.getElementById('voReportSubject').value;
+            if (!from || !to) { showToast('Select date range', 'error'); return; }
+
+            const voReportDataEl = document.getElementById('voReportData');
+            voReportDataEl.innerHTML = '';
+
+            let studentsToShow = [];
+            if (courseId && semesterId && subjectId) {
+                Object.entries(studentCourses).forEach(([roll, data]) => {
+                    if (data.courseId === courseId && data.semester === semesterId && data.subjects.includes(subjectId)) studentsToShow.push(roll);
+                });
+            } else {
+                studentsToShow = Object.keys(students);
+            }
+
+            studentsToShow.forEach(roll => {
+                const student = students[roll];
+                if (!student) return;
+                let present = 0, total = 0;
+                Object.keys(attendance).forEach(date => {
+                    if (date >= from && date <= to) {
+                        if (subjectId) {
+                            if (attendance[date]?.[subjectId]?.[roll]) {
+                                total++;
+                                if (attendance[date][subjectId][roll] === 'P') present++;
+                            }
+                        } else {
+                            let hasAttendance = false;
+                            Object.values(attendance[date] || {}).forEach(subAtt => {
+                                if (subAtt[roll]) { hasAttendance = true; if (subAtt[roll] === 'P') present++; }
+                            });
+                            if (hasAttendance) total++;
+                        }
+                    }
+                });
+                const percent = total ? Math.round((present / total) * 100) : 0;
+                voReportDataEl.innerHTML += `<tr>
+                    <td>${escapeHtml(roll)}</td>
+                    <td>${escapeHtml(student.name)}</td>
+                    <td>${present}</td>
+                    <td>${total - present}</td>
+                    <td>${total}</td>
+                    <td><div class="progress" style="height:20px"><div class="progress-bar ${percent >= 75 ? 'bg-success' : percent >= 50 ? 'bg-warning' : 'bg-danger'}" style="width:${percent}%">${percent}%</div></div></td>
+                </tr>`;
+            });
+            showToast('Report generated', 'success');
+        });
+
+        // ==================== MESSAGING SYSTEM ====================
+        let currentConvStudentUid = null;
+
+        window.loadAdminConversations = async function() {
+            const snap = await db.ref('users').once('value');
+            const allUsers = snap.val() || {};
+            const container = document.getElementById('adminConversationList');
+            if (!container) return;
+
+            const studentUsers = Object.entries(allUsers).filter(([uid, u]) => u.role === 'student');
+            if (studentUsers.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center p-3">No students yet.</p>';
+                return;
+            }
+
+            const convData = [];
+            for (const [uid, user] of studentUsers) {
+                const msgSnap = await db.ref(`messages/${uid}`).orderByChild('timestamp').limitToLast(1).once('value');
+                const msgData = msgSnap.val();
+                let lastMsg = '';
+                let lastTimestamp = 0;
+                if (msgData) {
+                    const msgs = Object.values(msgData);
+                    lastMsg = msgs[0]?.text || '';
+                    lastTimestamp = msgs[0]?.timestamp || 0;
+                }
+                const unreadSnap = await db.ref(`messages/${uid}`).once('value');
+                const unreadData = unreadSnap.val() || {};
+                const unread = Object.values(unreadData).filter(m => m.fromRole === 'student' && !m.read).length;
+                convData.push({ uid, user, lastMsg, lastTimestamp, unread });
+            }
+
+            convData.sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+
+            container.innerHTML = convData.map(({ uid, user, lastMsg, lastTimestamp, unread }) => {
+                const isActive = uid === currentConvStudentUid;
+                const timeStr = lastTimestamp ? new Date(lastTimestamp).toLocaleDateString() : '';
+                const rollDisplay = user.rollNo ? ` <small class="text-muted">(${escapeHtml(user.rollNo)})</small>` : '';
+                return `<div class="msg-conversation-item ${isActive ? 'active' : ''}" onclick="openAdminConversation('${uid}', '${escapeHtml((user.fullName || user.username || 'Unknown').replace(/'/g, "\\'"))}')">
+                    <div style="flex:1;min-width:0;">
+                        <div class="conv-name">${escapeHtml(user.fullName || user.username || 'Unknown')}${rollDisplay}</div>
+                        <div class="conv-preview">${lastMsg ? escapeHtml(lastMsg) : '<em>No messages yet</em>'}</div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        ${timeStr ? `<small class="text-muted" style="font-size:0.72rem;">${timeStr}</small>` : ''}
+                        ${unread > 0 ? `<div class="msg-unread-badge">${unread}</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-muted text-center p-3">No conversations yet.</p>';
+        }
+
+        window.openAdminConversation = async function(studentUid, studentName) {
+            currentConvStudentUid = studentUid;
+            const nameEl = document.getElementById('adminChatRecipientName');
+            if (nameEl) nameEl.textContent = studentName;
+
+            await renderAdminChatMessages(studentUid);
+
+            const msgSnap = await db.ref(`messages/${studentUid}`).once('value');
+            const msgs = msgSnap.val() || {};
+            const updates = {};
+            Object.entries(msgs).forEach(([msgId, msg]) => {
+                if (msg.fromRole === 'student' && !msg.read) {
+                    updates[`messages/${studentUid}/${msgId}/read`] = true;
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                await db.ref().update(updates);
+                loadAdminConversations();
+            } else {
+                loadAdminConversations();
+            }
+
+            db.ref(`messages/${studentUid}`).off('value');
+            db.ref(`messages/${studentUid}`).on('value', async () => {
+                if (currentConvStudentUid === studentUid) {
+                    await renderAdminChatMessages(studentUid);
+                }
+            });
+        }
+
+        async function renderAdminChatMessages(studentUid) {
+            const container = document.getElementById('adminChatMessages');
+            if (!container) return;
+            const snap = await db.ref(`messages/${studentUid}`).orderByChild('timestamp').once('value');
+            const msgs = snap.val();
+            if (!msgs) {
+                container.innerHTML = '<div class="msg-no-conv"><div class="msg-empty-state"><i class="fas fa-comments d-block"></i><p>No messages yet. Send a message to start.</p></div></div>';
+                return;
+            }
+            const sorted = Object.entries(msgs).sort((a, b) => a[1].timestamp - b[1].timestamp);
+            container.innerHTML = sorted.map(([id, msg]) => {
+                const isSent = msg.fromRole === 'admin';
+                const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = new Date(msg.timestamp).toLocaleDateString();
+                return `<div class="msg-bubble ${isSent ? 'sent' : 'received'}">
+                    ${!isSent ? `<div style="font-size:0.75rem;font-weight:700;opacity:0.7;margin-bottom:4px;">${escapeHtml(msg.fromName)}</div>` : ''}
+                    ${escapeHtml(msg.text)}
+                    <div class="msg-time">${dateStr} ${timeStr}${msg.isBroadcast ? ' · Broadcast' : ''}</div>
+                </div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        window.sendAdminReply = async function() {
+            if (!currentConvStudentUid) { showToast('Select a conversation first', 'error'); return; }
+            const input = document.getElementById('adminMessageInput');
+            const text = input?.value?.trim();
+            if (!text) return;
+            await db.ref(`messages/${currentConvStudentUid}`).push({
+                from: currentUser.uid,
+                fromName: currentUser.fullName,
+                fromRole: 'admin',
+                text: text,
+                timestamp: Date.now(),
+                read: true
+            });
+            input.value = '';
+            await renderAdminChatMessages(currentConvStudentUid);
+        }
+
+        window.sendBroadcastMessage = async function() {
+            const text = document.getElementById('broadcastMessage')?.value?.trim();
+            if (!text) { showToast('Please enter a message', 'error'); return; }
+            const snap = await db.ref('users').once('value');
+            const allUsers = snap.val() || {};
+            const studentUids = Object.entries(allUsers).filter(([uid, u]) => u.role === 'student').map(([uid]) => uid);
+            if (studentUids.length === 0) { showToast('No students to broadcast to', 'warning'); return; }
+
+            const msgData = {
+                from: currentUser.uid,
+                fromName: currentUser.fullName,
+                fromRole: 'admin',
+                text: text,
+                timestamp: Date.now(),
+                read: false,
+                isBroadcast: true
+            };
+            const updates = {};
+            studentUids.forEach(uid => {
+                const msgId = db.ref(`messages/${uid}`).push().key;
+                updates[`messages/${uid}/${msgId}`] = msgData;
+            });
+            await db.ref().update(updates);
+            document.getElementById('broadcastMessage').value = '';
+            showToast(`Broadcast sent to ${studentUids.length} students`, 'success');
+            if (currentConvStudentUid) renderAdminChatMessages(currentConvStudentUid);
+        }
+
+        window.sendStudentMessage = async function() {
+            const input = document.getElementById('studentMessageInput');
+            const text = input?.value?.trim();
+            if (!text) return;
+            await db.ref(`messages/${currentUser.uid}`).push({
+                from: currentUser.uid,
+                fromName: currentUser.fullName,
+                fromRole: 'student',
+                text: text,
+                timestamp: Date.now(),
+                read: false
+            });
+            input.value = '';
+            loadStudentMessages();
+        }
+
+        window.loadStudentMessages = async function() {
+            const container = document.getElementById('studentChatMessages');
+            if (!container) return;
+            const snap = await db.ref(`messages/${currentUser.uid}`).orderByChild('timestamp').once('value');
+            const msgs = snap.val();
+            if (!msgs) {
+                container.innerHTML = '<div class="msg-empty-state"><i class="fas fa-comments d-block"></i><p>No messages yet. Send a message to your admin below!</p></div>';
+                return;
+            }
+            const sorted = Object.entries(msgs).sort((a, b) => a[1].timestamp - b[1].timestamp);
+            container.innerHTML = sorted.map(([id, msg]) => {
+                const isSent = msg.fromRole === 'student';
+                const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = new Date(msg.timestamp).toLocaleDateString();
+                return `<div class="msg-bubble ${isSent ? 'sent' : 'received'}">
+                    ${!isSent ? `<div style="font-size:0.75rem;font-weight:700;opacity:0.7;margin-bottom:4px;">${escapeHtml(msg.fromName)}</div>` : ''}
+                    ${escapeHtml(msg.text)}
+                    <div class="msg-time">${dateStr} ${timeStr}${msg.isBroadcast ? ' · Broadcast' : ''}</div>
+                </div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+
+            const updates = {};
+            Object.entries(msgs).forEach(([msgId, msg]) => {
+                if (msg.fromRole === 'admin' && !msg.read) {
+                    updates[`messages/${currentUser.uid}/${msgId}/read`] = true;
+                }
+            });
+            if (Object.keys(updates).length > 0) await db.ref().update(updates);
+        }
+
+        function setupStudentMessagesListener() {
+            db.ref(`messages/${currentUser.uid}`).on('value', function() {
+                if (document.getElementById('studentDashboard')?.style.display !== 'none') {
+                    loadStudentMessages();
+                }
+            });
+        }
+
+        // ==================== ANNOUNCEMENT POPUP ====================
+        async function checkAndShowAnnouncementPopup() {
+            try {
+                const snap = await db.ref('announcements').orderByChild('timestamp').limitToLast(1).once('value');
+                const data = snap.val();
+                if (!data) return;
+                const entries = Object.entries(data);
+                if (entries.length === 0) return;
+                const [latestId, latest] = entries[0];
+                const dismissedKey = `dismissed_ann_${currentUser.uid}`;
+                const dismissedId = localStorage.getItem(dismissedKey);
+                if (dismissedId === latestId) return;
+
+                const popup = document.getElementById('announcementPopup');
+                if (!popup) return;
+                document.getElementById('popupAnnouncementTitle').textContent = latest.title;
+                document.getElementById('popupAnnouncementMessage').textContent = latest.message;
+                document.getElementById('popupAnnouncementTime').textContent = new Date(latest.timestamp).toLocaleString();
+                popup.style.display = 'flex';
+
+                document.getElementById('closeAnnouncementPopup').onclick = function() {
+                    popup.style.display = 'none';
+                    localStorage.setItem(dismissedKey, latestId);
+                };
+            } catch (error) {
+                console.error('Error checking announcements popup:', error);
+            }
+        }
+
         // ==================== INIT ====================
         async function init() {
             await createDefaultAdminIfNeeded();
@@ -2960,6 +4140,13 @@
                             renderUsersList();
                             const currentSubject = document.getElementById('attendanceSubject')?.value;
                             updateStats(currentSubject || null);
+                            loadPendingRequestsCount();
+                            loadAnnouncements();
+                        } else if (currentUser.role === 'view_only') {
+                            const voDash = document.getElementById('viewOnlyDashboard');
+                            if (voDash) voDash.style.display = 'block';
+                            document.getElementById('viewOnlyWelcome').textContent = `Welcome, ${currentUser.fullName}`;
+                            loadViewOnlyDashboard();
                         } else {
                             studentDash.style.display = 'block';
                             studentWelcome.textContent = `Welcome, ${currentUser.fullName}`;
@@ -3007,6 +4194,10 @@
                             }
                             
                             renderStudentDashboard();
+                            loadAnnouncements();
+                            loadStudentMessages();
+                            setupStudentMessagesListener();
+                            checkAndShowAnnouncementPopup();
                         }
                         showToast('Auto-login successful!', 'success');
                     }
