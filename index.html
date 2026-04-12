@@ -2979,7 +2979,14 @@
                 const dates = Object.keys(attendance)
                     .filter(date => attendance[date] && attendance[date][subject])
                     .sort();
-                const headers = ['Roll No', 'Student Name', ...dates.map(d => formatDate(d))];
+                const headers = [
+                    'Roll No',
+                    'Student Name',
+                    ...dates.map(d => formatDate(d)),
+                    'Total P',
+                    'Attendance %',
+                    'Total Classes'
+                ];
                 
                 const studentsForSubject = [];
                 Object.entries(studentCourses).forEach(([roll, data]) => {
@@ -2990,11 +2997,49 @@
                 
                 const data = studentsForSubject.map(roll => {
                     const student = students[roll];
-                    return [roll, student?.name || 'Unknown', ...dates.map(d => (attendance[d][subject][roll]) || 'A')];
+                    const statuses = dates.map(d => (attendance[d][subject][roll]) || 'A');
+                    const totalPresent = statuses.filter(status => status === 'P').length;
+                    const totalClasses = statuses.filter(status => status !== 'H').length;
+                    const percentage = totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(2) : '0.00';
+
+                    return [
+                        roll,
+                        student?.name || 'Unknown',
+                        ...statuses,
+                        totalPresent,
+                        `${percentage}%`,
+                        totalClasses
+                    ];
                 });
                 
                 const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers, ...data]), 'Attendance');
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+                // Color attendance status cells (P=green, A=red) in exported sheet.
+                for (let rowIdx = 1; rowIdx <= data.length; rowIdx++) {
+                    for (let dateCol = 0; dateCol < dates.length; dateCol++) {
+                        const colIdx = 2 + dateCol;
+                        const cellAddress = XLSX.utils.encode_cell({ r: rowIdx, c: colIdx });
+                        const cell = ws[cellAddress];
+                        if (!cell) continue;
+
+                        if (cell.v === 'P') {
+                            cell.s = {
+                                fill: { patternType: 'solid', fgColor: { rgb: 'C6EFCE' } },
+                                font: { color: { rgb: '006100' }, bold: true },
+                                alignment: { horizontal: 'center' }
+                            };
+                        } else if (cell.v === 'A') {
+                            cell.s = {
+                                fill: { patternType: 'solid', fgColor: { rgb: 'FFC7CE' } },
+                                font: { color: { rgb: '9C0006' }, bold: true },
+                                alignment: { horizontal: 'center' }
+                            };
+                        }
+                    }
+                }
+
+                XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
                 XLSX.writeFile(wb, `attendance_${new Date().toISOString().split('T')[0]}.xlsx`);
                 showToast('Excel downloaded', 'success');
             });
